@@ -23,58 +23,77 @@ const Login = () => {
   const currentLang = languages.find(l => l.code === language)
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setSuccess('')
-    setLoading(true)
+  e.preventDefault();
+  setError("");
+  setSuccess("");
+  setLoading(true);
 
-    const phoneRegex = /^[6-9]\d{9}$/
-    if (!phoneRegex.test(phone)) {
-      setError('Please enter a valid 10-digit Indian mobile number')
-      setLoading(false)
-      return
-    }
+  const phoneRegex = /^[6-9]\d{9}$/;
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
-      setLoading(false)
-      return
-    }
-
-    try {
-      const response = await API.post('/v1/auth/login', { phone, password })
-      localStorage.setItem('token', response.data.token)
-      localStorage.setItem('user', JSON.stringify(response.data.user))
-      setSuccess('Login successful! Redirecting...')
-      setTimeout(() => navigate('/dashboard'), 1500)
-    } catch (err) {
-      if (err.response) {
-        switch (err.response.status) {
-          case 401:
-            setError('Invalid phone number or password')
-            break
-          case 404:
-            setError('Account not found')
-            setTimeout(() => {
-              navigate('/register', { 
-                state: { message: 'Account not found. Please register first to continue.' }
-              })
-            }, 2000)
-            break
-          case 429:
-            setError('Too many attempts. Please try again later')
-            break
-          default:
-            setError(err.response.data?.message || 'Login failed. Please try again.')
-        }
-      } else {
-        setError('Network error. Please check your internet connection')
-      }
-    } finally {
-      setLoading(false)
-    }
+  // ✅ Validation
+  if (!phoneRegex.test(phone)) {
+    setError("Please enter a valid 10-digit Indian mobile number");
+    setLoading(false);
+    return;
   }
 
+  if (password.length < 8) {
+    setError("Password must be at least 8 characters long");
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await API.post("/api/auth/login", {
+      phone,
+      password,
+    });
+
+    const { accessToken, refreshToken, user } = response.data;
+
+    // ✅ Store tokens
+    localStorage.setItem("token", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    setSuccess("Login successful! Redirecting...");
+
+    // ✅ Role-based redirect (VERY IMPORTANT)
+    setTimeout(() => {
+      if (user.role === "farmer") {
+        navigate("/farmer/dashboard");
+      } else {
+        navigate("/officer/dashboard");
+      }
+    }, 1200);
+
+  } catch (err) {
+    console.error(err);
+
+    if (err.response) {
+      switch (err.response.status) {
+        case 401:
+          setError("Invalid phone number or password");
+          break;
+        case 404:
+          setError("Account not found");
+          setTimeout(() => {
+            navigate("/register");
+          }, 1500);
+          break;
+        case 429:
+          setError("Too many attempts. Try again later");
+          break;
+        default:
+          setError(err.response.data?.message || "Login failed");
+      }
+    } else {
+      setError("Network error. Please check your connection");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="farmer-login-wrapper">
       <div className="sunrise-background"></div>

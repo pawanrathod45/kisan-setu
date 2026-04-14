@@ -15,6 +15,7 @@ const riskRoutes = require("./src/routes/riskRoutes");
 const mlRoutes = require("./src/routes/mlRoutes");
 const ttsRoutes = require("./src/routes/ttsRoutes");
 const calendarRoutes = require("./src/routes/calendarRoutes");
+const authRoutes = require("./src/routes/authRoutes");
 
 // ✅ NEW: Weather Route
 const weatherRoutes = require("./src/routes/wheatherRoute");
@@ -27,6 +28,7 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
+app.use("/api/auth", authRoutes);
 app.use("/api", officerRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", imageRoutes);

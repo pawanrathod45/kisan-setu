@@ -1,9 +1,15 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+// Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+
+// Layout
 import DashboardLayout from './components/common/DashboardLayout';
+
+// Feature Pages
 import WeatherPage from './pages/WeatherPage';
 import MarketPage from './pages/MarketPage';
 import AIAssistantPage from './pages/AIAssistantPage';
@@ -15,19 +21,36 @@ import VoiceAssistantPage from './pages/VoiceAssistantPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 
+// 🔐 Protected Routes
+import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+        {/* Default Redirect */}
         <Route path="/" element={<Navigate to="/login" replace />} />
+
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Backwards compatible redirect so /dashboard uses new layout */}
+        {/* Backward compatibility */}
         <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
 
-        {/* Farmer app dashboard with sidebar + header */}
-        <Route path="/farmer" element={<DashboardLayout />}>
+        {/* 🔥 PROTECTED FARMER ROUTES */}
+        <Route
+          path="/farmer"
+          element={
+            <ProtectedRoute>
+              <RoleProtectedRoute role="farmer">
+                <DashboardLayout />
+              </RoleProtectedRoute>
+            </ProtectedRoute>
+          }
+        >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="weather" element={<WeatherPage />} />
           <Route path="market" element={<MarketPage />} />
@@ -41,7 +64,9 @@ function App() {
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
+        {/* ❌ Unauthorized fallback */}
         <Route path="*" element={<Navigate to="/login" replace />} />
+
       </Routes>
     </BrowserRouter>
   );
