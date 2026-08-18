@@ -27,6 +27,9 @@ import TasksPage from './pages/TasksPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 
+// 📱 Master Responsive Overrides
+import './styles/Responsive.css';
+
 function App() {
   return (
     <BrowserRouter>

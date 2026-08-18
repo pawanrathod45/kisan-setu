@@ -69,3 +69,6 @@ select {
   font-size: 14px;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Master Mobile & Tablet Responsive Override */
+@import './Responsive.css';
