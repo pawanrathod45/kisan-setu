@@ -74,9 +74,9 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
 
       {/* Right side: Quick Voice + Notifications + Profile */}
       <div className="header-right">
-        {/* Quick Voice Assistant shortcut */}
+        {/* Quick Voice Assistant shortcut (Desktop only) */}
         <button
-          className="header-quick-action-btn"
+          className="header-quick-action-btn d-none d-lg-inline-flex"
           onClick={() => navigate('/farmer/voice')}
           title="Open Voice Assistant"
           aria-label="Voice Assistant"
