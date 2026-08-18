@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Pages
-import Login from './pages/Login';
+import Login from './pages/login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 
@@ -20,6 +20,8 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import VoiceAssistantPage from './pages/VoiceAssistantPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import CropsPage from './pages/CropsPage';
+import TasksPage from './pages/TasksPage';
 
 // 🔐 Protected Routes
 import ProtectedRoute from './components/ProtectedRoute';
@@ -52,6 +54,8 @@ function App() {
           }
         >
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="crops" element={<CropsPage />} />
+          <Route path="tasks" element={<TasksPage />} />
           <Route path="weather" element={<WeatherPage />} />
           <Route path="market" element={<MarketPage />} />
           <Route path="ai-assistant" element={<AIAssistantPage />} />

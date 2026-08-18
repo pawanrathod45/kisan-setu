@@ -1,52 +1,55 @@
-// src/hooks/useDashboardData.js
-
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import API from "../services/api";
 
 export const useDashboardData = (user) => {
   const [weather, setWeather] = useState(null);
-  const [market, setMarket] = useState(null);
-  const [alerts, setAlerts] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    const fetchWeather = async () => {
+    if (hasFetched.current) return;
+    
+    const fetchAll = async () => {
       try {
         setLoading(true);
-        setError(null);
+        
+        // Fetch weather
         const city = user?.location || "Pune";
+        const weatherRes = await axios.get(`/api/weather?city=${city}`);
+        setWeather(weatherRes.data);
         
-        console.log("Fetching weather for:", city);
-        const res = await axios.get(`/api/weather?city=${city}`);
-        console.log("Weather response:", res.data);
+        // Fetch dashboard data
+        const dashboardRes = await API.get("/dashboard");
+        setData(dashboardRes.data);
         
-        setWeather(res.data);
         setLoading(false);
+        hasFetched.current = true;
       } catch (err) {
-        console.error("Weather fetch error:", err);
-        console.error("Error details:", err.response?.data || err.message);
+        console.error("Dashboard fetch error:", err);
         setError(err.message);
-        setLoading(false);
-        
-        // Set fallback data on error
         setWeather({
           temperature: "--",
           humidity: "--",
           windSpeed: "--",
-          condition: "Unknown",
-          description: "Unable to fetch weather"
+          condition: "Unknown"
         });
+        setLoading(false);
+        hasFetched.current = true;
       }
     };
 
-    fetchWeather();
+    fetchAll();
 
-    // auto refresh every 1 min
-    const interval = setInterval(fetchWeather, 60000);
+    const interval = setInterval(() => {
+      hasFetched.current = false;
+      fetchAll();
+    }, 300000);
+    
     return () => clearInterval(interval);
+  }, [user?.location]);
 
-  }, [user]);
-
-  return { weather, market, alerts, loading, error };
+  return { weather, data, loading, error };
 };

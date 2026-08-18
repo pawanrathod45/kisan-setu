@@ -1,29 +1,278 @@
-import React from 'react';
-import { Container } from 'react-bootstrap';
-import '../styles/Dashboard.css';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import {
+  FaCog, FaGlobe, FaBell, FaMoon, FaSun, FaShieldAlt, FaSignOutAlt,
+  FaCheck, FaSave, FaRobot, FaLeaf, FaDatabase, FaTrashAlt
+} from 'react-icons/fa';
+import { GiWheat, GiFertilizerBag } from 'react-icons/gi';
+import '../styles/Settings.css';
+
+import ConfirmModal from '../components/common/ConfirmModal';
+
+const LANGUAGES = [
+  { code: 'en', label: 'English', native: 'English (IN)' },
+  { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
+  { code: 'mr', label: 'Marathi', native: 'मराठी' },
+];
+
+/* Reusable Toggle */
+const Toggle = ({ checked, onChange, disabled }) => (
+  <button
+    role="switch"
+    aria-checked={checked}
+    className={`settings-toggle ${checked ? 'settings-toggle--on' : ''}`}
+    onClick={() => !disabled && onChange(!checked)}
+    style={{ opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
+  >
+    <span className="settings-toggle-thumb" />
+  </button>
+);
 
 const SettingsPage = () => {
-  const language = localStorage.getItem('language') || 'en';
+  /* ── State ── */
+  const [language, setLanguage]             = useState(localStorage.getItem('language') || 'en');
+  const [darkMode, setDarkMode]             = useState(localStorage.getItem('darkMode') === 'true');
+  const [notifications, setNotifs]          = useState(localStorage.getItem('notifications') !== 'false');
+  const [marketAlerts, setMarket]           = useState(localStorage.getItem('marketAlerts') !== 'false');
+  const [weatherAlerts, setWeather]         = useState(localStorage.getItem('weatherAlerts') !== 'false');
+  const [aiDiagnosticEngine, setAiEngine]   = useState(true);
+  const [soilCardSync, setSoilSync]         = useState(true);
+  const [calendarAutoSync, setCalSync]       = useState(true);
+  const [saved, setSaved]                   = useState(false);
+  const [clearedCache, setClearedCache]     = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  /* Apply dark mode class on mount */
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+  }, []);
+
+  /* ── Handlers ── */
+  const handleDarkMode = (val) => {
+    setDarkMode(val);
+    document.body.classList.toggle('dark-mode', val);
+    localStorage.setItem('darkMode', val);
+  };
+
+  const handleLanguage = (code) => {
+    setLanguage(code);
+    localStorage.setItem('language', code);
+  };
+
+  const handleSave = () => {
+    localStorage.setItem('language', language);
+    localStorage.setItem('darkMode', darkMode);
+    localStorage.setItem('notifications', notifications);
+    localStorage.setItem('marketAlerts', marketAlerts);
+    localStorage.setItem('weatherAlerts', weatherAlerts);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleClearCache = () => {
+    setClearedCache(true);
+    setTimeout(() => setClearedCache(false), 2500);
+  };
+
+  const confirmLogout = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  /* ── Section Card Component ── */
+  const Section = ({ icon, iconBg, iconColor, title, children }) => (
+    <motion.div
+      className="settings-section"
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="settings-section-header">
+        <span className="settings-section-icon" style={{ background: iconBg, color: iconColor }}>
+          {icon}
+        </span>
+        <h3 className="settings-section-title">{title}</h3>
+      </div>
+      <div className="settings-section-body">{children}</div>
+    </motion.div>
+  );
+
+  const Row = ({ label, sub, children }) => (
+    <div className="settings-row">
+      <div className="settings-row-info">
+        <span className="settings-row-label">{label}</span>
+        {sub && <span className="settings-row-sub">{sub}</span>}
+      </div>
+      <div>{children}</div>
+    </div>
+  );
 
   return (
-    <Container fluid className="dashboard-page">
-      <div className="info-card">
-        <h3>Settings</h3>
-        <p className="mb-3">
-          Manage basic preferences for your Kisan Setu experience. Advanced configuration can be
-          added here later without changing the main layout.
-        </p>
-        <div className="detail-item">
-          <div className="detail-icon">🌐</div>
-          <div>
-            <span className="detail-label">Language</span>
-            <span className="detail-value">{language.toUpperCase()}</span>
+    <div className="settings-page">
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        title="Terminate Farm Session?"
+        message="Are you sure you want to logout of Kisan Setu on this device?"
+        confirmText="Yes, Logout"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
+      
+      {/* ─── Hero Banner ─── */}
+      <motion.div className="settings-hero" initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="settings-hero-left">
+          <div className="settings-hero-icon">
+            <FaCog />
+          </div>
+          <div className="settings-hero-titles">
+            <h1>Farm & System Configuration</h1>
+            <p>Customize language dialects, precision AI thresholds, alert radars, and security preferences.</p>
           </div>
         </div>
+
+        <button className="settings-btn-save" onClick={handleSave}>
+          {saved ? <FaCheck style={{ color: '#15803d' }} /> : <FaSave />}
+          <span>{saved ? 'Preferences Saved!' : 'Save All Preferences'}</span>
+        </button>
+      </motion.div>
+
+      {/* ─── Settings Grid ─── */}
+      <div className="settings-grid">
+        
+        {/* 1. Regional & Language */}
+        <Section icon={<FaGlobe />} iconBg="#dcfce7" iconColor="#15803d" title="Regional Dialect & Currency">
+          <div className="settings-lang-grid">
+            {LANGUAGES.map(l => (
+              <button
+                key={l.code}
+                className={`settings-lang-card ${language === l.code ? 'active' : ''}`}
+                onClick={() => handleLanguage(l.code)}
+              >
+                {language === l.code && <FaCheck className="settings-lang-check" />}
+                <span className="settings-lang-native">{l.native}</span>
+                <span className="settings-lang-name">{l.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <Row
+            label="Mandi Price Currency"
+            sub="Indian Rupee (₹ / Quintal) standardized across APMC markets"
+          >
+            <span style={{ fontSize: '13px', fontWeight: 800, color: '#15803d', background: '#dcfce7', padding: '4px 10px', borderRadius: '8px' }}>
+              ₹ INR (Standard)
+            </span>
+          </Row>
+        </Section>
+
+        {/* 2. Precision Agronomy AI */}
+        <Section icon={<FaRobot />} iconBg="#e0e7ff" iconColor="#4338ca" title="Precision Agronomy AI Engine">
+          <Row
+            label="Google Gemini 2.5 Vision Diagnostics"
+            sub="High-confidence multi-modal crop disease and pest identification"
+          >
+            <Toggle checked={aiDiagnosticEngine} onChange={setAiEngine} />
+          </Row>
+
+          <Row
+            label="Soil Health Card Auto-Optimization"
+            sub="Automatically adjust fertilizer NPK recommendations based on soil health test records"
+          >
+            <Toggle checked={soilCardSync} onChange={setSoilSync} />
+          </Row>
+
+          <Row
+            label="Dynamic Crop Calendar Synchronization"
+            sub="Auto-schedule drip irrigation and foliar sprays based on local precipitation radar"
+          >
+            <Toggle checked={calendarAutoSync} onChange={setCalSync} />
+          </Row>
+        </Section>
+
+        {/* 3. Notifications & Alert Radars */}
+        <Section icon={<FaBell />} iconBg="#fee2e2" iconColor="#dc2626" title="Notification Radars & Alerts">
+          <Row
+            label="Enable Real-Time Alerts"
+            sub="Receive instant notifications on severe weather, pest outbreaks, and price surges"
+          >
+            <Toggle checked={notifications} onChange={setNotifs} />
+          </Row>
+
+          <Row
+            label="Mandi Arbitrage & Price Spike Alerts"
+            sub="Alert when modal APMC prices for your crop exceed 5% gain threshold"
+          >
+            <Toggle checked={marketAlerts} onChange={setMarket} disabled={!notifications} />
+          </Row>
+
+          <Row
+            label="Meteorological Radar Warnings"
+            sub="High-wind, hailstorm, and unseasonal rainfall advance warnings"
+          >
+            <Toggle checked={weatherAlerts} onChange={setWeather} disabled={!notifications} />
+          </Row>
+        </Section>
+
+        {/* 4. Account, Storage & Data Governance */}
+        <Section icon={<FaShieldAlt />} iconBg="#fef3c7" iconColor="#d97706" title="Account Security & Data Management">
+          <Row
+            label="Offline Farm Data Cache"
+            sub="Clear temporary cached advisory reports and image specimen data"
+          >
+            <button
+              onClick={handleClearCache}
+              style={{
+                background: clearedCache ? '#dcfce7' : '#f8fafc',
+                border: '1.5px solid #cbd5e1',
+                color: clearedCache ? '#15803d' : '#475569',
+                padding: '6px 14px',
+                borderRadius: '10px',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <FaTrashAlt /> {clearedCache ? '✓ Cache Cleared' : 'Clear Cache'}
+            </button>
+          </Row>
+
+          <Row
+            label="Farm Account Session"
+            sub="Securely sign out of your Kisan Setu session on this device"
+          >
+            <button
+              onClick={handleLogout}
+              style={{
+                background: '#fee2e2',
+                border: '1.5px solid #fca5a5',
+                color: '#dc2626',
+                padding: '8px 16px',
+                borderRadius: '10px',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <FaSignOutAlt /> Terminate Session
+            </button>
+          </Row>
+        </Section>
+
       </div>
-    </Container>
+
+    </div>
   );
 };
 
 export default SettingsPage;
-

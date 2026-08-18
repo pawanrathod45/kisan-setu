@@ -29,6 +29,12 @@ const getWeather = async (location) => {
       description: data.weather[0].description,
       windSpeed: Math.round(data.wind.speed * 3.6), // Convert m/s to km/h
       updatedAt: new Date().toLocaleTimeString(),
+      main: data.main,
+      weather: data.weather,
+      wind: data.wind,
+      clouds: data.clouds,
+      sys: data.sys,
+      visibility: data.visibility
     };
   } catch (error) {
     console.error("❌ Weather API Error:", error.message);
@@ -40,4 +46,25 @@ const getWeather = async (location) => {
   }
 };
 
-module.exports = { getWeather };
+const getForecast = async (location) => {
+  try {
+    const apiKey = process.env.WEATHER_API_KEY;
+    
+    if (!apiKey) {
+      console.error("❌ WEATHER_API_KEY not found");
+      return null;
+    }
+
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${location}&appid=${apiKey}&units=metric`
+    );
+
+    console.log("✅ Forecast data fetched for", location);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Forecast API Error:", error.message);
+    return null;
+  }
+};
+
+module.exports = { getWeather, getForecast };

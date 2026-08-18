@@ -1,0 +1,399 @@
+/* ═══════════════════════════════════════════════════════════
+   ProfileDropdown.css — Modern Farm Hub Design
+   ═══════════════════════════════════════════════════════════ */
+
+.profile-dropdown-wrapper {
+  position: relative;
+  z-index: 1100;
+}
+
+/* ── Trigger Button Pill ── */
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 50px;
+  padding: 4px 14px 4px 5px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  outline: none;
+  height: 44px;
+}
+
+.profile-trigger:hover,
+.profile-trigger.active {
+  border-color: #22c55e;
+  background: #fcfdfc;
+  box-shadow: 0 4px 14px rgba(21, 94, 45, 0.12);
+  transform: translateY(-1px);
+}
+
+.profile-trigger-avatar-wrap {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.profile-trigger-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #22c55e;
+  background: #f0fdf4;
+}
+
+.profile-online-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
+}
+
+.profile-trigger-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.15;
+}
+
+.profile-trigger-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+
+.profile-trigger-sub {
+  font-size: 11px;
+  color: #155e2d;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+  margin-top: 1px;
+}
+
+.profile-trigger-arrow {
+  color: #94a3b8;
+  font-size: 11px;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  margin-left: 2px;
+}
+
+.profile-trigger-arrow.rotate {
+  transform: rotate(180deg);
+  color: #155e2d;
+}
+
+/* ── Dropdown Card ── */
+.profile-dropdown-card {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 310px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 12px 36px -4px rgba(15, 23, 42, 0.16),
+    0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2ece3;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.97);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  z-index: 1200;
+}
+
+.profile-dropdown-card.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+/* ── Card Header ── */
+.profile-dropdown-header {
+  background: linear-gradient(135deg, #0a2e15 0%, #155e2d 60%, #1b7a3a 100%);
+  padding: 18px 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-dropdown-header::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.profile-header-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-dropdown-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2.5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+}
+
+.profile-header-status-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid #ffffff;
+}
+
+.profile-dropdown-info {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-dropdown-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.2px;
+}
+
+.profile-dropdown-phone {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 6px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-badge-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fef3c7;
+  background: rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.2px;
+}
+
+/* ── Summary Info Row ── */
+.profile-info-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8faf8;
+  border-bottom: 1px solid #e2ece3;
+}
+
+.profile-info-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #e2ece3;
+}
+
+.profile-info-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.profile-info-icon--amber {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.profile-info-icon--green {
+  background: #dcfce7;
+  color: #155e2d;
+}
+
+.profile-info-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profile-info-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.profile-info-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Menu List ── */
+.profile-menu-options {
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.profile-menu-item:hover {
+  background: #f0fdf4;
+}
+
+.profile-menu-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.profile-menu-icon-box--green { background: #dcfce7; color: #155e2d; }
+.profile-menu-icon-box--blue  { background: #e0f2fe; color: #0284c7; }
+.profile-menu-icon-box--amber { background: #fef3c7; color: #d97706; }
+.profile-menu-icon-box--purple{ background: #f3e8ff; color: #7c3aed; }
+
+.profile-menu-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.profile-menu-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.profile-menu-desc {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* ── Footer Logout ── */
+.profile-footer {
+  padding: 8px 10px 12px;
+  border-top: 1px solid #f1f5f1;
+}
+
+.profile-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.25);
+}
+
+.profile-logout-btn svg {
+  font-size: 14px;
+  color: #ffffff !important;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.profile-logout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgba(239, 68, 68, 0.38);
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.profile-logout-btn:hover svg {
+  transform: translateX(2px);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .profile-trigger-info {
+    display: none;
+  }
+  .profile-trigger {
+    padding: 4px;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    justify-content: center;
+  }
+  .profile-trigger-arrow {
+    display: none;
+  }
+  .profile-dropdown-card {
+    width: calc(100vw - 24px);
+    right: -6px;
+  }
+}

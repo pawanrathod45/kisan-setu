@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { getWeather } = require("../services/WeatherService");
+const { getWeather, getForecast } = require("../services/WeatherService");
 
 router.get("/", async (req, res) => {
   const location = req.query.city || "Pune";
@@ -19,6 +19,27 @@ router.get("/", async (req, res) => {
     res.json(data);
   } catch (error) {
     console.error("❌ Weather route error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+router.get("/forecast", async (req, res) => {
+  const location = req.query.city || "Pune";
+  
+  console.log("📈 Forecast API called for city:", location);
+
+  try {
+    const data = await getForecast(location);
+
+    if (!data) {
+      console.error("❌ Failed to fetch forecast data");
+      return res.status(500).json({ error: "Failed to fetch forecast" });
+    }
+    
+    console.log("✅ Sending forecast data");
+    res.json(data);
+  } catch (error) {
+    console.error("❌ Forecast route error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });

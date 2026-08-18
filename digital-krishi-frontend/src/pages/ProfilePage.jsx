@@ -1,183 +1,163 @@
-import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
-import { FaEdit, FaSave, FaTimes } from 'react-icons/fa';
-import '../styles/Dashboard.css';
+import React, { useState, useEffect } from "react";
+import profileService from "../services/profileService";
+import API from "../services/api";
+import ProfileCard from "../components/profile/ProfileCard";
+import EditProfileModal from "../components/profile/EditProfileModal";
+import "../components/profile/profile.css";
 
-const getStoredUser = () => JSON.parse(localStorage.getItem('user') || '{}');
+import ConfirmModal from "../components/common/ConfirmModal";
 
 const ProfilePage = () => {
-  const [user, setUser] = useState(getStoredUser());
-  const [isEditing, setIsEditing] = useState(false);
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    location: '',
-    crop: '',
-  });
-  const [saveMessage, setSaveMessage] = useState('');
+  const [user, setUser]                           = useState(null);
+  const [loading, setLoading]                     = useState(true);
+  const [editing, setEditing]                     = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [tip, setTip]                             = useState(null);
+  const [weather, setWeather]                     = useState(null);
+  const [market, setMarket]                       = useState(null);
+  const [error, setError]                         = useState(null);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await profileService.getProfile();
+      const profile = (res.data && (res.data.user || res.data)) || null;
+      setUser(profile);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load profile");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setUser(getStoredUser());
+    fetchProfile();
   }, []);
 
   useEffect(() => {
-    setForm({
-      name: user.name || '',
-      phone: user.phone || '',
-      location: user.location || '',
-      crop: user.crop || '',
-    });
-  }, [user, isEditing]);
+    if (!user) return;
+    
+    profileService.getTip().then((r) => setTip(r.data)).catch(() => {});
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    if (user.location) {
+      API.get(`/weather?city=${user.location}`)
+        .then((r) => setWeather(r.data))
+        .catch(() => {});
+    }
+
+    if (user.crop) {
+      API.get(`/market?crop=${user.crop}`)
+        .then((r) => setMarket(r.data))
+        .catch(() => {});
+    }
+  }, [user]);
+
+  const handleSave = async (formData, imageFile) => {
+    try {
+      let payload = { ...formData };
+
+      if (imageFile) {
+        const up = await profileService.uploadImage(imageFile);
+        payload.profileImage = up.data.url;
+      }
+
+      const res = await profileService.updateProfile(payload);
+      setUser(res.data);
+      setEditing(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save profile");
+    }
   };
 
-  const handleSave = () => {
-    const updated = { ...user, ...form };
-    localStorage.setItem('user', JSON.stringify(updated));
-    setUser(updated);
-    setIsEditing(false);
-    setSaveMessage('Profile updated. You can connect a backend API here later.');
-    setTimeout(() => setSaveMessage(''), 4000);
+  const confirmLogout = () => {
+    localStorage.clear();
+    window.location.href = "/";
   };
 
-  const handleCancel = () => {
-    setForm({
-      name: user.name || '',
-      phone: user.phone || '',
-      location: user.location || '',
-      crop: user.crop || '',
-    });
-    setIsEditing(false);
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
   };
+
+  const toggleNotif = async () => {
+    try {
+      const res = await profileService.updateProfile({
+        notificationsEnabled: !user.notificationsEnabled,
+      });
+      setUser(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleDark = async () => {
+    try {
+      const res = await profileService.updateProfile({
+        darkMode: !user.darkMode,
+      });
+      setUser(res.data);
+      document.body.classList.toggle("dark-mode", res.data.darkMode);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <div className="profile-loading">
+          <div className="spinner"></div>
+          <p>Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="profile-page">
+        <div className="profile-error">
+          <p>{error}</p>
+          <button onClick={fetchProfile} className="ks-btn primary">Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Container fluid className="dashboard-page">
-      <div className="info-card profile-page-card">
-        <div className="profile-page-header">
-          <h3>Your profile</h3>
-          {!isEditing ? (
-            <button
-              type="button"
-              className="profile-edit-btn"
-              onClick={() => setIsEditing(true)}
-              aria-label="Edit profile"
-            >
-              <FaEdit /> Edit profile
-            </button>
-          ) : (
-            <div className="profile-form-actions profile-form-actions-inline">
-              <button type="button" className="profile-save-btn" onClick={handleSave}>
-                <FaSave /> Save
-              </button>
-              <button type="button" className="profile-cancel-btn" onClick={handleCancel}>
-                <FaTimes /> Cancel
-              </button>
-            </div>
-          )}
-        </div>
-        <p className="profile-page-desc">
-          These details personalise weather, crop and market intelligence for you. You can edit
-          them below; later we can sync with your backend.
-        </p>
-        {saveMessage && <p className="profile-save-message">{saveMessage}</p>}
+    <div className="profile-page">
+      <ProfileCard
+        user={user}
+        tip={tip}
+        weather={weather}
+        market={market}
+        onEdit={() => setEditing(true)}
+        onLogout={handleLogout}
+        onToggleNotif={toggleNotif}
+        onToggleDark={toggleDark}
+      />
 
-        {!isEditing ? (
-          <div className="profile-details">
-            <div className="detail-item">
-              <span className="detail-icon">👤</span>
-              <div>
-                <span className="detail-label">Name</span>
-                <span className="detail-value">{user.name || 'Not set'}</span>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">📱</span>
-              <div>
-                <span className="detail-label">Phone</span>
-                <span className="detail-value">{user.phone || 'Not set'}</span>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">📍</span>
-              <div>
-                <span className="detail-label">Location</span>
-                <span className="detail-value">{user.location || 'Not set'}</span>
-              </div>
-            </div>
-            <div className="detail-item">
-              <span className="detail-icon">🌾</span>
-              <div>
-                <span className="detail-label">Main crop</span>
-                <span className="detail-value">{user.crop || 'Not set'}</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <form className="profile-edit-form" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-            <div className="profile-form-group">
-              <label htmlFor="profile-name">Name</label>
-              <input
-                id="profile-name"
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="profile-form-input"
-                placeholder="Your full name"
-              />
-            </div>
-            <div className="profile-form-group">
-              <label htmlFor="profile-phone">Phone</label>
-              <input
-                id="profile-phone"
-                type="tel"
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                className="profile-form-input"
-                placeholder="10-digit mobile number"
-              />
-            </div>
-            <div className="profile-form-group">
-              <label htmlFor="profile-location">Location</label>
-              <input
-                id="profile-location"
-                type="text"
-                name="location"
-                value={form.location}
-                onChange={handleChange}
-                className="profile-form-input"
-                placeholder="Village / District / State"
-              />
-            </div>
-            <div className="profile-form-group">
-              <label htmlFor="profile-crop">Main crop</label>
-              <input
-                id="profile-crop"
-                type="text"
-                name="crop"
-                value={form.crop}
-                onChange={handleChange}
-                className="profile-form-input"
-                placeholder="e.g. Wheat, Paddy, Cotton"
-              />
-            </div>
-            <div className="profile-form-actions">
-              <button type="submit" className="profile-save-btn">
-                <FaSave /> Save changes
-              </button>
-              <button type="button" className="profile-cancel-btn" onClick={handleCancel}>
-                <FaTimes /> Cancel
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
-    </Container>
+      <ConfirmModal
+        isOpen={showLogoutConfirm}
+        title="Sign Out of Kisan Setu?"
+        message="Are you sure you want to logout? You can securely sign back in at any time."
+        confirmText="Yes, Logout"
+        cancelText="Cancel"
+        type="danger"
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
+
+      <EditProfileModal
+        show={editing}
+        user={user}
+        onClose={() => setEditing(false)}
+        onSave={handleSave}
+      />
+    </div>
   );
 };
 
-export default ProfilePage;
+export default ProfilePage; 

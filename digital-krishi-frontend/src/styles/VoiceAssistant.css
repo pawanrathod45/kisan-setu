@@ -1,0 +1,384 @@
+/* ============================================================
+   VOICE ASSISTANT — PRO SAAS MULTI-LINGUAL SOUND CONSOLE
+   ============================================================ */
+
+.va-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  padding: 24px 20px 16px;
+  background: #f4f8f4;
+  color: #0f172a;
+  max-width: 1440px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+/* ── Hero Banner (Signature Lush Forest Gradient) ── */
+.va-hero-banner {
+  background: linear-gradient(135deg, #072712 0%, #0d421f 40%, #155e2d 100%);
+  border-radius: 20px;
+  padding: 20px 28px;
+  margin-bottom: 20px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(13, 66, 31, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  flex-wrap: wrap;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.va-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.va-hero-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #a78bfa;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.va-hero-icon-wrap svg {
+  width: 26px !important;
+  height: 26px !important;
+  display: block;
+}
+
+.va-hero-titles h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 3px 0;
+  letter-spacing: -0.4px;
+}
+
+.va-hero-titles p {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  margin: 0;
+}
+
+.va-lang-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 4px;
+}
+
+.va-lang-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.va-lang-btn.active {
+  background: #ffffff;
+  color: #15803d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Main Conversation Body ── */
+.va-body {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Left: Interactive Chat & Audio Stream ── */
+.va-chat-card {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.va-quick-prompts-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 18px;
+  border-bottom: 1.5px solid #f1f5f9;
+  background: #f8fafc;
+}
+
+.va-prompt-chip {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.va-prompt-chip:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  transform: translateY(-1px);
+}
+
+.va-messages-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: radial-gradient(circle at top right, rgba(21, 94, 45, 0.03), transparent 50%);
+}
+
+.va-msg-row {
+  display: flex;
+  gap: 12px;
+  max-width: 88%;
+}
+
+.va-msg-row.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.va-msg-row.bot {
+  align-self: flex-start;
+}
+
+.va-msg-bubble {
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.va-msg-bubble.user {
+  background: linear-gradient(135deg, #155e2d 0%, #16a34a 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.va-msg-bubble.bot {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  color: #0f172a;
+  border-bottom-left-radius: 4px;
+}
+
+.va-msg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 11px;
+}
+
+.va-msg-bubble.user .va-msg-footer {
+  border-top-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.va-speak-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.va-speak-btn:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+/* ── Right: Glowing Mic Console Card ── */
+.va-console-card {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.va-console-head h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.va-console-head p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+/* Central Microphone Soundwave Box */
+.va-mic-pulsing-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.va-pulse-ring-1,
+.va-pulse-ring-2 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #a855f7;
+  opacity: 0;
+}
+
+.va-mic-pulsing-wrap.listening .va-pulse-ring-1 {
+  animation: vaPulse 1.8s infinite cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.va-mic-pulsing-wrap.listening .va-pulse-ring-2 {
+  animation: vaPulse 1.8s infinite cubic-bezier(0.25, 1, 0.5, 1) 0.6s;
+}
+
+@keyframes vaPulse {
+  0% { transform: scale(0.85); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.va-main-mic-btn {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #155e2d 0%, #16a34a 100%);
+  border: none;
+  color: #ffffff;
+  font-size: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 22px rgba(21, 94, 45, 0.35);
+  transition: all 0.25s ease;
+  z-index: 2;
+}
+
+.va-main-mic-btn.listening {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.6);
+  transform: scale(1.05);
+}
+
+.va-main-mic-btn:hover {
+  transform: scale(1.08);
+}
+
+.va-transcript-preview {
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 12px 16px;
+  width: 100%;
+  min-height: 60px;
+  font-size: 13.5px;
+  color: #334155;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: italic;
+}
+
+.va-bottom-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.va-clear-btn {
+  flex: 1;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #64748b;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.va-clear-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .va-body {
+    grid-template-columns: 1fr;
+  }
+
+  .va-page {
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .va-chat-card {
+    height: 480px;
+  }
+}

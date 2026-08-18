@@ -1,0 +1,36 @@
+/* ===== Weather Page Container ===== */
+.weather-page {
+  min-height: 100vh;
+  padding: 32px;
+  background: linear-gradient(135deg, #F5FAF5 0%, #E8F5E9 100%);
+}
+
+/* ===== Sticky Panel ===== */
+.sticky-panel {
+  position: sticky;
+  top: 24px;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 1200px) {
+  .weather-page {
+    padding: 24px;
+  }
+  
+  .sticky-panel {
+    position: relative;
+    top: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .weather-page {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .weather-page {
+    padding: 16px;
+  }
+}

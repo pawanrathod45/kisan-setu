@@ -1,0 +1,761 @@
+/* ============================================================
+   AI CROP & DISEASE DETECTION — PRO SAAS AGRONOMY HOSPITAL
+   ============================================================ */
+
+.dd-page {
+  padding: 24px 20px;
+  min-height: 100vh;
+  background: #f4f8f4;
+  color: #0f172a;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* ── Hero Banner (Signature Lush Forest Gradient) ── */
+.dd-hero-banner {
+  background: linear-gradient(135deg, #072712 0%, #0d421f 40%, #155e2d 100%);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(13, 66, 31, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.dd-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.dd-hero-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.dd-hero-icon-wrap svg {
+  width: 28px !important;
+  height: 28px !important;
+  color: #4ade80 !important;
+  display: block;
+}
+
+.dd-hero-titles h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.dd-hero-titles p {
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  margin: 0;
+  max-width: 650px;
+  line-height: 1.45;
+}
+
+.dd-hero-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dd-badge-ai {
+  background: rgba(34, 197, 94, 0.22);
+  color: #86efac;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.4px;
+}
+
+.dd-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  animation: ddPulse 1.5s infinite;
+}
+
+@keyframes ddPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* ── Sample Specimen Selector ── */
+.dd-samples-bar {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 16px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.dd-samples-label {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #15803d;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.dd-samples-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: none;
+}
+
+.dd-sample-chip {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  padding: 6px 13px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dd-sample-chip:hover,
+.dd-sample-chip.active {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.12);
+}
+
+/* ── Main 2-Column Grid Layout ── */
+.dd-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Left Upload Card ── */
+.dd-upload-card {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dd-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dd-card-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dd-card-head h3 svg {
+  color: #15803d;
+}
+
+.dd-dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 38px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  background: #f8fafc;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dd-dropzone:hover,
+.dd-dropzone--active {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  transform: scale(1.01);
+}
+
+.dd-dropzone-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #e2ece3;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.dd-dropzone:hover .dd-dropzone-icon-box {
+  background: #dcfce7;
+  transform: scale(1.08);
+}
+
+.dd-dropzone-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.dd-dropzone-subtitle {
+  font-size: 12.5px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+.dd-browse-btn {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
+  padding: 9px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.dd-browse-btn:hover {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+/* Preview Box */
+.dd-preview-box {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1.5px solid #e2ece3;
+  background: #0f172a;
+}
+
+.dd-preview-img {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+}
+
+.dd-preview-clear-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dd-preview-clear-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
+}
+
+/* Scanner Animation Overlay */
+.dd-scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, #22c55e, transparent);
+  box-shadow: 0 0 14px #22c55e;
+  animation: scanLaser 2s infinite ease-in-out;
+}
+
+@keyframes scanLaser {
+  0% { top: 0; }
+  50% { top: 96%; }
+  100% { top: 0; }
+}
+
+.dd-upload-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.dd-diagnose-main-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #155e2d 0%, #16a34a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(21, 94, 45, 0.3);
+  transition: all 0.2s ease;
+}
+
+.dd-diagnose-main-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(21, 94, 45, 0.4);
+}
+
+.dd-diagnose-main-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.dd-retake-btn {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #475569;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dd-retake-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ── Right Results Hospital Panel ── */
+.dd-result-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dd-placeholder-card {
+  background: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 20px;
+  padding: 56px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dd-placeholder-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  background: #f0fdf4;
+  color: #16a34a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 16px;
+  border: 1.5px solid #bbf7d0;
+}
+
+.dd-placeholder-card h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.dd-placeholder-card p {
+  font-size: 13.5px;
+  color: #64748b;
+  max-width: 380px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Diagnosis Full Report Card */
+.dd-report-card {
+  background: #ffffff;
+  border: 1.5px solid #e2ece3;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dd-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid #f1f5f9;
+}
+
+.dd-report-crop-tag {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.dd-report-pathogen-tag {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+.dd-report-disease-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 6px 0 0 0;
+  letter-spacing: -0.4px;
+}
+
+.dd-severity-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mandi Terminal Widget */
+.dd-mandi-widget {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1.5px solid #86efac;
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.08);
+}
+
+.dd-mandi-widget-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dd-mandi-icon-box {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #dcfce7;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.dd-mandi-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.dd-mandi-price-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dd-mandi-trend-pill {
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Google AI Clinical Review Box */
+.dd-clinical-box {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%);
+  border: 1.5px solid #5eead4;
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+.dd-clinical-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.dd-clinical-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f766e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dd-confidence-badge {
+  font-size: 11px;
+  font-weight: 800;
+  background: #ccfbf1;
+  color: #115e59;
+  padding: 3px 9px;
+  border-radius: 12px;
+  border: 1px solid #99f6e4;
+}
+
+.dd-clinical-text {
+  margin: 0;
+  font-size: 13.5px;
+  color: #134e4a;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+/* Treatment Tabs */
+.dd-remedy-nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.dd-remedy-tab-btn {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  color: #475569;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.dd-remedy-tab-btn.active.tab-pesticide {
+  background: #7e22ce;
+  border-color: #7e22ce;
+  color: #ffffff;
+}
+
+.dd-remedy-tab-btn.active.tab-organic {
+  background: #15803d;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+.dd-remedy-tab-btn.active.tab-fertilizer {
+  background: #0284c7;
+  border-color: #0284c7;
+  color: #ffffff;
+}
+
+.dd-remedy-tab-btn.active.tab-cultural {
+  background: #d97706;
+  border-color: #d97706;
+  color: #ffffff;
+}
+
+/* Prescription Rows */
+.dd-prescriptions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dd-prescription-card {
+  background: #ffffff;
+  border: 1.5px solid #f1f5f9;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.dd-rx-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.dd-rx-detail {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.dd-rx-dosage-badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+/* Action Footer Buttons */
+.dd-action-footer {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+
+.dd-save-portfolio-btn {
+  flex: 1.2;
+  min-width: 220px;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 13px 20px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.28);
+  transition: all 0.2s ease;
+}
+
+.dd-save-portfolio-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.38);
+}
+
+.dd-schedule-spray-btn {
+  flex: 1;
+  min-width: 180px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  color: #15803d;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dd-schedule-spray-btn:hover {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dd-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dd-page {
+    padding: 16px 12px;
+  }
+
+  .dd-hero-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,503 @@
+/* ============================================
+   MARKET INTELLIGENCE & MANDI RATES — PRO SAAS
+   ============================================ */
+
+.dashboard-wrapper {
+  --m-primary: #155e2d;
+  --m-primary-mid: #16a34a;
+  --m-primary-light: #22c55e;
+  --m-amber: #d97706;
+  --m-amber-light: #fef3c7;
+  --m-blue: #0284c7;
+  --m-blue-light: #e0f2fe;
+  --m-red: #dc2626;
+  --m-red-light: #fee2e2;
+  --m-card: #ffffff;
+  --m-border: #e2ece3;
+  --m-text: #0f172a;
+  --m-muted: #64748b;
+  --m-radius: 20px;
+  --m-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+
+  background: #f4f8f4;
+  min-height: 100vh;
+  padding: 24px 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  color: var(--m-text);
+}
+
+/* Header */
+.dashboard-header {
+  background: #ffffff;
+  border-radius: var(--m-radius);
+  padding: 20px 26px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--m-shadow);
+  border: 1px solid var(--m-border);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-title-section h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--m-text);
+  margin: 0 0 2px 0;
+  letter-spacing: -0.5px;
+}
+
+.header-title-section p {
+  font-size: 13px;
+  color: var(--m-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-live {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.4px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #ffffff;
+  animation: pulse-m 1.5s infinite;
+}
+
+@keyframes pulse-m {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.badge-sync {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sync-icon {
+  font-size: 12px;
+}
+
+/* Dashboard Grid Layout (Left: 2.2fr, Right: 1fr) */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2.1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.left-section,
+.right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Filters Card */
+.filters-card {
+  background: #ffffff;
+  border-radius: var(--m-radius);
+  padding: 22px;
+  box-shadow: var(--m-shadow);
+  border: 1px solid var(--m-border);
+}
+
+.filters-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--m-text);
+  margin-bottom: 16px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-item label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--m-muted);
+  text-transform: uppercase;
+}
+
+.filter-item select {
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--m-text);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-item select:focus,
+.filter-item select:hover {
+  border-color: var(--m-primary-mid);
+  background: #ffffff;
+}
+
+.date-filter {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.date-filter button {
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--m-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-filter button.active {
+  background: var(--m-primary);
+  color: #ffffff;
+  border-color: var(--m-primary);
+}
+
+.btn-apply {
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-apply:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
+}
+
+/* Market Hero Card */
+.market-hero-card {
+  background: linear-gradient(135deg, #072712 0%, #0d421f 50%, #155e2d 100%);
+  border-radius: var(--m-radius);
+  padding: 24px 28px;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(13, 66, 31, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.hero-crop {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.hero-location {
+  margin: 4px 0 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.trend-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.trend-badge.rising { background: rgba(34, 197, 94, 0.25); color: #86efac; border: 1px solid #4ade80; }
+.trend-badge.falling { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #f87171; }
+.trend-badge.stable { background: rgba(255, 255, 255, 0.2); color: #ffffff; border: 1px solid rgba(255,255,255,0.3); }
+
+.hero-price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.price-box {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.price-box.main-price {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.price-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: uppercase;
+}
+
+.price-value {
+  font-size: 22px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.price-unit {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.price-value.positive { color: #86efac; }
+.price-value.negative { color: #fca5a5; }
+
+.hero-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 14px;
+}
+
+.market-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.status-dot.active {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+}
+
+/* Recommendations Card */
+.recommendations-card {
+  background: #ffffff;
+  border-radius: var(--m-radius);
+  padding: 22px;
+  box-shadow: var(--m-shadow);
+  border: 1.5px solid #86efac;
+}
+
+.recommendations-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #166534;
+  margin-bottom: 14px;
+}
+
+.recommendations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rec-card {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 12px;
+}
+
+.rec-icon {
+  font-size: 22px;
+}
+
+.rec-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2px;
+}
+
+.rec-desc {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Charts Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: var(--m-radius);
+  padding: 22px;
+  box-shadow: var(--m-shadow);
+  border: 1px solid var(--m-border);
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--m-text);
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  height: 240px;
+  position: relative;
+}
+
+/* AI Market Chatbot / Advisor Card */
+.chat-advisor-card {
+  background: #ffffff;
+  border-radius: var(--m-radius);
+  padding: 22px;
+  box-shadow: var(--m-shadow);
+  border: 1px solid var(--m-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-messages {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 340px;
+  padding: 8px 0;
+}
+
+.chat-msg {
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 90%;
+}
+
+.chat-msg.bot {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  color: #166534;
+  align-self: flex-start;
+}
+
+.chat-msg.user {
+  background: #15803d;
+  color: #ffffff;
+  align-self: flex-end;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.chat-input-row input {
+  flex: 1;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 9px 12px;
+  font-size: 13px;
+  outline: none;
+}
+
+.chat-input-row button {
+  background: #15803d;
+  color: #ffffff;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    padding: 16px 12px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-price-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

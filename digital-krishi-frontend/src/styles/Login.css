@@ -1,502 +1,474 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ============================================================
+   KISAN SETU — FULL-VIEWPORT BACKGROUND VIDEO WITH FLOATING AUTH CARD
+   ============================================================ */
+
+.ks-auth-viewport {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f172a;
 }
 
-.farmer-login-wrapper {
+/* ── Full Window Background Video & Overlay ── */
+.ks-fullscreen-video-bg {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  filter: brightness(0.85) contrast(1.05);
+}
+
+.ks-fullscreen-video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(5, 55, 25, 0.55) 0%,
+    rgba(3, 35, 15, 0.78) 100%
+  );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Top Floating Language Selector ── */
+.ks-lang-top-floating {
+  position: fixed;
+  top: 22px;
+  right: 26px;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ks-lang-btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ks-lang-btn.active {
+  background: #15803d;
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(21, 128, 61, 0.35);
+}
+
+/* ── Central Floating Executive Glassmorphic Auth Card ── */
+.ks-floating-card-container {
+  position: relative;
+  z-index: 10;
+  max-width: 1040px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 32px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  overflow: hidden;
+  min-height: 600px;
+}
+
+/* ============================================================
+   LEFT SIDE OF FLOATING CARD — BRAND & CAPABILITIES SHOWCASE
+   ============================================================ */
+.ks-card-brand-panel {
+  background: linear-gradient(145deg, #072e15 0%, #0d4a23 50%, #155e2d 100%);
+  padding: 44px 38px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
   overflow: hidden;
 }
 
-.sunrise-background {
+.ks-card-brand-panel::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #1a5f3f 0%, #2d7a4f 20%, #4a9d6f 40%, #6bc28f 60%, #8fd9af 80%, #b3e5cf 100%);
-  background-size: 200% 200%;
-  animation: sunriseMove 20s ease infinite;
+  top: -60px;
+  right: -60px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-@keyframes sunriseMove {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-.soft-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 30% 70%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 70% 30%, rgba(52, 211, 153, 0.1) 0%, transparent 50%);
-  z-index: 1;
-}
-
-.language-selector-top {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 100;
-}
-
-.lang-dropdown-wrapper {
+.ks-brand-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   position: relative;
+  z-index: 2;
 }
 
-.lang-dropdown-btn {
-  padding: 8px 12px;
+.ks-brand-logo-badge {
+  width: 46px;
+  height: 46px;
   border-radius: 14px;
-  border: 2px solid rgba(16, 185, 129, 0.3);
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(236, 253, 245, 0.95) 100%);
-  backdrop-filter: blur(15px);
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #86efac;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.ks-brand-top-text h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 850;
+  letter-spacing: -0.4px;
+  color: #ffffff;
+}
+
+.ks-brand-top-text p {
+  margin: 2px 0 0 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.ks-card-narrative {
+  position: relative;
+  z-index: 2;
+  margin: 28px 0;
+}
+
+.ks-narrative-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(134, 239, 172, 0.3);
+  font-size: 12px;
   font-weight: 700;
-  color: #065f46;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
-  border-left: 3px solid #10b981;
+  color: #bbf7d0;
+  margin-bottom: 12px;
+}
+
+.ks-card-narrative h1 {
+  font-size: 30px;
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: -0.6px;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+}
+
+.ks-card-narrative .ks-companion-subtitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #86efac;
+  margin: 0 0 12px 0;
+}
+
+.ks-card-narrative p {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0;
+}
+
+/* 4 Feature Badges inside Left Panel */
+.ks-card-badges-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ks-glass-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 10px 12px;
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.ks-glass-badge:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+  border-color: rgba(134, 239, 172, 0.4);
+}
+
+.ks-glass-icon-box {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.25);
+  color: #86efac;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ks-glass-title {
+  font-size: 12px;
+  font-weight: 750;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+/* ============================================================
+   RIGHT SIDE OF FLOATING CARD — AUTHENTICATION CONSOLE
+   ============================================================ */
+.ks-card-form-panel {
+  padding: 44px 38px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.ks-form-header {
+  margin-bottom: 24px;
+}
+
+.ks-form-header h3 {
+  font-size: 24px;
+  font-weight: 850;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.ks-form-header p {
+  font-size: 13.5px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form Stack */
+.ks-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ks-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ks-input-label {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #334155;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.lang-dropdown-btn:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(209, 250, 229, 1) 100%);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+.ks-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.lang-dropdown-btn .rotate {
-  transform: rotate(180deg);
-  transition: transform 0.3s;
-}
-
-.lang-dropdown-menu {
+.ks-country-badge {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 150px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(236, 253, 245, 0.98) 100%);
-  backdrop-filter: blur(20px);
-  border-radius: 14px;
-  border: 2px solid rgba(16, 185, 129, 0.3);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  left: 12px;
+  font-size: 13px;
+  font-weight: 750;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 7px;
+  border: 1px solid #bbf7d0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.lang-option {
+.ks-text-input {
   width: 100%;
-  padding: 10px 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 14px;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.ks-text-input.has-prefix {
+  padding-left: 74px;
+}
+
+.ks-text-input:focus {
+  border-color: #16a34a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14);
+}
+
+.ks-password-toggle {
+  position: absolute;
+  right: 12px;
   background: transparent;
   border: none;
-  text-align: left;
+  color: #64748b;
+  cursor: pointer;
   font-size: 14px;
-  font-weight: 600;
-  color: #065f46;
-  cursor: pointer;
-  border-left: 3px solid transparent;
-}
-
-.lang-option:hover {
-  background: rgba(16, 185, 129, 0.1);
-  border-left: 3px solid #10b981;
-}
-
-.lang-option.active {
-  background: rgba(16, 185, 129, 0.15);
-  border-left: 3px solid #059669;
-  color: #047857;
-  font-weight: 700;
-}
-
-.farmer-container {
-  position: relative;
-  z-index: 10;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 15px;
+  padding: 4px;
 }
 
-.farmer-card {
-  width: 100%;
-  max-width: 500px;
-  padding: 1.5rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(236, 253, 245, 0.98) 100%);
-  backdrop-filter: blur(25px);
-  border-radius: 20px;
-  border: 2px solid rgba(16, 185, 129, 0.3);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  position: relative;
-  z-index: 100;
+.ks-password-toggle:hover {
+  color: #0f172a;
 }
 
-.greeting-section {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.greeting-text {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #065f46;
-  margin-bottom: 0.75rem;
-}
-
-.wheat-icon {
-  font-size: 2.25rem;
-  color: #f59e0b;
-  filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.4));
-  margin: 0.6rem 0;
-}
-
-.platform-name {
-  font-size: 1.75rem;
-  font-weight: 900;
-  color: #10b981;
-  margin: 0.6rem 0;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.15);
-}
-
-.support-text {
-  font-size: 0.9rem;
-  color: #047857;
-  font-weight: 600;
-  margin-top: 0.6rem;
-  line-height: 1.4;
-}
-
-.farmer-alert {
+.ks-submit-btn {
+  background: linear-gradient(135deg, #155e2d 0%, #16a34a 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
   border-radius: 12px;
-  border: none;
-  padding: 0.9rem 1rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-}
-
-.alert-danger {
-  background: #fee2e2;
-  color: #991b1b;
-  border-left: 4px solid #dc2626;
-}
-
-.alert-success {
-  background: #d1fae5;
-  color: #065f46;
-  border-left: 4px solid #10b981;
-}
-
-.farmer-input-group {
-  margin-bottom: 1rem;
-}
-
-.farmer-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #065f46;
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.farmer-input {
-  width: 100%;
-  min-height: 48px;
-  padding: 0.8rem 0.95rem;
-  background: rgba(255, 255, 255, 0.95);
-  border: 2px solid #a7f3d0;
-  border-radius: 12px;
-  color: #065f46;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  position: relative;
-  z-index: 10;
-}
-
-.farmer-input::placeholder {
-  color: #6ee7b7;
-  font-weight: 500;
-}
-
-.farmer-input:focus {
-  outline: none;
-  background: #ffffff;
-  border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-}
-
-.password-wrapper {
-  position: relative;
-}
-
-.eye-btn {
-  position: absolute;
-  right: 0.8rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #10b981;
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: 0.5rem;
-  z-index: 20;
-}
-
-.eye-btn:hover {
-  color: #059669;
-}
-
-.farmer-login-btn {
-  width: 100%;
-  min-height: 50px;
-  padding: 0.9rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
-  border: none;
-  border-radius: 14px;
-  color: #fff;
-  font-size: 1rem;
+  font-size: 14.5px;
   font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
-  position: relative;
-  text-transform: uppercase;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(21, 94, 45, 0.3);
+  transition: all 0.2s ease;
+  margin-top: 4px;
 }
 
-.farmer-login-btn:hover:not(:disabled) {
+.ks-submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.6);
+  box-shadow: 0 8px 24px rgba(21, 94, 45, 0.4);
 }
 
-.farmer-login-btn:disabled {
-  opacity: 0.6;
+.ks-submit-btn:disabled {
+  opacity: 0.75;
   cursor: not-allowed;
 }
 
-.footer-section {
+/* 1-Click Demo Login */
+.ks-demo-box {
+  background: #f0fdf4;
+  border: 1.5px dashed #86efac;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-top: 18px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.6rem;
-  margin-top: 1.5rem;
-  font-size: 0.9rem;
-  flex-wrap: wrap;
-  position: relative;
-  z-index: 1;
+  font-size: 12px;
+  color: #166534;
 }
 
-.footer-link {
-  color: #059669;
+.ks-demo-btn {
+  background: #ffffff;
+  border: 1px solid #86efac;
+  color: #15803d;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ks-demo-btn:hover {
+  background: #15803d;
+  color: #ffffff;
+}
+
+/* Footer Link */
+.ks-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  font-size: 13px;
+}
+
+.ks-register-link {
+  color: #15803d;
+  font-weight: 800;
   text-decoration: none;
-  font-weight: 700;
+  transition: color 0.15s ease;
 }
 
-.footer-link:hover {
-  color: #047857;
+.ks-register-link:hover {
+  color: #16a34a;
   text-decoration: underline;
 }
 
-.dot {
-  color: #6ee7b7;
-  font-weight: bold;
-}
-
-@media (min-width: 576px) {
-  .language-selector-top {
-    top: 15px;
-    right: 15px;
-  }
-
-  .lang-dropdown-btn {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .farmer-container {
-    padding: 20px;
-  }
-
-  .farmer-card {
-    padding: 2rem 2.25rem;
+/* ============================================================
+   RESPONSIVE (MOBILE & TABLETS)
+   ============================================================ */
+@media (max-width: 960px) {
+  .ks-floating-card-container {
+    grid-template-columns: 1fr;
     border-radius: 24px;
   }
 
-  .greeting-text {
-    font-size: 1.15rem;
+  .ks-card-brand-panel {
+    padding: 32px 24px;
   }
 
-  .wheat-icon {
-    font-size: 2.75rem;
+  .ks-card-narrative h1 {
+    font-size: 24px;
   }
 
-  .platform-name {
-    font-size: 2.2rem;
+  .ks-card-form-panel {
+    padding: 32px 24px;
   }
 
-  .support-text {
-    font-size: 1rem;
-  }
-
-  .farmer-input {
-    min-height: 52px;
-    font-size: 1rem;
-  }
-
-  .farmer-login-btn {
-    min-height: 54px;
-    font-size: 1.15rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .language-selector-top {
-    top: 20px;
-    right: 20px;
-  }
-
-  .lang-dropdown-btn {
-    padding: 12px 20px;
-    font-size: 16px;
-  }
-
-  .farmer-card {
-    padding: 2.5rem 3rem;
-    border-radius: 28px;
-  }
-
-  .greeting-text {
-    font-size: 1.3rem;
-  }
-
-  .wheat-icon {
-    font-size: 3.25rem;
-  }
-
-  .platform-name {
-    font-size: 2.75rem;
-  }
-
-  .support-text {
-    font-size: 1.05rem;
-  }
-
-  .farmer-alert {
-    padding: 1.15rem 1.4rem;
-    font-size: 1rem;
-  }
-
-  .farmer-label {
-    font-size: 1rem;
-  }
-
-  .farmer-input {
-    min-height: 56px;
-    font-size: 1.05rem;
-    padding: 1rem 1.2rem;
-  }
-
-  .eye-btn {
-    font-size: 1.25rem;
-    right: 1rem;
-  }
-
-  .farmer-login-btn {
-    min-height: 56px;
-    font-size: 1.2rem;
-  }
-
-  .footer-section {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .farmer-card {
-    padding: 2.5rem 3rem;
-    border-radius: 32px;
-    border: 3px solid rgba(16, 185, 129, 0.3);
-  }
-
-  .greeting-section {
-    margin-bottom: 2rem;
-  }
-
-  .greeting-text {
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
-  }
-
-  .wheat-icon {
-    font-size: 3.5rem;
-    margin: 1rem 0;
-  }
-
-  .platform-name {
-    font-size: 3rem;
-    margin: 1rem 0;
-  }
-
-  .support-text {
-    font-size: 1.1rem;
-    margin-top: 0.75rem;
-    line-height: 1.6;
-  }
-
-  .farmer-alert {
-    padding: 1.25rem 1.5rem;
-    font-size: 1.05rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .farmer-input-group {
-    margin-bottom: 1.25rem;
-  }
-
-  .farmer-label {
-    font-size: 1.05rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .farmer-input {
-    min-height: 58px;
-    font-size: 1.05rem;
-    padding: 1rem 1.25rem;
-  }
-
-  .eye-btn {
-    font-size: 1.3rem;
-  }
-
-  .farmer-login-btn {
-    min-height: 58px;
-    font-size: 1.25rem;
-    padding: 1rem;
-    margin-top: 1.75rem;
-  }
-
-  .footer-section {
-    margin-top: 2rem;
-    font-size: 1rem;
-    gap: 1rem;
+  .ks-lang-top-floating {
+    top: 12px;
+    right: 12px;
   }
 }
