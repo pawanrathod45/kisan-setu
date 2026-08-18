@@ -37,10 +37,11 @@ html, body {
   }
 
   .content-wrapper {
-    padding: 18px 14px !important;
-    padding-bottom: 90px !important;
+    padding: 14px 12px 100px 12px !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-height: calc(100vh - 64px);
+    box-sizing: border-box !important;
   }
 
   /* Sidebar Drawer on Mobile & Tablet */

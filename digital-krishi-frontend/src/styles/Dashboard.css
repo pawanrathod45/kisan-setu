@@ -650,8 +650,8 @@ min-width:0;
 .header-page-row{
 display:flex;
 align-items:center;
-gap:10px;
-flex-wrap:wrap;
+gap:8px;
+min-width:0;
 }
 
 .header-page-name{
@@ -661,6 +661,25 @@ color:var(--text);
 letter-spacing:-.4px;
 margin:0;
 line-height:1.2;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+@media (max-width: 640px) {
+  .header-page-icon-pill {
+    display: none !important;
+  }
+  .header-page-badge {
+    display: none !important;
+  }
+  .header-quick-action-btn {
+    display: none !important;
+  }
+  .header-page-name {
+    font-size: 15px !important;
+    max-width: 140px;
+  }
 }
 
 .header-page-badge{
