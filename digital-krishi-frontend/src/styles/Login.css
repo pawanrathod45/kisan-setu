@@ -1,5 +1,6 @@
 /* ============================================================
    KISAN SETU — FULL-VIEWPORT BACKGROUND VIDEO WITH FLOATING AUTH CARD
+   Master Responsive Version
    ============================================================ */
 
 .ks-auth-viewport {
@@ -11,7 +12,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px 20px;
+  padding: 36px 18px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0f172a;
 }
@@ -26,7 +27,7 @@
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
-  filter: brightness(0.85) contrast(1.05);
+  filter: brightness(0.82) contrast(1.08);
 }
 
 .ks-fullscreen-video-overlay {
@@ -37,8 +38,8 @@
   height: 100vh;
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(5, 55, 25, 0.55) 0%,
-    rgba(3, 35, 15, 0.78) 100%
+    rgba(4, 45, 20, 0.6) 0%,
+    rgba(2, 28, 12, 0.82) 100%
   );
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -49,18 +50,18 @@
 /* ── Top Floating Language Selector ── */
 .ks-lang-top-floating {
   position: fixed;
-  top: 22px;
-  right: 26px;
-  z-index: 20;
+  top: 20px;
+  right: 24px;
+  z-index: 50;
   display: flex;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 4px;
   border-radius: 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
 .ks-lang-btn {
@@ -87,16 +88,16 @@
   z-index: 10;
   max-width: 1040px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   border-radius: 32px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
   border: 1.5px solid rgba(255, 255, 255, 0.8);
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   overflow: hidden;
-  min-height: 600px;
+  margin: auto;
 }
 
 /* ============================================================
@@ -447,28 +448,136 @@
 }
 
 /* ============================================================
-   RESPONSIVE (MOBILE & TABLETS)
+   MOBILE & TABLET RESPONSIVE PERFECTION
    ============================================================ */
-@media (max-width: 960px) {
-  .ks-floating-card-container {
-    grid-template-columns: 1fr;
-    border-radius: 24px;
+@media (max-width: 860px) {
+  .ks-auth-viewport {
+    padding: 16px 12px !important;
+    align-items: flex-start !important;
   }
 
+  .ks-floating-card-container {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+    border-radius: 24px !important;
+    margin: 40px auto 16px !important;
+  }
+
+  /* Compact Header on Mobile (No Oversized Block) */
   .ks-card-brand-panel {
-    padding: 32px 24px;
+    padding: 20px 18px !important;
+  }
+
+  .ks-brand-top {
+    gap: 10px !important;
+  }
+
+  .ks-brand-logo-badge {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 20px !important;
+  }
+
+  .ks-brand-top-text h2 {
+    font-size: 18px !important;
+  }
+
+  .ks-brand-top-text p {
+    display: none !important; /* Hide long tagline on mobile header */
+  }
+
+  .ks-card-narrative {
+    margin: 12px 0 10px !important;
+  }
+
+  .ks-narrative-tag {
+    display: none !important;
   }
 
   .ks-card-narrative h1 {
-    font-size: 24px;
+    font-size: 20px !important;
+    margin: 0 0 2px 0 !important;
   }
 
+  .ks-card-narrative .ks-companion-subtitle {
+    font-size: 13.5px !important;
+    margin: 0 !important;
+  }
+
+  .ks-card-narrative p {
+    display: none !important; /* Hide lengthy descriptive paragraph on mobile */
+  }
+
+  .ks-card-badges-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin-top: 10px !important;
+  }
+
+  .ks-glass-badge {
+    padding: 6px 8px !important;
+    border-radius: 10px !important;
+    gap: 6px !important;
+  }
+
+  .ks-glass-icon-box {
+    width: 22px !important;
+    height: 22px !important;
+    font-size: 11px !important;
+  }
+
+  .ks-glass-title {
+    font-size: 11px !important;
+  }
+
+  /* Mobile Form Padding */
   .ks-card-form-panel {
-    padding: 32px 24px;
+    padding: 22px 18px !important;
+  }
+
+  .ks-form-header {
+    margin-bottom: 16px !important;
+  }
+
+  .ks-form-header h3 {
+    font-size: 20px !important;
+  }
+
+  .ks-form-header p {
+    font-size: 12.5px !important;
+  }
+
+  .ks-form-stack {
+    gap: 14px !important;
+  }
+
+  .ks-text-input {
+    font-size: 16px !important; /* Prevents auto-zoom on iOS */
+    padding: 11px 14px !important;
+  }
+
+  .ks-submit-btn {
+    padding: 13px !important;
+    font-size: 14px !important;
+  }
+
+  .ks-demo-box {
+    margin-top: 14px !important;
+    padding: 8px 12px !important;
+  }
+
+  .ks-form-footer {
+    margin-top: 16px !important;
   }
 
   .ks-lang-top-floating {
-    top: 12px;
-    right: 12px;
+    top: 10px !important;
+    right: 12px !important;
+    padding: 3px !important;
+  }
+
+  .ks-lang-btn {
+    padding: 4px 10px !important;
+    font-size: 11.5px !important;
   }
 }
