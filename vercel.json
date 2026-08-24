@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npm --prefix digital-krishi-frontend install && npm --prefix digital-krishi-frontend run build",
+  "outputDirectory": "digital-krishi-frontend/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
