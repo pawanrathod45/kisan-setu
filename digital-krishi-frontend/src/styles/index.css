@@ -1,3 +1,6 @@
+/* Master Mobile & Tablet Responsive Override */
+@import './Responsive.css';
+
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -69,6 +72,3 @@ select {
   font-size: 14px;
   -webkit-tap-highlight-color: transparent;
 }
-
-/* Master Mobile & Tablet Responsive Override */
-@import './Responsive.css';

@@ -1,7 +1,15 @@
 import axios from "axios";
 
+// Helper to reliably compute the API base URL for dev and production
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return "http://localhost:5000/api";
+  const clean = envUrl.trim().replace(/\/+$/, "");
+  return clean.endsWith("/api") ? clean : `${clean}/api`;
+};
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseURL(),
   headers: {
     "Content-Type": "application/json",
   },
@@ -29,8 +37,11 @@ API.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
-      localStorage.removeItem("token");
-      window.location.href = "/";
+      const currentPath = window.location.pathname;
+      if (currentPath !== "/login" && currentPath !== "/register" && currentPath !== "/") {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(error);

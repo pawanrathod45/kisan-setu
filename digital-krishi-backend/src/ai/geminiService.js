@@ -3,9 +3,9 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const PRIMARY_MODEL = "gemini-2.5-flash";
-const FALLBACK_MODEL = "gemini-2.5-flash-lite";
-const SECONDARY_FALLBACK = "gemini-3.5-flash-lite";
+const PRIMARY_MODEL = "gemini-2.0-flash";
+const FALLBACK_MODEL = "gemini-1.5-flash";
+const SECONDARY_FALLBACK = "gemini-1.5-pro";
 
 /* ── Offline Expert Agricultural Intelligence Knowledgebase ── */
 const generateLocalAgriExpertResponse = (promptText) => {

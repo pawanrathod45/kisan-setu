@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 
 const isDatabaseConnected = () => mongoose.connection.readyState === 1;
 
+const JWT_SECRET = process.env.JWT_SECRET || "kisan_setu_jwt_super_secret_key_2026";
+
 // REGISTER
 exports.register = async (req, res) => {
   try {
@@ -44,9 +46,35 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    console.log("✅ User registered:", phone);
+    console.log("✅ User registered successfully:", phone);
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Generate JWT tokens for instant seamless login
+    const accessToken = jwt.sign(
+      { id: user._id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      JWT_SECRET,
+      { expiresIn: "30d" }
+    );
+
+    res.status(201).json({
+      message: "User registered successfully",
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        location: user.location,
+        crop: user.crop,
+      },
+    });
 
   } catch (err) {
     console.error("❌ Registration error:", err);
@@ -96,14 +124,14 @@ exports.login = async (req, res) => {
     // Generate JWT token
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "fallback_secret_key",
+      JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    // Generate refresh token (optional)
+    // Generate refresh token
     const refreshToken = jwt.sign(
       { id: user._id },
-      process.env.JWT_SECRET || "fallback_secret_key",
+      JWT_SECRET,
       { expiresIn: "30d" }
     );
 
