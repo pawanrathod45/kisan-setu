@@ -47,12 +47,38 @@ const seedAdmin = async () => {
       console.log("👑 New Admin account created successfully!");
     }
 
+    // Seed / Ensure Demo Farmer Account
+    const farmerEmail = "farmer.demo@kisansetu.com";
+    const farmerPassword = "password123";
+    const farmerHash = await bcrypt.hash(farmerPassword, 10);
+
+    let farmer = await User.findOne({ email: farmerEmail });
+    if (farmer) {
+      farmer.password = farmerHash;
+      farmer.isEmailVerified = true;
+      farmer.status = "active";
+      await farmer.save();
+      console.log("👨‍🌾 Existing Demo Farmer account updated successfully!");
+    } else {
+      farmer = new User({
+        name: "Ramesh Patil (Demo Farmer)",
+        email: farmerEmail,
+        password: farmerHash,
+        role: "farmer",
+        status: "active",
+        isEmailVerified: true,
+        location: "Pune, Maharashtra",
+        crop: "Wheat (गेहूं)",
+        farmingType: "traditional"
+      });
+      await farmer.save();
+      console.log("👨‍🌾 New Demo Farmer account created successfully!");
+    }
+
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("🔑 ADMIN CREDENTIALS FOR TESTING:");
-    console.log(`📱 Mobile:   ${adminPhone}`);
-    console.log(`📧 Email:    ${adminEmail}`);
-    console.log(`🔒 Password: ${adminPassword}`);
-    console.log(`🛡️ Role:     admin`);
+    console.log("🔑 CREDENTIALS CREATED & VERIFIED IN MONGODB:");
+    console.log(`👑 ADMIN:  ${adminEmail}  | Password: ${adminPassword}`);
+    console.log(`👨‍🌾 FARMER: ${farmerEmail} | Password: ${farmerPassword}`);
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     process.exit(0);
