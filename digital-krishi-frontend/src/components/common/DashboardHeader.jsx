@@ -90,8 +90,8 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              padding: '6px 10px',
+              gap: '4px',
+              padding: '6px 9px',
               borderRadius: '10px',
               background: '#f0fdf4',
               border: '1.5px solid #86efac',
@@ -103,7 +103,7 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
             }}
           >
             <FaGlobe style={{ fontSize: '13px' }} />
-            <span className="d-none d-sm-inline">{currentLangObj.native || currentLangObj.name}</span>
+            <span className="d-none d-md-inline">{currentLangObj.native || currentLangObj.name}</span>
           </button>
 
           {langDropdownOpen && (
@@ -115,18 +115,18 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
               <div
                 style={{
                   position: 'absolute',
-                  top: 'calc(100% + 8px)',
+                  top: 'calc(100% + 6px)',
                   right: 0,
                   background: '#ffffff',
-                  borderRadius: '14px',
+                  borderRadius: '12px',
                   boxShadow: '0 10px 28px rgba(15, 23, 42, 0.14)',
                   border: '1.5px solid #e2ece3',
-                  padding: '6px',
+                  padding: '4px',
                   zIndex: 1050,
-                  minWidth: '130px',
+                  width: '130px',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '4px'
+                  gap: '2px'
                 }}
               >
                 {languages.map((l) => (
@@ -140,12 +140,12 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '8px 12px',
+                      padding: '7px 10px',
                       borderRadius: '8px',
                       background: language === l.code ? '#dcfce7' : 'transparent',
                       color: language === l.code ? '#15803d' : '#334155',
                       fontWeight: language === l.code ? 800 : 600,
-                      fontSize: '12.5px',
+                      fontSize: '12px',
                       border: 'none',
                       cursor: 'pointer',
                       textAlign: 'left',
@@ -153,7 +153,7 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
                     }}
                   >
                     <span>{l.native || l.name}</span>
-                    {language === l.code && <FaCheck style={{ fontSize: '10px' }} />}
+                    {language === l.code && <FaCheck style={{ fontSize: '10px', color: '#15803d' }} />}
                   </button>
                 ))}
               </div>
