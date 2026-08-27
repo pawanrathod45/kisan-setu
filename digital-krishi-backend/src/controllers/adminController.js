@@ -492,42 +492,65 @@ exports.getSystemHealth = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Admin System Health Error:", err);
+    res.status(500).json({ message: "Failed to retrieve system health metrics", error: err.message });
+  }
+};
+
 // 11. COMPREHENSIVE REPORTS & AUDIT ANALYTICS (REAL DATABASE AGGREGATIONS)
 exports.getReportsAndAnalytics = async (req, res) => {
   try {
+    const { range = "30d" } = req.query;
+
+    let dateMatch = {};
+    const now = Date.now();
+    if (range === "7d") {
+      dateMatch = { createdAt: { $gte: new Date(now - 7 * 24 * 60 * 60 * 1000) } };
+    } else if (range === "30d") {
+      dateMatch = { createdAt: { $gte: new Date(now - 30 * 24 * 60 * 60 * 1000) } };
+    } else if (range === "90d") {
+      dateMatch = { createdAt: { $gte: new Date(now - 90 * 24 * 60 * 60 * 1000) } };
+    } else if (range === "180d") {
+      dateMatch = { createdAt: { $gte: new Date(now - 180 * 24 * 60 * 60 * 1000) } };
+    } else if (range === "1y") {
+      dateMatch = { createdAt: { $gte: new Date(now - 365 * 24 * 60 * 60 * 1000) } };
+    }
+
     const [
       totalUsers,
       verifiedUsersCount,
       unverifiedUsersCount,
       activeUsersCount,
       suspendedUsersCount,
+      periodNewUsers,
       totalCropsCount,
       totalAlertsCount,
       totalTasksCount
     ] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ isEmailVerified: true }),
-      User.countDocuments({ isEmailVerified: false }),
-      User.countDocuments({ status: "active" }),
-      User.countDocuments({ status: "suspended" }),
-      Crop.countDocuments(),
-      Alert.countDocuments(),
-      Task.countDocuments()
+      User.countDocuments().catch(() => 0),
+      User.countDocuments({ isEmailVerified: true }).catch(() => 0),
+      User.countDocuments({ isEmailVerified: false }).catch(() => 0),
+      User.countDocuments({ status: "active" }).catch(() => 0),
+      User.countDocuments({ status: "suspended" }).catch(() => 0),
+      User.countDocuments(dateMatch).catch(() => 0),
+      Crop.countDocuments().catch(() => 0),
+      Alert.countDocuments().catch(() => 0),
+      Task.countDocuments().catch(() => 0)
     ]);
 
     // Role breakdown
     const roleStats = await User.aggregate([
       {
         $group: {
-          _id: "$role",
+          _id: { $ifNull: ["$role", "farmer"] },
           count: { $sum: 1 }
         }
       },
       { $sort: { count: -1 } }
-    ]);
+    ]).catch(() => []);
 
-    // Registration growth timeline (Daily)
-    const userGrowth = await User.aggregate([
+    // Registration growth timeline (Daily within selected date range)
+    const userGrowthPipeline = [
+      ...(Object.keys(dateMatch).length > 0 ? [{ $match: dateMatch }] : []),
       {
         $group: {
           _id: {
@@ -537,8 +560,9 @@ exports.getReportsAndAnalytics = async (req, res) => {
         }
       },
       { $sort: { _id: 1 } },
-      { $limit: 30 }
-    ]);
+      { $limit: 31 }
+    ];
+    const userGrowth = await User.aggregate(userGrowthPipeline).catch(() => []);
 
     // Regional distribution (Locations)
     const regionalDistribution = await User.aggregate([
@@ -550,37 +574,38 @@ exports.getReportsAndAnalytics = async (req, res) => {
       },
       { $sort: { count: -1 } },
       { $limit: 8 }
-    ]);
+    ]).catch(() => []);
 
     // Crop Distribution & Acreage
     const cropDistribution = await Crop.aggregate([
       {
         $group: {
-          _id: "$name",
+          _id: { $ifNull: ["$name", "General Crop"] },
           totalPlots: { $sum: 1 },
           totalAcreage: { $sum: { $ifNull: ["$area", 0] } }
         }
       },
       { $sort: { totalPlots: -1 } },
       { $limit: 8 }
-    ]);
+    ]).catch(() => []);
 
     // Alert Severity Distribution
     const alertSeverityStats = await Alert.aggregate([
       {
         $group: {
-          _id: "$severity",
+          _id: { $ifNull: ["$severity", "medium"] },
           count: { $sum: 1 }
         }
       },
       { $sort: { count: -1 } }
-    ]);
+    ]).catch(() => []);
 
     // Recent System Audit Activity (Latest 8 user signups & status updates)
     const recentAuditActivity = await User.find()
       .select("name email role status isEmailVerified createdAt lastLogin")
       .sort({ updatedAt: -1 })
-      .limit(8);
+      .limit(8)
+      .catch(() => []);
 
     res.json({
       success: true,
@@ -592,9 +617,12 @@ exports.getReportsAndAnalytics = async (req, res) => {
           verificationRate: totalUsers > 0 ? ((verifiedUsersCount / totalUsers) * 100).toFixed(1) : 0,
           activeUsersCount,
           suspendedUsersCount,
+          periodNewUsers,
           totalCropsCount,
           totalAlertsCount,
-          totalTasksCount
+          totalTasksCount,
+          dbStatus: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected",
+          range
         },
         roleStats,
         userGrowth,
@@ -609,4 +637,5 @@ exports.getReportsAndAnalytics = async (req, res) => {
     res.status(500).json({ message: "Failed to generate analytics reports", error: err.message });
   }
 };
+
 
