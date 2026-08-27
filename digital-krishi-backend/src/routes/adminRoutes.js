@@ -27,6 +27,7 @@ router.delete("/alerts/:id", adminController.deleteAlert);
 
 // 5. Reports & System Analytics
 router.get("/reports", adminController.getReportsAndAnalytics);
+router.get("/analytics", adminController.getReportsAndAnalytics);
 
 // 6. Database Diagnostics & System Health
 router.get("/system-health", adminController.getSystemHealth);

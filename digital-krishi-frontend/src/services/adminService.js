@@ -59,6 +59,12 @@ const adminService = {
   getSystemHealth: async () => {
     const response = await API.get("/admin/system-health");
     return response.data;
+  },
+
+  // 11. Reports and Real Database Analytics
+  getReports: async (params = {}) => {
+    const response = await API.get("/admin/reports", { params });
+    return response.data;
   }
 };
 

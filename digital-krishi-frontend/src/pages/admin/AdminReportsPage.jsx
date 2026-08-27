@@ -18,7 +18,7 @@ import {
   FaUserCheck,
   FaFileAlt
 } from "react-icons/fa";
-import API from "../../services/api";
+import adminService from "../../services/adminService";
 import "../../styles/Admin.css";
 
 const DATE_RANGES = [
@@ -40,9 +40,11 @@ const AdminReportsPage = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await API.get(`/admin/reports?range=${range}`);
-      if (res.data?.success) {
-        setData(res.data.data);
+      const res = await adminService.getReports({ range });
+      if (res?.success) {
+        setData(res.data);
+      } else if (res?.data) {
+        setData(res.data);
       } else {
         throw new Error("Invalid API response format");
       }
