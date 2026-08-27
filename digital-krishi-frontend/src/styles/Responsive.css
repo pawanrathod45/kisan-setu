@@ -1,18 +1,88 @@
 /* ============================================================
-   KISAN SETU — MASTER MOBILE & TABLET RESPONSIVE SYSTEM
-   Universal multi-device optimization (320px to 1440px)
+   KISAN SETU — MASTER MULTI-DEVICE RESPONSIVE SYSTEM
+   Universal Precision Optimization (320px to 2560px)
    ============================================================ */
 
-/* ── Prevent Any Unintended Horizontal Scrolling ── */
+/* ── 1. Global Viewport & Container Foundations ── */
 html, body {
-  overflow-x: hidden !important;
-  width: 100% !important;
-  max-width: 100vw !important;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* Prevent Flex & Grid item blowouts across all browsers */
+.dashboard-layout,
+.main-content,
+.content-wrapper,
+.ks-page,
+.dashboard-page,
+.weather-dashboard,
+.dashboard-wrapper,
+.ai-krishi-wrapper,
+.dd-page,
+.settings-page,
+.profile-container {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   ULTRA-WIDE SCREENS (min-width: 1920px and 2560px)
+   ============================================================ */
+@media (min-width: 1920px) {
+  .content-wrapper {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 32px 28px;
+  }
+
+  .ks-page,
+  .weather-dashboard,
+  .dashboard-wrapper,
+  .ai-krishi-wrapper,
+  .dd-page,
+  .settings-page,
+  .profile-container {
+    max-width: 1560px;
+    margin: 0 auto;
+  }
+
+  .summary-metrics-row.row,
+  .summary-metrics-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  .feature-preview-grid.row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 24px !important;
+  }
+}
+
+/* ============================================================
+   LAPTOP & COMPACT DESKTOP (1025px to 1440px)
+   ============================================================ */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .content-wrapper {
+    padding: 20px 18px;
+  }
+
+  .summary-metrics-row.row,
+  .summary-metrics-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .feature-preview-grid.row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+  }
 }
 
 /* ============================================================
@@ -37,10 +107,10 @@ html, body {
   }
 
   .content-wrapper {
-    padding: 14px 12px 100px 12px !important;
+    padding: 14px 12px 90px 12px !important;
     width: 100% !important;
     max-width: 100% !important;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 60px);
     box-sizing: border-box !important;
   }
 
@@ -59,6 +129,10 @@ html, body {
 
   .sidebar.open {
     transform: translateX(0) !important;
+  }
+
+  .sidebar-close-btn {
+    display: flex !important;
   }
 
   .sidebar-overlay {
@@ -115,37 +189,67 @@ html, body {
     flex-shrink: 0 !important;
   }
 
-  /* Dashboard Summary Metrics Grid (2 columns on tablet) */
+  /* Dashboard Summary Metrics (2 columns on tablet) */
+  .summary-metrics-row.row,
   .summary-metrics-grid,
   .metric-cards-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
 
   /* Feature Preview Cards */
+  .feature-preview-grid.row,
   .feature-preview-grid {
-    grid-template-columns: 1fr !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 14px !important;
   }
 
   /* Welcome Hero Card */
   .hero-welcome-card {
-    padding: 20px 16px !important;
+    padding: 22px 18px !important;
     flex-direction: column !important;
     gap: 16px !important;
   }
 
   .hero-welcome-card .hero-content {
     flex-direction: column !important;
+    gap: 16px !important;
   }
 
-  /* My Crops Grid */
-  .crops-grid-container {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
+  .hero-right {
+    width: 100% !important;
   }
 
-  /* Auth Floating Card */
+  .premium-weather {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* 2-Column Section Grids Collapse on Tablet/Mobile */
+  .crop-calendar-layout-grid,
+  .analytics-main-grid,
+  .ai-dashboard-grid,
+  .dd-grid-layout,
+  .dashboard-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+
+  .calendar-matrix-card {
+    width: 100% !important;
+  }
+
+  /* Crops Portfolio Grid */
+  .crops-portfolio-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  /* Auth Card */
   .ks-floating-card-container {
     grid-template-columns: 1fr !important;
     max-width: 95vw !important;
@@ -167,306 +271,377 @@ html, body {
 @media (max-width: 768px) {
   
   /* Typography Scale */
-  h1 { font-size: 22px !important; }
-  h2 { font-size: 19px !important; }
+  h1 { font-size: 20px !important; }
+  h2 { font-size: 18px !important; }
   h3 { font-size: 16px !important; }
 
   /* Dashboard Header */
   .header-search-wrap {
-    display: none !important; /* Hide wide search bar on phone */
+    display: none !important;
+  }
+
+  .header-page-name {
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 140px !important;
+  }
+
+  .header-page-badge {
+    display: none !important;
   }
 
   .header-actions-group {
-    gap: 8px !important;
+    gap: 6px !important;
   }
 
-  .header-notification-btn {
+  .header-bell-btn {
     width: 36px !important;
     height: 36px !important;
   }
 
   .profile-trigger {
-    padding: 3px 8px !important;
-    gap: 6px !important;
+    padding: 3px 6px !important;
+    gap: 4px !important;
+    height: 36px !important;
   }
 
-  .profile-trigger-name {
+  .profile-trigger-name,
+  .profile-trigger-sub,
+  .profile-trigger-arrow {
     display: none !important;
   }
 
+  /* Notification dropdown on mobile */
+  .notif-panel {
+    position: fixed !important;
+    top: 64px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 0 auto !important;
+    z-index: 100000 !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  /* Profile dropdown card on mobile */
+  .profile-dropdown-card {
+    position: fixed !important;
+    top: 64px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 0 auto !important;
+    z-index: 100000 !important;
+  }
+
+  /* Feature Preview Cards: 1 column on mobile */
+  .feature-preview-grid.row,
+  .feature-preview-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
   /* ── 1. My Crops Page Mobile ── */
-  .crops-header-row {
+  .ks-page-header {
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 12px !important;
   }
 
-  .add-crop-cta-btn {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .crop-compact-card {
-    min-height: auto !important;
-    padding: 14px !important;
-  }
-
-  .crop-card-top-strip {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-
-  .crop-action-buttons-row {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
-    gap: 6px !important;
+  .ks-page-header button,
+  .ks-page-header-left {
     width: 100% !important;
   }
 
-  .crop-action-btn {
-    padding: 8px 4px !important;
-    font-size: 11px !important;
+  .crops-portfolio-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
   }
 
   /* ── 2. Tasks & Sowing Planner Mobile ── */
-  .tasks-filter-tabs-bar {
+  .ks-tab-bar {
     display: flex !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     padding-bottom: 6px !important;
-    gap: 8px !important;
+    gap: 6px !important;
     scrollbar-width: none !important;
   }
 
-  .tasks-filter-tabs-bar::-webkit-scrollbar {
+  .ks-tab-bar::-webkit-scrollbar {
     display: none !important;
   }
 
-  .task-filter-pill {
+  .ks-tab {
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-  }
-
-  .task-row-card {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 12px !important;
-    padding: 14px !important;
-  }
-
-  .task-row-actions {
-    width: 100% !important;
-    justify-content: flex-end !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
   }
 
   /* ── 3. Crop Calendar & Milestones Mobile ── */
-  .crop-milestone-roadmap {
+  .calendar-milestone-scroll {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 10px !important;
-    gap: 10px !important;
+    padding-bottom: 8px !important;
     scrollbar-width: none !important;
   }
 
-  .calendar-month-matrix {
+  .calendar-milestone-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .calendar-milestone-grid {
+    display: flex !important;
+    gap: 12px !important;
+    min-width: 540px !important;
+  }
+
+  .calendar-milestone-step {
+    flex: 1 !important;
+    min-width: 90px !important;
+  }
+
+  .calendar-weekday-headers,
+  .calendar-days-grid {
     gap: 4px !important;
   }
 
   .calendar-day-cell {
-    min-height: 48px !important;
+    height: 48px !important;
     padding: 4px !important;
+    border-radius: 8px !important;
   }
 
-  .calendar-day-number {
+  .calendar-day-num {
     font-size: 11px !important;
   }
 
-  .calendar-stage-dot {
-    width: 5px !important;
-    height: 5px !important;
+  /* ── 4. Analytics Page Mobile ── */
+  .analytics-kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
   }
 
-  /* ── 4. Weather & Radar Mobile ── */
-  .weather-hero-banner {
-    padding: 20px 16px !important;
+  .analytics-crop-stats-grid {
+    display: flex !important;
     flex-direction: column !important;
-    gap: 16px !important;
+    gap: 4px !important;
   }
 
-  .weather-hourly-strip {
+  /* ── 5. Weather & Radar Mobile ── */
+  .weather-dashboard {
+    padding: 14px 10px !important;
+  }
+
+  .dashboard-header-premium {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+
+  .stats-grid-premium {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .hourly-scroll {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     gap: 8px !important;
     padding-bottom: 6px !important;
   }
 
-  .weather-hourly-card {
-    min-width: 78px !important;
-    flex-shrink: 0 !important;
+  /* ── 6. Market Intelligence Mobile ── */
+  .dashboard-wrapper {
+    padding: 14px 10px !important;
   }
 
-  .weather-metrics-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-
-  /* ── 5. Market Intelligence Mobile ── */
-  .mandi-filter-bar {
-    flex-direction: column !important;
-    gap: 10px !important;
-  }
-
-  .mandi-table-wrapper {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    border-radius: 14px !important;
-  }
-
-  .mandi-table-wrapper table {
-    min-width: 520px !important;
-  }
-
-  /* ── 6. Disease Detection Mobile ── */
-  .disease-dropzone {
-    padding: 24px 14px !important;
-    min-height: 180px !important;
-  }
-
-  .disease-result-layout {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .disease-diagnosis-card,
-  .disease-prescription-card {
-    padding: 16px 14px !important;
-  }
-
-  /* ── 7. Voice Assistant Mobile ── */
-  .voice-assistant-hero {
-    padding: 24px 16px !important;
-  }
-
-  .voice-mic-glow-circle {
-    width: 100px !important;
-    height: 100px !important;
-  }
-
-  .voice-mic-main-btn {
-    width: 68px !important;
-    height: 68px !important;
-    font-size: 24px !important;
-  }
-
-  .voice-quick-prompts-row {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-  }
-
-  .voice-prompt-pill {
-    font-size: 11.5px !important;
-    padding: 6px 10px !important;
-  }
-
-  /* ── 8. Farmer Profile & Dossier Mobile ── */
-  .profile-hero-card {
-    padding: 20px 16px !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    gap: 16px !important;
-  }
-
-  .profile-hero-actions {
-    flex-direction: row !important;
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .profile-dossier-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-
-  /* ── 9. Farm Settings Mobile ── */
-  .settings-domain-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  .settings-row {
+  .dashboard-header {
     flex-direction: column !important;
     align-items: flex-start !important;
-    gap: 8px !important;
+    padding: 16px !important;
+    gap: 12px !important;
   }
 
-  /* ── 10. Universal Modern Modals on Mobile ── */
-  .ks-modal {
-    max-width: 95vw !important;
-    width: 95vw !important;
-    max-height: 90vh !important;
-    border-radius: 20px !important;
-    padding: 0 !important;
-  }
-
-  .ks-modal-header {
-    padding: 14px 18px !important;
-  }
-
-  .ks-modal-body {
-    padding: 16px 18px !important;
-    max-height: calc(90vh - 120px) !important;
-  }
-
-  .ks-modal-footer {
-    padding: 12px 18px 16px !important;
-  }
-
-  /* ── 11. Auth Pages Grid Stacking on Mobile ── */
-  .ks-auth-viewport {
-    padding: 16px 10px !important;
-  }
-
-  .ks-floating-card-container {
-    border-radius: 24px !important;
-    margin: 10px auto !important;
-    min-height: auto !important;
-  }
-
-  .ks-card-brand-panel {
-    padding: 24px 16px !important;
-  }
-
-  .ks-card-narrative h1 {
-    font-size: 22px !important;
-  }
-
-  .ks-card-badges-grid {
+  .filters-grid {
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
   }
 
-  .ks-glass-badge {
-    padding: 8px 10px !important;
+  .mandi-table-wrapper,
+  .table-responsive {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    border-radius: 12px !important;
   }
 
-  .ks-glass-title {
-    font-size: 11px !important;
+  /* ── 7. Disease Detection Mobile ── */
+  .dd-page {
+    padding: 14px 10px !important;
   }
 
-  .ks-card-form-panel {
-    padding: 24px 16px !important;
+  .dd-hero-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 16px !important;
+    gap: 12px !important;
   }
 
-  .ks-lang-top-floating {
-    top: 10px !important;
-    right: 10px !important;
-    padding: 3px !important;
+  .dd-action-footer {
+    flex-direction: column !important;
+    gap: 8px !important;
   }
 
-  .ks-lang-btn {
-    padding: 4px 10px !important;
-    font-size: 11.5px !important;
+  .dd-action-footer button {
+    width: 100% !important;
+  }
+
+  /* ── 8. Voice Assistant Mobile ── */
+  .va-page {
+    padding: 14px 10px 90px !important;
+  }
+
+  .va-hero-banner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 16px !important;
+    gap: 12px !important;
+  }
+
+  /* ── 9. Profile & Settings Mobile ── */
+  .profile-container,
+  .settings-page {
+    padding: 14px 10px !important;
+  }
+
+  .profile-executive-hero,
+  .settings-hero {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 18px 16px !important;
+    gap: 14px !important;
+  }
+
+  .profile-hero-left {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .profile-hero-actions {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .profile-hero-actions button {
+    flex: 1 !important;
+  }
+
+  .profile-dossier-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .profile-widgets-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .settings-lang-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    padding: 14px 12px !important;
+    gap: 8px !important;
+  }
+
+  /* ── 10. Modals, Bottom Navigation & Auth on Mobile ── */
+  .ks-modal,
+  .modal-container {
+    max-width: calc(100vw - 20px) !important;
+    width: calc(100vw - 20px) !important;
+    max-height: 90vh !important;
+    border-radius: 20px !important;
+    margin: auto !important;
+  }
+
+  .ks-modal-body,
+  .modal-body {
+    max-height: calc(90vh - 120px) !important;
+    padding: 16px 14px !important;
+  }
+
+  .ks-modal-footer,
+  .modal-footer {
+    padding: 12px 14px !important;
+  }
+
+  .ks-mobile-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 62px !important;
+    background: #ffffff !important;
+    border-top: 1.5px solid #e2ece3 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+    z-index: 99990 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 4px !important;
+  }
+
+  .ks-mobile-nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-decoration: none !important;
+    color: #64748b !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    gap: 3px !important;
+    flex: 1 !important;
+    height: 100% !important;
+    position: relative !important;
+    transition: color 0.15s ease !important;
+  }
+
+  .ks-mobile-nav-item.active {
+    color: #15803d !important;
+  }
+
+  .ks-mobile-nav-icon {
+    font-size: 18px !important;
+  }
+
+  .ks-mobile-nav-dot {
+    position: absolute !important;
+    bottom: 4px !important;
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    background: #15803d !important;
+  }
+}
+
+/* Hide mobile bottom nav on desktop */
+@media (min-width: 769px) {
+  .ks-mobile-nav {
+    display: none !important;
   }
 }
 
@@ -475,10 +650,20 @@ html, body {
    ============================================================ */
 @media (max-width: 425px) {
   
+  .content-wrapper {
+    padding: 10px 8px 84px 8px !important;
+  }
+
+  .summary-metrics-row.row,
   .summary-metrics-grid,
   .metric-cards-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  .analytics-kpi-grid {
     grid-template-columns: 1fr !important;
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .profile-dossier-grid {
@@ -486,22 +671,64 @@ html, body {
     gap: 8px !important;
   }
 
-  .ks-card-badges-grid {
+  .settings-lang-grid {
     grid-template-columns: 1fr !important;
     gap: 6px !important;
   }
 
-  .crop-action-buttons-row {
-    grid-template-columns: repeat(2, 1fr) !important;
+  .filters-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .stats-grid-premium {
+    grid-template-columns: 1fr 1fr !important;
     gap: 6px !important;
   }
 
-  .ks-text-input {
-    font-size: 16px !important; /* Prevents auto-zoom on iOS safari */
+  .stat-card {
+    padding: 8px 4px !important;
   }
 
-  .ks-submit-btn {
-    padding: 13px 16px !important;
-    font-size: 14px !important;
+  .stat-label {
+    font-size: 9.5px !important;
+  }
+
+  .stat-value {
+    font-size: 12.5px !important;
+  }
+
+  .ks-auth-viewport {
+    padding: 10px 6px !important;
+  }
+
+  .ks-floating-card-container {
+    border-radius: 18px !important;
+  }
+
+  .ks-card-brand-panel,
+  .ks-card-form-panel {
+    padding: 18px 12px !important;
+  }
+
+  .ks-card-badges-grid {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+}
+
+/* ============================================================
+   MICRO PHONES (max-width: 360px)
+   ============================================================ */
+@media (max-width: 360px) {
+  .header-page-name {
+    max-width: 100px !important;
+  }
+
+  .summary-metrics-row.row,
+  .summary-metrics-grid,
+  .metric-cards-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 }

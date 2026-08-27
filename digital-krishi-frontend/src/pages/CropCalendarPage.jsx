@@ -129,11 +129,11 @@ const CropCalendarPage = () => {
       </motion.div>
 
       {/* ─── Seasonal Stage Progression Roadmap ─── */}
-      <div style={{
+      <div className="calendar-milestone-card" style={{
         background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px',
-        padding: '18px 22px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)'
+        padding: '18px 20px', marginBottom: '24px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>🌱 Wheat (Primary Crop) Lifecycle Phase</span>
             <span style={{ background: '#dcfce7', color: '#15803d', fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '8px' }}>
@@ -143,39 +143,34 @@ const CropCalendarPage = () => {
           <span style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>68% Stage Completion</span>
         </div>
 
-        {/* Milestone Steps */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', position: 'relative' }}>
-          {[
-            { label: 'Sowing & Germination', state: 'done', icon: <FaCheck /> },
-            { label: 'Crown Root (CRI)', state: 'done', icon: <FaCheck /> },
-            { label: 'Tillering & Vegetative', state: 'active', icon: <FaSun /> },
-            { label: 'Flowering & Heading', state: 'upcoming', icon: <FaClock /> },
-            { label: 'Maturity & Harvest', state: 'upcoming', icon: <GiScythe /> }
-          ].map((st, i) => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '6px' }}>
-              <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
-                background: st.state === 'done' ? '#15803d' : st.state === 'active' ? '#22c55e' : '#f1f5f9',
-                color: st.state === 'done' || st.state === 'active' ? '#ffffff' : '#94a3b8',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800,
-                boxShadow: st.state === 'active' ? '0 0 10px rgba(34, 197, 94, 0.5)' : 'none',
-                border: st.state === 'upcoming' ? '1.5px solid #cbd5e1' : 'none'
-              }}>
-                {st.icon}
+        {/* Milestone Steps with horizontal scroll container on mobile */}
+        <div className="calendar-milestone-scroll">
+          <div className="calendar-milestone-grid">
+            {[
+              { label: 'Sowing & Germination', state: 'done', icon: <FaCheck /> },
+              { label: 'Crown Root (CRI)', state: 'done', icon: <FaCheck /> },
+              { label: 'Tillering & Vegetative', state: 'active', icon: <FaSun /> },
+              { label: 'Flowering & Heading', state: 'upcoming', icon: <FaClock /> },
+              { label: 'Maturity & Harvest', state: 'upcoming', icon: <GiScythe /> }
+            ].map((st, i) => (
+              <div key={i} className="calendar-milestone-step">
+                <div className={`calendar-milestone-icon-wrap ${st.state}`}>
+                  {st.icon}
+                </div>
+                <span className={`calendar-milestone-label ${st.state}`}>
+                  {st.label}
+                </span>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: st.state === 'active' ? 800 : 600, color: st.state === 'active' ? '#15803d' : '#475569' }}>
-                {st.label}
-              </span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
       {/* ─── 2-Column Grid: Calendar Matrix & Day Activity Inspector ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', gap: '24px' }}>
+      <div className="crop-calendar-layout-grid">
         
         {/* Left: Interactive Month Calendar */}
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '20px', padding: '22px', boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)' }}>
+        <div className="calendar-matrix-card">
           {/* Calendar Header Controls */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>
@@ -185,6 +180,7 @@ const CropCalendarPage = () => {
             <div style={{ display: 'flex', gap: '8px' }}>
               <button
                 onClick={handlePrevMonth}
+                aria-label="Previous Month"
                 style={{
                   background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#334155',
                   width: '34px', height: '34px', borderRadius: '10px', display: 'flex',
@@ -195,6 +191,7 @@ const CropCalendarPage = () => {
               </button>
               <button
                 onClick={handleNextMonth}
+                aria-label="Next Month"
                 style={{
                   background: '#f8fafc', border: '1.5px solid #e2e8f0', color: '#334155',
                   width: '34px', height: '34px', borderRadius: '10px', display: 'flex',
@@ -207,19 +204,19 @@ const CropCalendarPage = () => {
           </div>
 
           {/* Weekday Headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '8px', textAlign: 'center' }}>
+          <div className="calendar-weekday-headers">
             {DAY_LABELS.map(d => (
-              <div key={d} style={{ fontSize: '12px', fontWeight: 800, color: '#64748b', padding: '4px 0' }}>
+              <div key={d} className="calendar-weekday-header">
                 {d}
               </div>
             ))}
           </div>
 
           {/* Calendar Day Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+          <div className="calendar-days-grid">
             {/* Empty slots before first day */}
             {Array.from({ length: firstDayIndex }).map((_, i) => (
-              <div key={`empty-${i}`} style={{ height: '56px' }} />
+              <div key={`empty-${i}`} className="calendar-day-empty" />
             ))}
 
             {/* Month Days */}
@@ -233,43 +230,28 @@ const CropCalendarPage = () => {
                 <div
                   key={dayNum}
                   onClick={() => setSelectedDay(dayNum)}
-                  style={{
-                    height: '56px',
-                    borderRadius: '12px',
-                    border: isSelected ? '2px solid #15803d' : isToday ? '1.5px solid #86efac' : '1px solid #f1f5f9',
-                    background: isSelected ? '#f0fdf4' : isToday ? '#fafdfa' : '#ffffff',
-                    padding: '6px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    transition: 'all 0.15s ease',
-                    boxShadow: isSelected ? '0 2px 8px rgba(21, 128, 61, 0.15)' : 'none'
-                  }}
+                  className={`calendar-day-cell ${isSelected ? 'selected' : ''} ${isToday ? 'today' : ''}`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{
-                      fontSize: '12px', fontWeight: isToday || isSelected ? 800 : 600,
-                      color: isSelected ? '#15803d' : isToday ? '#16a34a' : '#334155'
-                    }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <span className="calendar-day-num">
                       {dayNum}
                     </span>
                     {isToday && (
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22c55e' }} />
+                      <span className="calendar-today-dot" />
                     )}
                   </div>
 
                   {/* Event indicator dots */}
                   {dayEvts.length > 0 && (
-                    <div style={{ display: 'flex', gap: '3px', flexWrap: 'wrap' }}>
+                    <div className="calendar-events-dots-row">
                       {dayEvts.map(ev => {
                         const conf = STAGE_CONFIG[ev.stage] || STAGE_CONFIG.sowing;
                         return (
                           <div
                             key={ev.id}
                             style={{
-                              width: '7px', height: '7px', borderRadius: '50%',
-                              background: conf.color
+                              width: '6px', height: '6px', borderRadius: '50%',
+                              background: conf.color, flexShrink: 0
                             }}
                           />
                         );

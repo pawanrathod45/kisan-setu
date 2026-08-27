@@ -248,7 +248,7 @@ const CropsPage = () => {
 
       {/* Loading Skeleton */}
       {loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
+        <div className="crops-portfolio-grid">
           {[1, 2, 3].map(n => (
             <div key={n} className="ks-card" style={{ height: 320, borderRadius: '20px', padding: '20px', background: '#ffffff', border: '1px solid var(--border)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', height: '100%' }}>
@@ -264,7 +264,7 @@ const CropsPage = () => {
 
       {/* Crops Grid */}
       {!loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '22px' }}>
+        <div className="crops-portfolio-grid">
           <AnimatePresence>
             {crops.length === 0 && (
               <div className="ks-empty" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '24px', border: '2px dashed var(--border)' }}>

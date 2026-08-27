@@ -128,55 +128,55 @@ const AnalyticsPage = () => {
       </motion.div>
 
       {/* ─── 4 Primary KPI Cards ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+      <div className="analytics-kpi-grid">
         
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
+        <div className="analytics-kpi-card" style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '18px 20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>Est. Gross Revenue</span>
             <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
               <FaRupeeSign />
             </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>₹5,22,700</div>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>₹5,22,700</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '12px', color: '#15803d', fontWeight: 700 }}>
             <FaArrowUp /> +14.2% projected vs last season
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
+        <div className="analytics-kpi-card" style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '18px 20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>Yield Efficiency</span>
             <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
               <FaLeaf />
             </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>91.4%</div>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>91.4%</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '12px', color: '#0284c7', fontWeight: 700 }}>
             <FaArrowUp /> +6.8% biomass accumulation
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
+        <div className="analytics-kpi-card" style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '18px 20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: 800, color: '#7e22ce', textTransform: 'uppercase' }}>Resource Optimization</span>
             <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#f3e8ff', color: '#7e22ce', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
               <FaTint />
             </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>94.0%</div>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>94.0%</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '12px', color: '#7e22ce', fontWeight: 700 }}>
             <FaBolt /> 18% water & fertilizer savings
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
+        <div className="analytics-kpi-card" style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '18px', padding: '18px 20px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.04)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span style={{ fontSize: '12px', fontWeight: 800, color: '#b45309', textTransform: 'uppercase' }}>Risk Vulnerability</span>
             <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
               <FaShieldAlt />
             </div>
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>Low (14%)</div>
+          <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>Low (14%)</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '12px', color: '#15803d', fontWeight: 700 }}>
             <FaShieldAlt /> Optimal weather & low pest pressure
           </div>
@@ -185,11 +185,11 @@ const AnalyticsPage = () => {
       </div>
 
       {/* ─── 2-Column Grid: Multi-Crop Portfolio & Price Momentum Chart ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '22px', marginBottom: '24px' }}>
+      <div className="analytics-main-grid">
         
         {/* Left: Multi-Crop Performance Matrix */}
         <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '20px', padding: '22px', boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FaChartPie style={{ color: '#15803d' }} /> Crop Portfolio Revenue & Yield Matrix
             </h3>
@@ -205,7 +205,7 @@ const AnalyticsPage = () => {
                   padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '10px'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <div>
                     <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{item.crop}</div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
@@ -220,7 +220,7 @@ const AnalyticsPage = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', paddingTop: '8px', borderTop: '1px solid #e2e8f0', fontSize: '11.5px' }}>
+                <div className="analytics-crop-stats-grid">
                   <div>
                     <span style={{ color: '#64748b' }}>Input Cost: </span>
                     <strong style={{ color: '#334155' }}>{item.costPerAcre}</strong>

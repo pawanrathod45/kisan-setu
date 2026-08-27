@@ -5,10 +5,11 @@ import {
   FaHome, FaCloudSun, FaChartLine, FaRobot, FaCamera,
   FaBell, FaCalendarAlt, FaChartBar, FaMicrophone,
   FaUser, FaCog, FaSeedling, FaCalendarCheck, FaSignOutAlt,
-  FaChevronRight, FaCheckCircle
+  FaChevronRight, FaCheckCircle, FaTimes
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
 import { translations } from '../../utils/translations';
+import ConfirmModal from './ConfirmModal';
 
 const PRIMARY_NAV = [
   { path: '/farmer/dashboard',        icon: FaHome,          label: 'Dashboard',           iconColor: '#4ade80' },
@@ -29,7 +30,7 @@ const SECONDARY_NAV = [
   { path: '/farmer/settings', icon: FaCog,  label: 'Farm Settings',   iconColor: '#cbd5e1' },
 ];
 
-const SidebarItem = ({ item, index, toggleSidebar }) => (
+const SidebarItem = ({ item, index, closeSidebar }) => (
   <motion.div
     initial={{ opacity: 0, x: -8 }}
     animate={{ opacity: 1, x: 0 }}
@@ -39,9 +40,7 @@ const SidebarItem = ({ item, index, toggleSidebar }) => (
       to={item.path}
       className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
       onClick={() => {
-        if (window.innerWidth < 1025 && toggleSidebar) {
-          toggleSidebar();
-        }
+        if (closeSidebar) closeSidebar();
       }}
     >
       <div className="sidebar-icon-container" style={{ background: `${item.iconColor}16` }}>
@@ -68,9 +67,7 @@ const SidebarItem = ({ item, index, toggleSidebar }) => (
   </motion.div>
 );
 
-import ConfirmModal from './ConfirmModal';
-
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
   const navigate = useNavigate();
   const language = localStorage.getItem('language') || 'en';
   const t = translations[language];
@@ -87,8 +84,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     setShowLogoutConfirm(true);
   };
 
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1025;
-
   return (
     <>
       <ConfirmModal
@@ -101,19 +96,30 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         onConfirm={confirmLogout}
         onCancel={() => setShowLogoutConfirm(false)}
       />
-      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`} aria-label="Main Navigation">
         {/* Brand Header */}
         <div className="sidebar-header">
-          <div className="sidebar-logo-wrap">
-            <GiWheat className="sidebar-logo" />
-          </div>
-          <div className="sidebar-brand-text">
-            <div className="sidebar-title-row">
-              <h2 className="sidebar-title">{t?.title || 'Kisan Setu'}</h2>
-              <span className="sidebar-version-tag">Pro</span>
+          <div className="sidebar-brand-left">
+            <div className="sidebar-logo-wrap">
+              <GiWheat className="sidebar-logo" />
             </div>
-            <p className="sidebar-tagline">Precision Agriculture Engine</p>
+            <div className="sidebar-brand-text">
+              <div className="sidebar-title-row">
+                <h2 className="sidebar-title">{t?.title || 'Kisan Setu'}</h2>
+                <span className="sidebar-version-tag">Pro</span>
+              </div>
+              <p className="sidebar-tagline">Precision Agriculture Engine</p>
+            </div>
           </div>
+
+          {/* Close button visible only on mobile/tablet drawer */}
+          <button
+            className="sidebar-close-btn"
+            onClick={closeSidebar || toggleSidebar}
+            aria-label="Close navigation menu"
+          >
+            <FaTimes />
+          </button>
         </div>
 
         {/* Scrollable Nav Section */}
@@ -128,7 +134,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 key={item.path}
                 item={item}
                 index={i}
-                toggleSidebar={toggleSidebar}
+                closeSidebar={closeSidebar}
               />
             ))}
           </div>
@@ -143,7 +149,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                 key={item.path}
                 item={item}
                 index={PRIMARY_NAV.length + i}
-                toggleSidebar={toggleSidebar}
+                closeSidebar={closeSidebar}
               />
             ))}
           </div>
@@ -194,14 +200,14 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
       {/* Mobile Backdrop Overlay */}
       <AnimatePresence>
-        {isOpen && isMobile && (
+        {isOpen && (
           <motion.div
             className="sidebar-overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            onClick={toggleSidebar}
+            onClick={closeSidebar || toggleSidebar}
           />
         )}
       </AnimatePresence>
@@ -210,3 +216,4 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 };
 
 export default Sidebar;
+
