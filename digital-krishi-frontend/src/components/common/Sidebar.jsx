@@ -105,9 +105,9 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
             <div className="sidebar-brand-text">
               <div className="sidebar-title-row">
                 <h2 className="sidebar-title">{t.title || 'Kisan Setu'}</h2>
-                <span className="sidebar-version-tag">Pro</span>
+                <span className="sidebar-version-tag">🌾 FARMER</span>
               </div>
-              <p className="sidebar-tagline">{t.tagline || 'Precision Agriculture Engine'}</p>
+              <p className="sidebar-tagline">{t.tagline || 'Smart Farming Dashboard'}</p>
             </div>
           </div>
 
