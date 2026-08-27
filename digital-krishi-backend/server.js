@@ -31,6 +31,7 @@ const marketRoutes = require("./src/routes/marketRoutes");
 const cropsRoutes = require("./src/routes/cropsRoutes");
 const tasksRoutes = require("./src/routes/tasksRoutes");
 const alertsRoutes = require("./src/routes/alertsRoutes");
+const adminRoutes = require("./src/routes/adminRoutes");
 
 // Initialize Express
 const app = express();
@@ -88,6 +89,7 @@ app.get("/api/health", healthHandler);
 
 // API Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api", officerRoutes);
 app.use("/api", analyticsRoutes);
 app.use("/api", imageRoutes);

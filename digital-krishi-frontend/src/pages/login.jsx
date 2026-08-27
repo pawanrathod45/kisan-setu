@@ -84,7 +84,11 @@ const Login = () => {
         );
 
         setTimeout(() => {
-          navigate('/farmer/dashboard');
+          if (response.data.user?.role === 'admin') {
+            navigate('/admin/dashboard');
+          } else {
+            navigate('/farmer/dashboard');
+          }
         }, 600);
       } else {
         throw new Error('Authentication payload missing');

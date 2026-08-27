@@ -1,0 +1,63 @@
+require("dotenv").config();
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const User = require("./src/models/User");
+
+const seedAdmin = async () => {
+  try {
+    const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI;
+    if (!mongoUri) {
+      console.error("❌ No MONGO_URI provided in environment");
+      process.exit(1);
+    }
+
+    await mongoose.connect(mongoUri);
+    console.log("✅ Connected to MongoDB for Admin Setup");
+
+    const adminPhone = "9999999999";
+    const adminEmail = "admin@kisansetu.com";
+    const adminPassword = "AdminPassword@123";
+
+    let admin = await User.findOne({ $or: [{ phone: adminPhone }, { email: adminEmail }] });
+
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    if (admin) {
+      admin.role = "admin";
+      admin.status = "active";
+      admin.password = hashedPassword;
+      admin.name = "Kisan Setu Super Admin";
+      await admin.save();
+      console.log("👑 Existing user promoted to Admin successfully!");
+    } else {
+      admin = new User({
+        name: "Kisan Setu Super Admin",
+        phone: adminPhone,
+        email: adminEmail,
+        password: hashedPassword,
+        role: "admin",
+        status: "active",
+        location: "Kisan Setu Command Center, Pune",
+        crop: "Precision Agriculture",
+        farmingType: "organic"
+      });
+      await admin.save();
+      console.log("👑 New Admin account created successfully!");
+    }
+
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("🔑 ADMIN CREDENTIALS FOR TESTING:");
+    console.log(`📱 Mobile:   ${adminPhone}`);
+    console.log(`📧 Email:    ${adminEmail}`);
+    console.log(`🔒 Password: ${adminPassword}`);
+    console.log(`🛡️ Role:     admin`);
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+    process.exit(0);
+  } catch (err) {
+    console.error("❌ Admin Setup Error:", err);
+    process.exit(1);
+  }
+};
+
+seedAdmin();

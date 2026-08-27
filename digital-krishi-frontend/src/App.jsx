@@ -23,6 +23,14 @@ import SettingsPage from './pages/SettingsPage';
 import CropsPage from './pages/CropsPage';
 import TasksPage from './pages/TasksPage';
 
+// Admin Console
+import AdminLayout from './components/admin/AdminLayout';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminCropsPage from './pages/admin/AdminCropsPage';
+import AdminAlertsPage from './pages/admin/AdminAlertsPage';
+import AdminSystemPage from './pages/admin/AdminSystemPage';
+
 // 🔐 Protected Routes
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
@@ -73,6 +81,25 @@ function App() {
             <Route path="voice" element={<VoiceAssistantPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="settings" element={<SettingsPage />} />
+          </Route>
+
+          {/* 🛡️ PROTECTED ADMIN CONSOLE ROUTES */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <RoleProtectedRoute role="admin">
+                  <AdminLayout />
+                </RoleProtectedRoute>
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="crops" element={<AdminCropsPage />} />
+            <Route path="alerts" element={<AdminAlertsPage />} />
+            <Route path="system" element={<AdminSystemPage />} />
           </Route>
 
           {/* ❌ Unauthorized fallback */}
