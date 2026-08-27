@@ -26,10 +26,24 @@ html, body {
 .ai-krishi-wrapper,
 .dd-page,
 .settings-page,
-.profile-container {
-  min-width: 0;
-  width: 100%;
+.profile-container,
+.admin-app-layout,
+.admin-main-container,
+.admin-content-area,
+.admin-page-container {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+img, svg, canvas, iframe, video {
+  max-width: 100%;
+}
+
+input, select, textarea, button {
   box-sizing: border-box;
+  max-width: 100%;
 }
 
 /* ============================================================

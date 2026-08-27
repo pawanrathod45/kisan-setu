@@ -19,27 +19,29 @@
   --m-radius: 20px;
   --m-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
 
-  background: #f4f8f4;
-  min-height: 100vh;
-  padding: 24px 20px;
-  max-width: 1440px;
+  background: transparent;
+  min-height: auto;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   color: var(--m-text);
+  box-sizing: border-box;
 }
 
 /* Header */
 .dashboard-header {
   background: #ffffff;
   border-radius: var(--m-radius);
-  padding: 20px 26px;
-  margin-bottom: 24px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: var(--m-shadow);
   border: 1px solid var(--m-border);
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
 }
 
 .header-left {
@@ -483,21 +485,74 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-wrapper {
-    padding: 16px 12px;
-  }
-
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .header-title-section h1 {
+    font-size: 18px;
+  }
+
+  .market-hero-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+
+  .hero-crop {
+    font-size: 20px;
   }
 
   .hero-price-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+  }
+
+  .price-box {
+    padding: 10px 12px;
+  }
+
+  .price-value {
+    font-size: 18px;
+  }
+
+  .filters-card {
+    padding: 16px 14px;
+  }
+
+  .filters-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .date-filter {
+    flex-wrap: wrap;
+  }
+
+  .date-filter button {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    padding: 6px 10px;
+  }
+
+  .hero-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
