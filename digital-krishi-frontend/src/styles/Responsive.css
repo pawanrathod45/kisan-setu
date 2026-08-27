@@ -82,6 +82,15 @@ input, select, textarea, button {
 /* ============================================================
    LAPTOP & COMPACT DESKTOP (1025px to 1440px)
    ============================================================ */
+@media (min-width: 1025px) {
+  .sidebar-overlay,
+  .admin-sidebar-overlay {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+}
+
 @media (min-width: 1025px) and (max-width: 1440px) {
   .content-wrapper {
     padding: 20px 18px;

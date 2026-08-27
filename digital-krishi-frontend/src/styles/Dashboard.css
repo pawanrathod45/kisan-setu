@@ -596,12 +596,20 @@ color:#b91c1c;
 transform:translateX(1px);
 }
 
-.sidebar-overlay{
-position:fixed;
-inset:0;
-background:rgba(15,23,42,.5);
-z-index:1999;
-backdrop-filter:blur(4px);
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 1999;
+  }
 }
 
 /* ============================================
