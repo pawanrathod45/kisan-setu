@@ -192,24 +192,25 @@
   line-height: 1.4;
 }
 
-/* ── Language Cards Grid ── */
+/* ── Language Cards Grid (Compact & Sleek) ── */
 .settings-lang-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 18px 22px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  max-width: 520px;
+  gap: 10px;
+  padding: 14px 18px;
 }
 
 .settings-lang-card {
-  background: #f8fafc;
+  background: #ffffff;
   border: 1.5px solid #cbd5e1;
-  border-radius: 14px;
-  padding: 14px 10px;
+  border-radius: 12px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  gap: 4px;
+  gap: 2px;
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
@@ -223,17 +224,17 @@
 .settings-lang-card.active {
   background: #f0fdf4;
   border-color: #15803d;
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.12);
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.12);
 }
 
 .settings-lang-native {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   color: #0f172a;
 }
 
 .settings-lang-name {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: #64748b;
 }
@@ -245,9 +246,9 @@
 
 .settings-lang-check {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 11px;
+  top: 10px;
+  right: 10px;
+  font-size: 10px;
   color: #15803d;
 }
 

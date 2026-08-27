@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
 import API from '../services/api';
-import { translations, languages } from '../utils/translations';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/Login.css';
 
 // Realistic Farming Video URL with fallback and poster
@@ -31,14 +31,8 @@ const Register = () => {
   const [loading, setLoading]                         = useState(false);
   const [showPassword, setShowPassword]               = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [language, setLanguage]                       = useState(localStorage.getItem('language') || 'en');
 
-  const t = translations[language] || translations.en;
-
-  const handleLanguageChange = (code) => {
-    setLanguage(code);
-    localStorage.setItem('language', code);
-  };
+  const { language, setLanguage, t, languages } = useLanguage();
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -58,7 +52,19 @@ const Register = () => {
           ? 'Please enter a valid 10-digit Indian mobile number'
           : language === 'mr'
           ? 'कृपया 10 अंकी वैध मोबाईल नंबर टाका'
-          : 'कृपया 10-अंकीय मान्य मोबाइल नंबर दर्ज करें'
+          : 'कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें'
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      setError(
+        language === 'en'
+          ? 'Please enter your full name'
+          : language === 'mr'
+          ? 'कृपया आपले पूर्ण नाव प्रविष्ट करा'
+          : 'कृपया अपना पूरा नाम दर्ज करें'
       );
       setLoading(false);
       return;
@@ -70,7 +76,7 @@ const Register = () => {
           ? 'Password must be at least 6 characters'
           : language === 'mr'
           ? 'पासवर्ड किमान 6 अक्षरांचा असावा'
-          : 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए'
+          : 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए'
       );
       setLoading(false);
       return;
@@ -82,7 +88,7 @@ const Register = () => {
           ? 'Passwords do not match'
           : language === 'mr'
           ? 'पासवर्ड जुळत नाहीत'
-          : 'पासवर्ड और पुष्टि पासवर्ड मेल नहीं खाते'
+          : 'पासवर्ड मेल नहीं खाते'
       );
       setLoading(false);
       return;
@@ -90,46 +96,34 @@ const Register = () => {
 
     try {
       const response = await API.post('/auth/register', {
-        name: formData.name,
+        name: formData.name.trim(),
         phone: cleanPhone,
         password: formData.password,
-        location: formData.location,
-        crop: formData.crop,
-        role: 'farmer'
+        role: 'farmer',
+        location: formData.location.trim() || 'Maharashtra, India',
+        crop: formData.crop.trim() || 'Wheat (गेहूं)'
       });
 
-      const { accessToken, token, refreshToken, user } = response.data;
-      const validToken = accessToken || token;
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (validToken) localStorage.setItem('token', validToken);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
-
-      setSuccess(
-        language === 'en'
-          ? 'Registration successful! Welcome to Kisan Setu...'
-          : language === 'mr'
-          ? 'नोंदणी यशस्वी! किसान सेतूमध्ये आपले स्वागत आहे...'
-          : 'पंजीकरण सफल! किसान सेतु डैशबोर्ड में आपका स्वागत है…'
-      );
-
-      setTimeout(() => {
-        navigate('/farmer/dashboard');
-      }, 1000);
-
-    } catch (err) {
-      console.error('Registration error:', err);
-      if (err.response?.status === 409 || err.response?.data?.message?.includes('already')) {
-        setError(
+        setSuccess(
           language === 'en'
-            ? 'Account already exists with this mobile number. Please login'
+            ? 'Account created successfully! Loading dashboard...'
             : language === 'mr'
-            ? 'हे खाते आधीच अस्तित्वात आहे. कृपया लॉगिन करा'
-            : 'यह मोबाइल नंबर पहले से पंजीकृत है। कृपया लॉगिन करें'
+            ? 'नोंदणी यशस्वी! डॅशबोर्ड सुरू होत आहे...'
+            : 'पंजीकरण सफल! डैशबोर्ड लोड हो रहा है...'
         );
+
+        setTimeout(() => {
+          navigate('/farmer/dashboard');
+        }, 700);
       } else {
-        setError(err.response?.data?.message || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
+        throw new Error('Missing registration token');
       }
+    } catch (err) {
+      setError(err.response?.data?.message || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
     } finally {
       setLoading(false);
     }
@@ -159,7 +153,7 @@ const Register = () => {
           <button
             key={l.code}
             className={`ks-lang-btn ${language === l.code ? 'active' : ''}`}
-            onClick={() => handleLanguageChange(l.code)}
+            onClick={() => setLanguage(l.code)}
           >
             {l.name}
           </button>
@@ -174,65 +168,52 @@ const Register = () => {
         transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
       >
         
-        {/* Left Side: Brand Narrative & Feature Badges */}
+        {/* Left Side: Brand Narrative & Feature Highlights */}
         <div className="ks-card-brand-panel">
-          
           <div className="ks-brand-top">
             <div className="ks-brand-logo-badge">
               <GiWheat />
             </div>
             <div className="ks-brand-top-text">
-              <h2>🌾 किसान सेतु</h2>
-              <p>Smart Agriculture • Real-Time Insights • AI Assistance</p>
+              <h2>{t.title || 'किसान सेतु'}</h2>
+              <p>{t.tagline || 'सटीक कृषि और क्लाउड एआई'}</p>
             </div>
           </div>
 
           <div className="ks-card-narrative">
-            <div className="ks-narrative-tag">
-              <span>●</span>
-              <span>{language === 'en' ? 'New Farmer Portal' : 'नवीन शेतकरी नोंदणी'}</span>
-            </div>
+            <span className="ks-narrative-tag">
+              🌾 {language === 'en' ? 'New Farmer Portal' : 'नवीन शेतकरी नोंदणी'}
+            </span>
             <h1>{t.registerHeading || 'New Farmer Registration'}</h1>
-            <div className="ks-companion-subtitle">
-              {t.showcaseTitle || 'Digital Agricultural Empowerment'}
-            </div>
-            <p>
-              {t.showcaseDesc || 'Join India’s fastest-growing precision agriculture network. Empower your farm with AI disease diagnostics and APMC mandi rates.'}
+            <p className="ks-companion-subtitle">
+              {t.registerSubheading || 'Fill in your details and start your digital farm account in 1 minute.'}
             </p>
           </div>
 
+          {/* 3 Value Pillars */}
           <div className="ks-card-badges-grid">
-            
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaChartLine /></div>
-              <span className="ks-glass-title">📈 {t.apmcTrans || 'Direct APMC Mandi Rates'}</span>
+              <div className="ks-glass-icon-box"><FaCloudSun /></div>
+              <span className="ks-glass-title">100% Free Kisan Access</span>
             </div>
 
             <div className="ks-glass-badge">
               <div className="ks-glass-icon-box"><FaRobot /></div>
-              <span className="ks-glass-title">🤖 {t.aiAdvisor || '24/7 AI Crop Doctor'}</span>
+              <span className="ks-glass-title">24/7 AI Agronomist</span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaSeedling /></div>
-              <span className="ks-glass-title">🌱 {t.freeAccess || '100% Free Kisan Platform'}</span>
+              <div className="ks-glass-icon-box"><FaChartLine /></div>
+              <span className="ks-glass-title">Direct APMC Mandi Rates</span>
             </div>
-
-            <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaCloudSun /></div>
-              <span className="ks-glass-title">🌦️ Smart Weather Alerts</span>
-            </div>
-
           </div>
-
         </div>
 
         {/* Right Side: Registration Form */}
         <div className="ks-card-form-panel">
-          
           <div className="ks-form-header">
-            <h3>{t.registerHeading || 'New Farmer Registration'}</h3>
-            <p>{t.registerSubheading || 'Fill in your details and start your digital farm account in 1 minute.'}</p>
+            <h2 className="ks-form-title">{t.registerHeading || 'New Farmer Registration'}</h2>
+            <p className="ks-form-sub">{t.registerSubheading || 'Fill in your details and start your digital farm account.'}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -295,18 +276,53 @@ const Register = () => {
               />
             </div>
 
-            {/* Mobile Number */}
+            {/* Mobile Number - Two distinct side-by-side boxes (Zero overlap possible) */}
             <div className="ks-input-group">
               <label className="ks-input-label">
                 <FaMobileAlt style={{ color: '#15803d' }} /> {t.mobile || 'Mobile Number'} *
               </label>
-              <div className="ks-input-container">
-                <span className="ks-country-badge">🇮🇳 +91</span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    background: '#dcfce7',
+                    border: '1.5px solid #86efac',
+                    borderRadius: '12px',
+                    padding: '10px 12px',
+                    color: '#15803d',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    userSelect: 'none',
+                    lineHeight: 1
+                  }}
+                >
+                  <span style={{ fontSize: '15px' }}>🇮🇳</span>
+                  <span>+91</span>
+                </div>
+
                 <input
                   type="tel"
                   name="phone"
-                  className="ks-text-input has-prefix"
-                  placeholder={t.mobilePlaceholder || '98765 43210'}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#f8fafc',
+                    fontSize: '15px',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder={t.mobilePlaceholder || '10-digit mobile number'}
                   value={formData.phone}
                   onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                   required
@@ -315,7 +331,7 @@ const Register = () => {
             </div>
 
             {/* District & Primary Crop Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div className="ks-input-group">
                 <label className="ks-input-label">
                   <FaMapMarkerAlt style={{ color: '#15803d' }} /> {t.district || 'District'}
@@ -346,16 +362,44 @@ const Register = () => {
             </div>
 
             {/* Password & Confirm Password Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div className="ks-input-group">
                 <label className="ks-input-label">
                   <FaLock style={{ color: '#15803d' }} /> {t.password || 'Password'} *
                 </label>
-                <div className="ks-input-container">
+                <div
+                  className="ks-password-input-box"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    width: '100%',
+                    background: '#f8fafc',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: '12px',
+                    padding: '3px 8px 3px 12px',
+                    gap: '6px',
+                    boxSizing: 'border-box'
+                  }}
+                >
                   <input
                     type={showPassword ? 'text' : 'password'}
                     name="password"
-                    className="ks-text-input"
+                    className="ks-password-field"
+                    style={{
+                      flex: '1 1 auto',
+                      minWidth: 0,
+                      width: '100%',
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      padding: '8px 0',
+                      margin: 0,
+                      fontSize: '15px',
+                      color: '#0f172a',
+                      fontWeight: 600,
+                      boxShadow: 'none'
+                    }}
                     placeholder="••••••"
                     value={formData.password}
                     onChange={handleChange}
@@ -363,8 +407,21 @@ const Register = () => {
                   />
                   <button
                     type="button"
-                    className="ks-password-toggle"
+                    className="ks-password-toggle-btn"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
+                    style={{
+                      flexShrink: 0,
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#64748b',
+                      cursor: 'pointer',
+                      padding: '4px 6px',
+                      fontSize: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -375,11 +432,39 @@ const Register = () => {
                 <label className="ks-input-label">
                   <FaLock style={{ color: '#15803d' }} /> {t.confirmPassword || 'Confirm'} *
                 </label>
-                <div className="ks-input-container">
+                <div
+                  className="ks-password-input-box"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    width: '100%',
+                    background: '#f8fafc',
+                    border: '1.5px solid #cbd5e1',
+                    borderRadius: '12px',
+                    padding: '3px 8px 3px 12px',
+                    gap: '6px',
+                    boxSizing: 'border-box'
+                  }}
+                >
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     name="confirmPassword"
-                    className="ks-text-input"
+                    className="ks-password-field"
+                    style={{
+                      flex: '1 1 auto',
+                      minWidth: 0,
+                      width: '100%',
+                      border: 'none',
+                      outline: 'none',
+                      background: 'transparent',
+                      padding: '8px 0',
+                      margin: 0,
+                      fontSize: '15px',
+                      color: '#0f172a',
+                      fontWeight: 600,
+                      boxShadow: 'none'
+                    }}
                     placeholder="••••••"
                     value={formData.confirmPassword}
                     onChange={handleChange}
@@ -387,8 +472,21 @@ const Register = () => {
                   />
                   <button
                     type="button"
-                    className="ks-password-toggle"
+                    className="ks-password-toggle-btn"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label="Toggle confirm password visibility"
+                    style={{
+                      flexShrink: 0,
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#64748b',
+                      cursor: 'pointer',
+                      padding: '4px 6px',
+                      fontSize: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
                   >
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -413,10 +511,10 @@ const Register = () => {
             </button>
           </form>
 
-          {/* Footer Login Link */}
-          <div className="ks-form-footer">
-            <span style={{ color: '#64748b' }}>{t.alreadyAccount || 'Already have an account?'}</span>
-            <Link to="/login" className="ks-register-link">
+          {/* Footer Sign In Link */}
+          <div className="ks-auth-footer-prompt">
+            <span>{t.alreadyAccount || 'Already have an account?'}</span>
+            <Link to="/login" className="ks-footer-link">
               {t.signInLink || 'Sign In Here'}
             </Link>
           </div>

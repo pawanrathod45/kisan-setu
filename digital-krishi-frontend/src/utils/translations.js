@@ -1,8 +1,9 @@
 export const translations = {
   en: {
-    greeting: "🙏 Welcome Farmer",
+    // Brand & General
     title: "Kisan Setu",
     tagline: "Precision Agriculture & Cloud AI",
+    greeting: "🙏 Welcome Farmer",
     showcaseTitle: "Digital Agricultural Empowerment",
     showcaseDesc: "AI-driven crop disease diagnostics, precision weather forecasts, and live AGMARKNET APMC mandi prices all in one place.",
     featureMandi: "AGMARKNET Live Mandi Rates & Arbitrage Forecasts",
@@ -11,6 +12,41 @@ export const translations = {
     statKisans: "50,000+ Verified Kisans",
     statVolume: "₹12.4 Cr Mandi Volume",
     statAccuracy: "99.4% Scan Precision",
+
+    // Navigation & Workspace
+    mainWorkspace: "MAIN WORKSPACE",
+    preferencesAccount: "PREFERENCES & ACCOUNT",
+    dashboard: "Dashboard",
+    myCrops: "My Crops",
+    tasksSowing: "Tasks & Sowing",
+    weatherAdvisory: "Weather Advisory",
+    marketIntelligence: "Market Intelligence",
+    aiKrishiOfficer: "AI Krishi Officer",
+    diseaseDetection: "Disease Detection",
+    smartAlerts: "Smart Alerts",
+    cropCalendar: "Crop Calendar",
+    farmAnalytics: "Farm Analytics",
+    voiceAssistant: "Voice Assistant",
+    farmerProfile: "Farmer Profile",
+    farmSettings: "Farm Settings",
+    systemStatus: "System Status",
+    operational: "100% Operational",
+    verifiedAccount: "Verified Account",
+    signOut: "Sign Out",
+    signOutTitle: "Sign Out of Kisan Setu?",
+    signOutDesc: "Are you sure you want to logout? You can securely sign back in at any time.",
+    yesLogout: "Yes, Logout",
+    cancel: "Cancel",
+
+    // Top Header & Notification Panel
+    farmNotifications: "Farm Notifications",
+    newTag: "new",
+    markAllRead: "Mark all read",
+    viewAllAlerts: "View All Alerts & Advisories",
+    voiceShortcut: "Voice",
+    language: "Language",
+
+    // Auth Pages
     loginHeading: "Farmer Account Login",
     loginSubheading: "Enter your registered mobile number and password to access your farm portal.",
     mobile: "Mobile Number",
@@ -24,8 +60,6 @@ export const translations = {
     demoFill: "1-Click Auto-Fill",
     newFarmerPrompt: "Need a new farmer account?",
     registerLink: "Register Here",
-
-    // Register page
     registerHeading: "New Farmer Registration",
     registerSubheading: "Fill in your details and start your digital farm account in 1 minute.",
     fullName: "Farmer Full Name",
@@ -42,12 +76,35 @@ export const translations = {
     signInLink: "Sign In Here",
     freeAccess: "100% Free Kisan Access",
     aiAdvisor: "24/7 AI Agronomist",
-    apmcTrans: "Direct APMC Transparency"
+    apmcTrans: "Direct APMC Transparency",
+
+    // Dashboard Overview
+    welcomeFarmer: "Welcome back",
+    precisionEngine: "Your smart agriculture dashboard is synchronized with live satellite radar and AGMARKNET APMC feeds.",
+    activeCropsCount: "Active Crops",
+    todayTasksCount: "Today's Tasks",
+    liveMandiAlerts: "Mandi Price Trends",
+    diseaseRiskScore: "Disease Risk",
+    lowRisk: "Low Risk (Optimal)",
+
+    // Settings Page
+    settingsTitle: "Farm Platform Settings",
+    settingsSubtitle: "Customize language dialects, precision AI thresholds, alert radars, and security preferences.",
+    savePreferences: "Save All Preferences",
+    preferencesSaved: "Preferences Saved!",
+    regionalLanguage: "Regional Dialect & Language",
+    mandiCurrency: "Mandi Price Currency",
+    precisionAiEngine: "Precision Agronomy AI Engine",
+    aiVisionDesc: "High-confidence multi-modal crop disease and pest identification",
+    alertRadar: "Critical Alert Radar & Push Alerts",
+    securityTitle: "Account & Device Security"
   },
+
   hi: {
-    greeting: "🙏 नमस्कार किसान भाई / बहन",
+    // Brand & General
     title: "किसान सेतु",
     tagline: "सटीक कृषि और क्लाउड एआई",
+    greeting: "🙏 नमस्कार किसान भाई / बहन",
     showcaseTitle: "डिजिटल कृषि सशक्तिकरण",
     showcaseDesc: "AI-संचालित फसल रोग निदान, सटीक मौसम पूर्वानुमान और पूरे भारत के लाइव APMC मंडी भाव एक ही स्थान पर।",
     featureMandi: "AGMARKNET लाइव मंडी भाव और मूल्य पूर्वानुमान",
@@ -56,6 +113,41 @@ export const translations = {
     statKisans: "50,000+ सत्यापित किसान",
     statVolume: "₹12.4 करोड़ व्यापार",
     statAccuracy: "99.4% निदान सटीकता",
+
+    // Navigation & Workspace
+    mainWorkspace: "मुख्य कार्यक्षेत्र",
+    preferencesAccount: "प्राथमिकताएं एवं खाता",
+    dashboard: "डैशबोर्ड",
+    myCrops: "मेरी फसलें",
+    tasksSowing: "दैनिक कार्य एवं बुवाई",
+    weatherAdvisory: "मौसम परामर्श",
+    marketIntelligence: "मंडी भाव एवं विश्लेषण",
+    aiKrishiOfficer: "एआई कृषि अधिकारी",
+    diseaseDetection: "फसल रोग पहचान",
+    smartAlerts: "स्मार्ट अलर्ट्स",
+    cropCalendar: "फसल कैलेंडर",
+    farmAnalytics: "कृषि विश्लेषण",
+    voiceAssistant: "ध्वनि सहायक",
+    farmerProfile: "किसान प्रोफाइल",
+    farmSettings: "फार्म सेटिंग्स",
+    systemStatus: "सिस्टम स्थिति",
+    operational: "100% सक्रिय",
+    verifiedAccount: "सत्यापित खाता",
+    signOut: "लॉगआउट",
+    signOutTitle: "किसान सेतु से साइन आउट करें?",
+    signOutDesc: "क्या आप वाकई लॉगआउट करना चाहते हैं? आप कभी भी सुरक्षित रूप से पुनः लॉगिन कर सकते हैं।",
+    yesLogout: "हाँ, लॉगआउट करें",
+    cancel: "रद्द करें",
+
+    // Top Header & Notification Panel
+    farmNotifications: "फार्म सूचनाएं (नोटिफिकेशन)",
+    newTag: "नया",
+    markAllRead: "सभी पढ़े हुए चिन्हित करें",
+    viewAllAlerts: "सभी अलर्ट और परामर्श देखें",
+    voiceShortcut: "आवाज",
+    language: "भाषा",
+
+    // Auth Pages
     loginHeading: "किसान खाता लॉगिन",
     loginSubheading: "अपने पंजीकृत मोबाइल नंबर और पासवर्ड से पोर्टल में प्रवेश करें।",
     mobile: "मोबाइल नंबर",
@@ -69,8 +161,6 @@ export const translations = {
     demoFill: "1-Click Auto-Fill",
     newFarmerPrompt: "नया किसान खाता बनाएं?",
     registerLink: "यहाँ पंजीकरण करें",
-
-    // Register page
     registerHeading: "नया किसान पंजीकरण",
     registerSubheading: "अपना विवरण भरें और 1 मिनट में डिजिटल खाता शुरू करें।",
     fullName: "किसान का पूरा नाम",
@@ -87,12 +177,35 @@ export const translations = {
     signInLink: "यहाँ लॉगिन करें",
     freeAccess: "100% मुफ्त किसान सेवा",
     aiAdvisor: "24/7 AI कृषि विशेषज्ञ",
-    apmcTrans: "पारदर्शी APMC मंडी भाव"
+    apmcTrans: "पारदर्शी APMC मंडी भाव",
+
+    // Dashboard Overview
+    welcomeFarmer: "स्वागत है किसान भाई",
+    precisionEngine: "आपका स्मार्ट कृषि डैशबोर्ड लाइव उपग्रह रडार और APMC मंडी भावों के साथ सिंक्रनाइज़ है।",
+    activeCropsCount: "सक्रिय फसलें",
+    todayTasksCount: "आज के कार्य",
+    liveMandiAlerts: "मंडी भाव रुझान",
+    diseaseRiskScore: "रोग जोखिम",
+    lowRisk: "कम जोखिम (अनुकूल)",
+
+    // Settings Page
+    settingsTitle: "फार्म प्लेटफॉर्म सेटिंग्स",
+    settingsSubtitle: "भाषा, AI संवेदनशीलता, मौसम अलर्ट और सुरक्षा प्राथमिकताएं सेट करें।",
+    savePreferences: "सभी प्राथमिकताएं सहेजें",
+    preferencesSaved: "प्राथमिकताएं सहेजी गईं!",
+    regionalLanguage: "क्षेत्रीय भाषा चुनें",
+    mandiCurrency: "मंडी मुद्रा",
+    precisionAiEngine: "सटीक कृषि एआई इंजन",
+    aiVisionDesc: "उच्च सटीकता वाला फसल रोग एवं कीट पहचान सिस्टम",
+    alertRadar: "मौसम एवं फसल सुरक्षा अलर्ट रडार",
+    securityTitle: "खाता एवं सुरक्षा"
   },
+
   mr: {
-    greeting: "🙏 स्वागत आहे शेतकरी मित्र / भगिनी",
+    // Brand & General
     title: "किसान सेतु",
     tagline: "अचूक शेती आणि क्लाउड एआय",
+    greeting: "🙏 स्वागत आहे शेतकरी मित्र / भगिनी",
     showcaseTitle: "डिजिटल शेती सक्षमीकरण",
     showcaseDesc: "AI-आधारित पीक रोग निदान, हवामानाचा अचूक अंदाज आणि संपूर्ण भारतातील थेट APMC बाजारभाव एकाच ठिकाणी.",
     featureMandi: "AGMARKNET थेट बाजारभाव आणि नफा अंदाज",
@@ -101,6 +214,41 @@ export const translations = {
     statKisans: "50,000+ नोंदणीकृत शेतकरी",
     statVolume: "₹12.4 कोटी बाजार उलाढाल",
     statAccuracy: "99.4% अचूक निदान",
+
+    // Navigation & Workspace
+    mainWorkspace: "मुख्य कार्यक्षेत्र",
+    preferencesAccount: "प्राधान्ये आणि खाते",
+    dashboard: "डॅशबोर्ड",
+    myCrops: "माझी पिके",
+    tasksSowing: "दैनिक कामे व पेरणी",
+    weatherAdvisory: "हवामान सल्ला",
+    marketIntelligence: "बाजारभाव व विश्लेषण",
+    aiKrishiOfficer: "एआय कृषी अधिकारी",
+    diseaseDetection: "पीक रोग निदान",
+    smartAlerts: "स्मार्ट सूचना (अलर्ट)",
+    cropCalendar: "पीक कॅलेंडर",
+    farmAnalytics: "शेती विश्लेषण",
+    voiceAssistant: "व्हॉइस असिस्टंट",
+    farmerProfile: "शेतकरी प्रोफाइल",
+    farmSettings: "शेती सेटिंग्ज",
+    systemStatus: "सिस्टम स्थिती",
+    operational: "100% कार्यरत",
+    verifiedAccount: "सत्यापित खाते",
+    signOut: "साइन आउट",
+    signOutTitle: "किसान सेतु मधून बाहेर पडायचे?",
+    signOutDesc: "तुम्हाला नक्की लॉगआउट करायचे आहे का? तुम्ही कधीही पुन्हा सुरक्षितपणे लॉगिन करू शकता.",
+    yesLogout: "होय, लॉगआउट करा",
+    cancel: "रद्द करा",
+
+    // Top Header & Notification Panel
+    farmNotifications: "शेती सूचना (नोटिफिकेशन)",
+    newTag: "नवीन",
+    markAllRead: "सर्व वाचलेले चिन्हांकित करा",
+    viewAllAlerts: "सर्व सूचना व सल्ले पहा",
+    voiceShortcut: "आवाज",
+    language: "भाषा",
+
+    // Auth Pages
     loginHeading: "शेतकरी खाते लॉगिन",
     loginSubheading: "आपल्या नोंदणीकृत मोबाईल नंबर आणि पासवर्डने शेती पोर्टलमध्ये प्रवेश करा.",
     mobile: "मोबाईल नंबर",
@@ -114,8 +262,6 @@ export const translations = {
     demoFill: "1-Click Auto-Fill",
     newFarmerPrompt: "नवीन शेतकरी खाते हवे आहे?",
     registerLink: "येथे नोंदणी करा",
-
-    // Register page
     registerHeading: "नवीन शेतकरी नोंदणी",
     registerSubheading: "आपली माहिती भरा आणि 1 मिनिटात आपले स्मार्ट शेती खाते सुरू करा.",
     fullName: "शेतकऱ्याचे पूर्ण नाव",
@@ -132,12 +278,33 @@ export const translations = {
     signInLink: "येथे लॉगिन करा",
     freeAccess: "100% मोफत शेतकरी सेवा",
     aiAdvisor: "24/7 AI कृषी तज्ज्ञ",
-    apmcTrans: "थेट पारदर्शक बाजारभाव"
+    apmcTrans: "थेट पारदर्शक बाजारभाव",
+
+    // Dashboard Overview
+    welcomeFarmer: "स्वागत आहे शेतकरी मित्र",
+    precisionEngine: "आपला स्मार्ट डिजिटल शेती डॅशबोर्ड थेट उपग्रह रडार आणि APMC बाजारभावांशी जोडलेला आहे.",
+    activeCropsCount: "सक्रिय पिके",
+    todayTasksCount: "आजची कामे",
+    liveMandiAlerts: "बाजारभाव कल",
+    diseaseRiskScore: "रोग धोका पातळी",
+    lowRisk: "कमी धोका (उत्तम स्थिती)",
+
+    // Settings Page
+    settingsTitle: "प्लॅटफॉर्म सेटिंग्ज",
+    settingsSubtitle: "भाषा, AI संवेदनशीलता, हवामान सूचना आणि सुरक्षा प्राधान्ये बदला.",
+    savePreferences: "सर्व प्राधान्ये जतन करा",
+    preferencesSaved: "प्राधान्ये जतन झाली!",
+    regionalLanguage: "प्रादेशिक भाषा निवडा",
+    mandiCurrency: "बाजारभाव चलन",
+    precisionAiEngine: "अचूक शेती AI इंजिन",
+    aiVisionDesc: "उच्च अचूकतेसह पीक रोग व कीड ओळखणारी प्रणाली",
+    alertRadar: "हवामान व पीक संरक्षण अलर्ट",
+    securityTitle: "खाते आणि सुरक्षा"
   }
 };
 
 export const languages = [
-  { code: 'en', name: 'English' },
-  { code: 'hi', name: 'हिन्दी' },
-  { code: 'mr', name: 'मराठी' }
+  { code: 'en', name: 'English', native: 'English', label: 'English' },
+  { code: 'hi', name: 'हिन्दी', native: 'हिन्दी', label: 'Hindi' },
+  { code: 'mr', name: 'मराठी', native: 'मराठी', label: 'Marathi' }
 ];

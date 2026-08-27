@@ -86,16 +86,16 @@
 .ks-floating-card-container {
   position: relative;
   z-index: 10;
-  max-width: 1040px;
+  max-width: 780px;
   width: 100%;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border-radius: 32px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  border-radius: 26px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 1fr 1.08fr;
   overflow: hidden;
   margin: auto;
 }
@@ -105,7 +105,7 @@
    ============================================================ */
 .ks-card-brand-panel {
   background: linear-gradient(145deg, #072e15 0%, #0d4a23 50%, #155e2d 100%);
-  padding: 44px 38px;
+  padding: 24px 22px;
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -119,8 +119,8 @@
   position: absolute;
   top: -60px;
   right: -60px;
-  width: 240px;
-  height: 240px;
+  width: 200px;
+  height: 200px;
   background: radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, transparent 70%);
   pointer-events: none;
 }
@@ -128,37 +128,37 @@
 .ks-brand-top {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   position: relative;
   z-index: 2;
 }
 
 .ks-brand-logo-badge {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(10px);
   border: 1.5px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
   color: #86efac;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
 }
 
 .ks-brand-top-text h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: 17px;
   font-weight: 850;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.3px;
   color: #ffffff;
 }
 
 .ks-brand-top-text p {
-  margin: 2px 0 0 0;
-  font-size: 11.5px;
+  margin: 1px 0 0 0;
+  font-size: 10.5px;
   color: rgba(255, 255, 255, 0.85);
   font-weight: 600;
 }
@@ -166,42 +166,43 @@
 .ks-card-narrative {
   position: relative;
   z-index: 2;
-  margin: 28px 0;
+  margin: 20px 0;
 }
 
 .ks-narrative-tag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
   background: rgba(34, 197, 94, 0.2);
   border: 1px solid rgba(134, 239, 172, 0.3);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #bbf7d0;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .ks-card-narrative h1 {
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 850;
   line-height: 1.25;
-  letter-spacing: -0.6px;
+  letter-spacing: -0.5px;
   color: #ffffff;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
 }
 
 .ks-card-narrative .ks-companion-subtitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: #86efac;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
 }
 
-.ks-card-narrative p {
-  font-size: 13.5px;
-  line-height: 1.6;
+.ks-card-narrative p,
+.ks-narrative-desc {
+  font-size: 13px;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.88);
   margin: 0;
 }
@@ -212,18 +213,18 @@
   z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .ks-glass-badge {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 8px 10px;
+  border-radius: 12px;
   transition: all 0.2s ease;
 }
 
@@ -234,30 +235,30 @@
 }
 
 .ks-glass-icon-box {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
   background: rgba(34, 197, 94, 0.25);
   color: #86efac;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
 .ks-glass-title {
-  font-size: 12px;
-  font-weight: 750;
+  font-size: 11px;
+  font-weight: 700;
   color: #ffffff;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 /* ============================================================
-   RIGHT SIDE OF FLOATING CARD — AUTHENTICATION CONSOLE
+   RIGHT SIDE OF FLOATING CARD — AUTH FORM
    ============================================================ */
 .ks-card-form-panel {
-  padding: 44px 38px;
+  padding: 32px 30px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -265,70 +266,53 @@
 }
 
 .ks-form-header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
+.ks-form-title,
+.ks-form-header h2,
 .ks-form-header h3 {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 850;
   color: #0f172a;
-  margin: 0 0 6px 0;
-  letter-spacing: -0.5px;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.4px;
 }
 
+.ks-form-sub,
 .ks-form-header p {
-  font-size: 13.5px;
+  font-size: 13px;
   color: #64748b;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 /* Form Stack */
 .ks-form-stack {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
 }
 
 .ks-input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .ks-input-label {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 750;
   color: #334155;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
-.ks-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.ks-country-badge {
-  position: absolute;
-  left: 12px;
-  font-size: 13px;
-  font-weight: 750;
-  color: #15803d;
-  background: #dcfce7;
-  padding: 3px 8px;
-  border-radius: 7px;
-  border: 1px solid #bbf7d0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
+/* ── Standard Text Input ── */
 .ks-text-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 12px;
   border: 1.5px solid #cbd5e1;
   background: #f8fafc;
@@ -338,41 +322,134 @@
   transition: all 0.2s ease;
 }
 
-.ks-text-input.has-prefix {
-  padding-left: 74px;
-}
-
 .ks-text-input:focus {
   border-color: #16a34a;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14);
 }
 
-.ks-password-toggle {
-  position: absolute;
-  right: 12px;
-  background: transparent;
-  border: none;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
+/* ── Phone Input Container (Flex layout - prevents flag overlap) ── */
+.ks-phone-input-box {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #f8fafc !important;
+  border-radius: 12px !important;
+  padding: 3px 6px 3px 8px !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
 }
 
-.ks-password-toggle:hover {
-  color: #0f172a;
+.ks-phone-input-box:focus-within {
+  border-color: #16a34a !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14) !important;
+}
+
+.ks-phone-flag-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  flex: 0 0 auto !important;
+  position: static !important; /* STRICTLY IN FLOW - NEVER ABSOLUTE */
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #15803d !important;
+  background: #dcfce7 !important;
+  padding: 5px 9px !important;
+  border-radius: 8px !important;
+  border: 1px solid #bbf7d0 !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+}
+
+.ks-phone-number-field {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 6px !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  color: #0f172a !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 100% !important;
+  line-height: normal !important;
+}
+
+.ks-phone-number-field::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* ── Password Input Container (Flex layout - prevents toggle overlap) ── */
+.ks-password-input-box {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #f8fafc !important;
+  border-radius: 12px !important;
+  padding: 3px 8px 3px 12px !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.ks-password-input-box:focus-within {
+  border-color: #16a34a !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.14) !important;
+}
+
+.ks-password-field {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 8px 0 !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  color: #0f172a !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 100% !important;
+  line-height: normal !important;
+}
+
+.ks-password-toggle-btn {
+  flex: 0 0 auto !important;
+  position: static !important;
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  padding: 4px 6px !important;
+  font-size: 15px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: color 0.15s ease !important;
+}
+
+.ks-password-toggle-btn:hover {
+  color: #0f172a !important;
 }
 
 .ks-submit-btn {
   background: linear-gradient(135deg, #155e2d 0%, #16a34a 100%);
   color: #ffffff;
   border: none;
-  padding: 14px 20px;
+  padding: 12px 18px;
   border-radius: 12px;
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -399,12 +476,12 @@
   background: #f0fdf4;
   border: 1.5px dashed #86efac;
   border-radius: 12px;
-  padding: 10px 14px;
-  margin-top: 18px;
+  padding: 8px 12px;
+  margin-top: 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 11.5px;
   color: #166534;
 }
 
@@ -414,7 +491,7 @@
   color: #15803d;
   padding: 3px 8px;
   border-radius: 6px;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 750;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -426,24 +503,26 @@
 }
 
 /* Footer Link */
+.ks-auth-footer-prompt,
 .ks-form-footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
-  font-size: 13px;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 12.5px;
+  color: #64748b;
 }
 
+.ks-footer-link,
 .ks-register-link {
   color: #15803d;
   font-weight: 800;
   text-decoration: none;
-  transition: color 0.15s ease;
 }
 
+.ks-footer-link:hover,
 .ks-register-link:hover {
-  color: #16a34a;
   text-decoration: underline;
 }
 
@@ -452,132 +531,125 @@
    ============================================================ */
 @media (max-width: 860px) {
   .ks-auth-viewport {
-    padding: 16px 12px !important;
-    align-items: flex-start !important;
+    padding: 12px 10px !important;
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .ks-floating-card-container {
     grid-template-columns: 1fr !important;
-    max-width: 100% !important;
-    border-radius: 24px !important;
-    margin: 40px auto 16px !important;
+    max-width: 440px !important;
+    width: 100% !important;
+    border-radius: 20px !important;
+    margin: 36px auto 12px !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
   }
 
-  /* Compact Header on Mobile (No Oversized Block) */
+  /* Compact Brand Header on Mobile */
   .ks-card-brand-panel {
-    padding: 20px 18px !important;
+    padding: 14px 16px !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
 
   .ks-brand-top {
-    gap: 10px !important;
+    gap: 8px !important;
   }
 
   .ks-brand-logo-badge {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 20px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 17px !important;
+    border-radius: 8px !important;
   }
 
   .ks-brand-top-text h2 {
-    font-size: 18px !important;
+    font-size: 15.5px !important;
   }
 
   .ks-brand-top-text p {
-    display: none !important; /* Hide long tagline on mobile header */
-  }
-
-  .ks-card-narrative {
-    margin: 12px 0 10px !important;
-  }
-
-  .ks-narrative-tag {
     display: none !important;
   }
 
-  .ks-card-narrative h1 {
-    font-size: 20px !important;
-    margin: 0 0 2px 0 !important;
-  }
-
-  .ks-card-narrative .ks-companion-subtitle {
-    font-size: 13.5px !important;
-    margin: 0 !important;
-  }
-
-  .ks-card-narrative p {
-    display: none !important; /* Hide lengthy descriptive paragraph on mobile */
+  /* Hide bulky narrative & capability tiles on mobile login/register */
+  .ks-card-narrative {
+    display: none !important;
   }
 
   .ks-card-badges-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6px !important;
-    margin-top: 10px !important;
+    display: none !important;
   }
 
-  .ks-glass-badge {
-    padding: 6px 8px !important;
-    border-radius: 10px !important;
-    gap: 6px !important;
-  }
-
-  .ks-glass-icon-box {
-    width: 22px !important;
-    height: 22px !important;
-    font-size: 11px !important;
-  }
-
-  .ks-glass-title {
-    font-size: 11px !important;
-  }
-
-  /* Mobile Form Padding */
+  /* Mobile Form Padding - Clean & Compact */
   .ks-card-form-panel {
-    padding: 22px 18px !important;
+    padding: 16px 16px 18px !important;
   }
 
   .ks-form-header {
-    margin-bottom: 16px !important;
+    margin-bottom: 12px !important;
   }
 
+  .ks-form-title,
+  .ks-form-header h2,
   .ks-form-header h3 {
-    font-size: 20px !important;
+    font-size: 18px !important;
+    margin: 0 0 2px 0 !important;
   }
 
+  .ks-form-sub,
   .ks-form-header p {
-    font-size: 12.5px !important;
+    font-size: 12px !important;
   }
 
   .ks-form-stack {
-    gap: 14px !important;
+    gap: 11px !important;
+  }
+
+  .ks-input-group {
+    gap: 4px !important;
+  }
+
+  .ks-input-label {
+    font-size: 11.5px !important;
   }
 
   .ks-text-input {
-    font-size: 16px !important; /* Prevents auto-zoom on iOS */
-    padding: 11px 14px !important;
+    font-size: 14.5px !important;
+    padding: 8px 10px !important;
   }
 
   .ks-submit-btn {
-    padding: 13px !important;
-    font-size: 14px !important;
+    padding: 11px 16px !important;
+    font-size: 13.5px !important;
+    margin-top: 2px !important;
   }
 
   .ks-demo-box {
-    margin-top: 14px !important;
-    padding: 8px 12px !important;
+    margin-top: 10px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
   }
 
+  .ks-demo-btn {
+    padding: 2px 7px !important;
+    font-size: 10.5px !important;
+  }
+
+  .ks-auth-footer-prompt,
   .ks-form-footer {
-    margin-top: 16px !important;
+    margin-top: 12px !important;
+    font-size: 11.5px !important;
   }
 
   .ks-lang-top-floating {
-    top: 10px !important;
-    right: 12px !important;
+    top: 8px !important;
+    right: 10px !important;
     padding: 3px !important;
   }
 
   .ks-lang-btn {
-    padding: 4px 10px !important;
-    font-size: 11.5px !important;
+    padding: 3px 8px !important;
+    font-size: 11px !important;
   }
 }

@@ -7,7 +7,7 @@ import {
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
 import API from '../services/api';
-import { translations, languages } from '../utils/translations';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/Login.css';
 
 // Realistic Farming Video URL with fallback and poster
@@ -17,22 +17,15 @@ const FARMER_POSTER_IMAGE =
   'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?q=80&w=1200&auto=format&fit=crop';
 
 const Login = () => {
-  const navigate                              = useNavigate();
-  const [phone, setPhone]                     = useState('');
-  const [password, setPassword]               = useState('');
-  const [error, setError]                     = useState('');
-  const [success, setSuccess]                 = useState('');
-  const [loading, setLoading]                 = useState(false);
-  const [showPassword, setShowPassword]       = useState(false);
-  const [language, setLanguage]               = useState(localStorage.getItem('language') || 'en');
-
-  // Translation dictionary with safe fallback
-  const t = translations[language] || translations.en;
-
-  const handleLanguageChange = (code) => {
-    setLanguage(code);
-    localStorage.setItem('language', code);
-  };
+  const navigate                        = useNavigate();
+  const [phone, setPhone]               = useState('');
+  const [password, setPassword]         = useState('');
+  const [error, setError]               = useState('');
+  const [success, setSuccess]           = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
+  const { language, setLanguage, t, languages } = useLanguage();
 
   const fillDemoCredentials = () => {
     setPhone('7972822860');
@@ -60,13 +53,13 @@ const Login = () => {
       return;
     }
 
-    if (password.length < 6) {
+    if (!password || password.length < 6) {
       setError(
         language === 'en'
           ? 'Password must be at least 6 characters'
           : language === 'mr'
           ? 'पासवर्ड किमान 6 अक्षरांचा असावा'
-          : 'पासवर्ड कम से कम 6 अक्षरों का होना चाहिए'
+          : 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए'
       );
       setLoading(false);
       return;
@@ -75,42 +68,30 @@ const Login = () => {
     try {
       const response = await API.post('/auth/login', {
         phone: cleanPhone,
-        password: password,
+        password: password.trim()
       });
 
-      const { accessToken, token, refreshToken, user } = response.data;
-      const validToken = accessToken || token;
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
 
-      if (validToken) {
-        localStorage.setItem('token', validToken);
-      }
-      if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
-      }
-      if (user) {
-        localStorage.setItem('user', JSON.stringify(user));
-      }
+        setSuccess(
+          language === 'en'
+            ? 'Access granted! Loading your farm dashboard...'
+            : language === 'mr'
+            ? 'लॉगिन यशस्वी! डॅशबोर्ड उघडत आहे...'
+            : 'सफलतापूर्वक लॉग इन हुआ! डैशबोर्ड लोड हो रहा है...'
+        );
 
-      setSuccess(
-        language === 'en'
-          ? 'Login successful! Redirecting to dashboard...'
-          : language === 'mr'
-          ? 'लॉगिन यशस्वी! डॅशबोर्ड सुरू होत आहे...'
-          : 'लॉगिन सफल! किसान सेतु डैशबोर्ड लोड हो रहा है…'
-      );
-
-      setTimeout(() => {
-        if (user && user.role === 'officer') {
-          navigate('/officer/dashboard');
-        } else {
+        setTimeout(() => {
           navigate('/farmer/dashboard');
-        }
-      }, 800);
-
+        }, 600);
+      } else {
+        throw new Error('Authentication payload missing');
+      }
     } catch (err) {
-      console.error('Login error:', err);
       if (err.response) {
-        if (err.response.status === 401) {
+        if (err.response.status === 400 || err.response.status === 401) {
           setError(
             language === 'en'
               ? 'Invalid mobile number or password'
@@ -144,7 +125,6 @@ const Login = () => {
   return (
     <div className="ks-auth-viewport">
 
-      {/* ── Background Video covering whole window ── */}
       <video
         autoPlay
         muted
@@ -156,16 +136,14 @@ const Login = () => {
         <source src={FARMER_WELCOME_VIDEO_URL} type="video/mp4" />
       </video>
 
-      {/* ── Dark Green Gradient Overlay across entire window ── */}
       <div className="ks-fullscreen-video-overlay" />
 
-      {/* ── Floating Language Switcher Top Right ── */}
       <div className="ks-lang-top-floating">
         {languages.map((l) => (
           <button
             key={l.code}
             className={`ks-lang-btn ${language === l.code ? 'active' : ''}`}
-            onClick={() => handleLanguageChange(l.code)}
+            onClick={() => setLanguage(l.code)}
           >
             {l.name}
           </button>
@@ -177,68 +155,83 @@ const Login = () => {
         className="ks-floating-card-container"
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
         
         {/* Left Side: Brand Narrative & Feature Highlights */}
         <div className="ks-card-brand-panel">
-          
           <div className="ks-brand-top">
             <div className="ks-brand-logo-badge">
               <GiWheat />
             </div>
             <div className="ks-brand-top-text">
-              <h2>🌾 किसान सेतु</h2>
-              <p>Smart Agriculture • Real-Time Insights • AI Assistance</p>
+              <h2>{t.title || 'किसान सेतु'}</h2>
+              <p>{t.tagline || 'सटीक कृषि और क्लाउड एआई'}</p>
             </div>
           </div>
 
           <div className="ks-card-narrative">
-            <div className="ks-narrative-tag">
-              <span>●</span>
-              <span>{language === 'en' ? 'Live Precision Farming' : 'सक्रिय डिजिटल कृषी'}</span>
-            </div>
-            <h1>Welcome to Kisan Setu</h1>
-            <div className="ks-companion-subtitle">
-              Your Smart Digital Farming Companion
-            </div>
-            <p>
-              Access real-time weather insights, live mandi prices, AI-powered crop guidance, disease detection, and smart farming recommendations — all in one platform.
+            <span className="ks-narrative-tag">
+              🌾 {language === 'en' ? 'Smart Agriculture Engine' : 'डिजिटल शेती साथी'}
+            </span>
+            <h1>{t.showcaseTitle || 'Welcome to Kisan Setu'}</h1>
+            <p className="ks-companion-subtitle">
+              {language === 'en'
+                ? 'Your Smart Digital Farming Companion'
+                : language === 'mr'
+                ? 'आपला डिजिटल शेती साथी'
+                : 'आपका स्मार्ट डिजिटल कृषि साथी'}
+            </p>
+            <p className="ks-narrative-desc">
+              {t.showcaseDesc || 'AI-driven crop disease diagnostics, precision weather forecasts, and live AGMARKNET APMC mandi prices.'}
             </p>
           </div>
 
+          {/* Feature Badges (Desktop Only / Compact) */}
           <div className="ks-card-badges-grid">
-            
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaCloudSun /></div>
-              <span className="ks-glass-title">🌦️ Live Weather Intelligence</span>
+              <div className="ks-glass-icon-box">
+                <FaCloudSun />
+              </div>
+              <span className="ks-glass-title">
+                ⛅ {language === 'en' ? 'Live Weather' : language === 'mr' ? 'हवामान अंदाज' : 'लाइव मौसम'}
+              </span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaChartLine /></div>
-              <span className="ks-glass-title">📈 Real-Time Mandi Prices</span>
+              <div className="ks-glass-icon-box">
+                <FaChartLine />
+              </div>
+              <span className="ks-glass-title">
+                📈 {language === 'en' ? 'Mandi Prices' : language === 'mr' ? 'थेट बाजारभाव' : 'लाइव मंडी भाव'}
+              </span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaRobot /></div>
-              <span className="ks-glass-title">🤖 AI Krishi Officer</span>
+              <div className="ks-glass-icon-box">
+                <FaRobot />
+              </div>
+              <span className="ks-glass-title">
+                🤖 {language === 'en' ? 'AI Krishi Officer' : language === 'mr' ? 'एआय कृषी सल्ला' : 'एआई कृषि अधिकारी'}
+              </span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaSeedling /></div>
-              <span className="ks-glass-title">🌱 Smart Crop Guidance</span>
+              <div className="ks-glass-icon-box">
+                <FaSeedling />
+              </div>
+              <span className="ks-glass-title">
+                🌱 {language === 'en' ? 'Crop Guidance' : language === 'mr' ? 'स्मार्ट पीक सल्ला' : 'सटीक फसल सलाह'}
+              </span>
             </div>
-
           </div>
-
         </div>
 
-        {/* Right Side: High-Contrast Login Form */}
+        {/* Right Side: High-Precision Sign-In Form */}
         <div className="ks-card-form-panel">
-          
           <div className="ks-form-header">
-            <h3>{t.loginHeading || 'Farmer Account Login'}</h3>
-            <p>{t.loginSubheading || 'Enter your registered mobile number and password to access your farm portal.'}</p>
+            <h2 className="ks-form-title">{t.loginHeading || 'Farmer Account Login'}</h2>
+            <p className="ks-form-sub">{t.loginSubheading || 'Enter your registered mobile number and password.'}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -251,11 +244,11 @@ const Login = () => {
                   background: '#fee2e2',
                   border: '1.5px solid #fca5a5',
                   color: '#dc2626',
-                  padding: '10px 14px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
+                  padding: '9px 12px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
                   fontWeight: 650,
-                  marginBottom: '16px'
+                  marginBottom: '12px'
                 }}
               >
                 ⚠️ {error}
@@ -271,11 +264,11 @@ const Login = () => {
                   background: '#dcfce7',
                   border: '1.5px solid #86efac',
                   color: '#15803d',
-                  padding: '10px 14px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
+                  padding: '9px 12px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
                   fontWeight: 750,
-                  marginBottom: '16px'
+                  marginBottom: '12px'
                 }}
               >
                 ✅ {success}
@@ -285,17 +278,52 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="ks-form-stack">
             
-            {/* Mobile Number */}
+            {/* Mobile Number - Two distinct side-by-side boxes (Zero overlap possible) */}
             <div className="ks-input-group">
               <label className="ks-input-label">
                 <FaMobileAlt style={{ color: '#15803d' }} /> {t.mobile || 'Mobile Number'}
               </label>
-              <div className="ks-input-container">
-                <span className="ks-country-badge">🇮🇳 +91</span>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '4px',
+                    background: '#dcfce7',
+                    border: '1.5px solid #86efac',
+                    borderRadius: '12px',
+                    padding: '10px 12px',
+                    color: '#15803d',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    userSelect: 'none',
+                    lineHeight: 1
+                  }}
+                >
+                  <span style={{ fontSize: '15px' }}>🇮🇳</span>
+                  <span>+91</span>
+                </div>
+
                 <input
                   type="tel"
-                  className="ks-text-input has-prefix"
-                  placeholder={t.mobilePlaceholder || '98765 43210'}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: '12px',
+                    border: '1.5px solid #cbd5e1',
+                    background: '#f8fafc',
+                    fontSize: '15px',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  placeholder={t.mobilePlaceholder || '10-digit mobile number'}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   required
@@ -311,16 +339,44 @@ const Login = () => {
                 </label>
                 <Link
                   to="/forgot-password"
-                  style={{ fontSize: '12px', color: '#15803d', fontWeight: 700, textDecoration: 'none' }}
+                  style={{ fontSize: '11.5px', color: '#15803d', fontWeight: 700, textDecoration: 'none' }}
                 >
                   {t.forgotPassword || 'Forgot Password?'}
                 </Link>
               </div>
 
-              <div className="ks-input-container">
+              <div
+                className="ks-password-input-box"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  width: '100%',
+                  background: '#f8fafc',
+                  border: '1.5px solid #cbd5e1',
+                  borderRadius: '12px',
+                  padding: '3px 8px 3px 12px',
+                  gap: '6px',
+                  boxSizing: 'border-box'
+                }}
+              >
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="ks-text-input"
+                  className="ks-password-field"
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: 0,
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    padding: '8px 0',
+                    margin: 0,
+                    fontSize: '15px',
+                    color: '#0f172a',
+                    fontWeight: 600,
+                    boxShadow: 'none'
+                  }}
                   placeholder={t.passwordPlaceholder || '••••••••'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -328,9 +384,21 @@ const Login = () => {
                 />
                 <button
                   type="button"
-                  className="ks-password-toggle"
+                  className="ks-password-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label="Toggle password visibility"
+                  style={{
+                    flexShrink: 0,
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#64748b',
+                    cursor: 'pointer',
+                    padding: '4px 6px',
+                    fontSize: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -366,10 +434,9 @@ const Login = () => {
             </button>
           </div>
 
-          {/* Footer Registration Link */}
-          <div className="ks-form-footer">
-            <span style={{ color: '#64748b' }}>{t.newFarmerPrompt || 'Need a new farmer account?'}</span>
-            <Link to="/register" className="ks-register-link">
+          <div className="ks-auth-footer-prompt">
+            <span>{t.newFarmerPrompt || 'Need a new farmer account?'}</span>
+            <Link to="/register" className="ks-footer-link">
               {t.registerLink || 'Register Here'}
             </Link>
           </div>

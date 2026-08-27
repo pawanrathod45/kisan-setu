@@ -1440,12 +1440,12 @@ gap:var(--space-2);
 
 .summary-metric-card{
 border-radius:var(--radius-lg);
-padding:20px 22px;
+padding:16px 18px;
 box-shadow:0 2px 8px rgba(15,23,42,.04);
 border:1.5px solid var(--border);
 display:flex;
 align-items:center;
-gap:16px;
+gap:14px;
 cursor:pointer;
 transition:all var(--transition);
 position:relative;
@@ -1455,25 +1455,25 @@ overflow:hidden;
 .summary-metric-top-bar{
 position:absolute;
 top:0;left:0;right:0;
-height:4px;
+height:3.5px;
 border-radius:var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .summary-metric-card:hover{
-transform:translateY(-4px);
+transform:translateY(-3px);
 box-shadow:0 8px 24px rgba(15,23,42,.08);
 }
 
 .summary-metric-icon{
-width:54px;
-height:54px;
-border-radius:16px;
+width:46px;
+height:46px;
+border-radius:13px;
 display:flex;
 align-items:center;
 justify-content:center;
 flex-shrink:0;
 transition:transform var(--transition);
-font-size:1.35rem;
+font-size:1.2rem;
 }
 
 .summary-metric-card:hover .summary-metric-icon{

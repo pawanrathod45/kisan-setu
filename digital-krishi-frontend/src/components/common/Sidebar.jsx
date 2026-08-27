@@ -8,27 +8,8 @@ import {
   FaChevronRight, FaCheckCircle, FaTimes
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
-import { translations } from '../../utils/translations';
+import { useLanguage } from '../../context/LanguageContext';
 import ConfirmModal from './ConfirmModal';
-
-const PRIMARY_NAV = [
-  { path: '/farmer/dashboard',        icon: FaHome,          label: 'Dashboard',           iconColor: '#4ade80' },
-  { path: '/farmer/crops',            icon: FaSeedling,      label: 'My Crops',            iconColor: '#22c55e' },
-  { path: '/farmer/tasks',            icon: FaCalendarCheck, label: 'Tasks & Sowing',      iconColor: '#c084fc', badge: 'Daily', badgeColor: '#c084fc', badgeBg: 'rgba(192, 132, 252, 0.18)' },
-  { path: '/farmer/weather',          icon: FaCloudSun,      label: 'Weather Advisory',    iconColor: '#38bdf8', badge: 'Live',  badgeColor: '#38bdf8', badgeBg: 'rgba(56, 189, 248, 0.18)' },
-  { path: '/farmer/market',           icon: FaChartLine,     label: 'Market Intelligence', iconColor: '#fbbf24', badge: 'Mandi', badgeColor: '#fbbf24', badgeBg: 'rgba(251, 191, 36, 0.18)' },
-  { path: '/farmer/ai-assistant',     icon: FaRobot,         label: 'AI Krishi Officer',   iconColor: '#2dd4bf', badge: '✨ AI',  badgeColor: '#2dd4bf', badgeBg: 'rgba(45, 212, 191, 0.22)' },
-  { path: '/farmer/disease-detection',icon: FaCamera,        label: 'Disease Detection',   iconColor: '#f472b6', badge: 'Scan',  badgeColor: '#f472b6', badgeBg: 'rgba(244, 114, 182, 0.18)' },
-  { path: '/farmer/alerts',           icon: FaBell,          label: 'Smart Alerts',        iconColor: '#f87171', badge: '2 New', badgeColor: '#f87171', badgeBg: 'rgba(248, 113, 113, 0.22)' },
-  { path: '/farmer/calendar',         icon: FaCalendarAlt,   label: 'Crop Calendar',       iconColor: '#34d399' },
-  { path: '/farmer/analytics',        icon: FaChartBar,      label: 'Farm Analytics',      iconColor: '#818cf8' },
-  { path: '/farmer/voice',            icon: FaMicrophone,    label: 'Voice Assistant',     iconColor: '#a78bfa', badge: 'Mic',   badgeColor: '#a78bfa', badgeBg: 'rgba(167, 139, 250, 0.18)' },
-];
-
-const SECONDARY_NAV = [
-  { path: '/farmer/profile',  icon: FaUser, label: 'Farmer Profile',  iconColor: '#60a5fa' },
-  { path: '/farmer/settings', icon: FaCog,  label: 'Farm Settings',   iconColor: '#cbd5e1' },
-];
 
 const SidebarItem = ({ item, index, closeSidebar }) => (
   <motion.div
@@ -69,10 +50,28 @@ const SidebarItem = ({ item, index, closeSidebar }) => (
 
 const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
   const navigate = useNavigate();
-  const language = localStorage.getItem('language') || 'en';
-  const t = translations[language];
+  const { t } = useLanguage();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const primaryNav = [
+    { path: '/farmer/dashboard',        icon: FaHome,          label: t.dashboard || 'Dashboard',                     iconColor: '#4ade80' },
+    { path: '/farmer/crops',            icon: FaSeedling,      label: t.myCrops || 'My Crops',                        iconColor: '#22c55e' },
+    { path: '/farmer/tasks',            icon: FaCalendarCheck, label: t.tasksSowing || 'Tasks & Sowing',              iconColor: '#c084fc', badge: 'Daily', badgeColor: '#c084fc', badgeBg: 'rgba(192, 132, 252, 0.18)' },
+    { path: '/farmer/weather',          icon: FaCloudSun,      label: t.weatherAdvisory || 'Weather Advisory',        iconColor: '#38bdf8', badge: 'Live',  badgeColor: '#38bdf8', badgeBg: 'rgba(56, 189, 248, 0.18)' },
+    { path: '/farmer/market',           icon: FaChartLine,     label: t.marketIntelligence || 'Market Intelligence',  iconColor: '#fbbf24', badge: 'Mandi', badgeColor: '#fbbf24', badgeBg: 'rgba(251, 191, 36, 0.18)' },
+    { path: '/farmer/ai-assistant',     icon: FaRobot,         label: t.aiKrishiOfficer || 'AI Krishi Officer',       iconColor: '#2dd4bf', badge: '✨ AI',  badgeColor: '#2dd4bf', badgeBg: 'rgba(45, 212, 191, 0.22)' },
+    { path: '/farmer/disease-detection',icon: FaCamera,        label: t.diseaseDetection || 'Disease Detection',      iconColor: '#f472b6', badge: 'Scan',  badgeColor: '#f472b6', badgeBg: 'rgba(244, 114, 182, 0.18)' },
+    { path: '/farmer/alerts',           icon: FaBell,          label: t.smartAlerts || 'Smart Alerts',                iconColor: '#f87171', badge: '2 New', badgeColor: '#f87171', badgeBg: 'rgba(248, 113, 113, 0.22)' },
+    { path: '/farmer/calendar',         icon: FaCalendarAlt,   label: t.cropCalendar || 'Crop Calendar',             iconColor: '#34d399' },
+    { path: '/farmer/analytics',        icon: FaChartBar,      label: t.farmAnalytics || 'Farm Analytics',            iconColor: '#818cf8' },
+    { path: '/farmer/voice',            icon: FaMicrophone,    label: t.voiceAssistant || 'Voice Assistant',          iconColor: '#a78bfa', badge: 'Mic',   badgeColor: '#a78bfa', badgeBg: 'rgba(167, 139, 250, 0.18)' },
+  ];
+
+  const secondaryNav = [
+    { path: '/farmer/profile',  icon: FaUser, label: t.farmerProfile || 'Farmer Profile',  iconColor: '#60a5fa' },
+    { path: '/farmer/settings', icon: FaCog,  label: t.farmSettings || 'Farm Settings',   iconColor: '#cbd5e1' },
+  ];
 
   const confirmLogout = () => {
     localStorage.removeItem('token');
@@ -88,10 +87,10 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
     <>
       <ConfirmModal
         isOpen={showLogoutConfirm}
-        title="Sign Out of Kisan Setu?"
-        message="Are you sure you want to logout? You can securely sign back in at any time."
-        confirmText="Yes, Logout"
-        cancelText="Cancel"
+        title={t.signOutTitle || "Sign Out of Kisan Setu?"}
+        message={t.signOutDesc || "Are you sure you want to logout? You can securely sign back in at any time."}
+        confirmText={t.yesLogout || "Yes, Logout"}
+        cancelText={t.cancel || "Cancel"}
         type="danger"
         onConfirm={confirmLogout}
         onCancel={() => setShowLogoutConfirm(false)}
@@ -105,10 +104,10 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
             </div>
             <div className="sidebar-brand-text">
               <div className="sidebar-title-row">
-                <h2 className="sidebar-title">{t?.title || 'Kisan Setu'}</h2>
+                <h2 className="sidebar-title">{t.title || 'Kisan Setu'}</h2>
                 <span className="sidebar-version-tag">Pro</span>
               </div>
-              <p className="sidebar-tagline">Precision Agriculture Engine</p>
+              <p className="sidebar-tagline">{t.tagline || 'Precision Agriculture Engine'}</p>
             </div>
           </div>
 
@@ -125,11 +124,11 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
         {/* Scrollable Nav Section */}
         <nav className="sidebar-nav ks-scroll">
           <div className="sidebar-section-header">
-            <span className="sidebar-group-label">MAIN WORKSPACE</span>
+            <span className="sidebar-group-label">{t.mainWorkspace || 'MAIN WORKSPACE'}</span>
           </div>
 
           <div className="sidebar-items-list">
-            {PRIMARY_NAV.map((item, i) => (
+            {primaryNav.map((item, i) => (
               <SidebarItem
                 key={item.path}
                 item={item}
@@ -140,15 +139,15 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
           </div>
 
           <div className="sidebar-section-header" style={{ marginTop: '18px' }}>
-            <span className="sidebar-group-label">PREFERENCES & ACCOUNT</span>
+            <span className="sidebar-group-label">{t.preferencesAccount || 'PREFERENCES & ACCOUNT'}</span>
           </div>
 
           <div className="sidebar-items-list">
-            {SECONDARY_NAV.map((item, i) => (
+            {secondaryNav.map((item, i) => (
               <SidebarItem
                 key={item.path}
                 item={item}
-                index={PRIMARY_NAV.length + i}
+                index={primaryNav.length + i}
                 closeSidebar={closeSidebar}
               />
             ))}
@@ -159,9 +158,9 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
             <div className="sidebar-health-row">
               <div className="sidebar-health-beacon">
                 <span className="sidebar-health-dot" />
-                <span className="sidebar-health-title">System Status</span>
+                <span className="sidebar-health-title">{t.systemStatus || 'System Status'}</span>
               </div>
-              <span className="sidebar-health-val">100% Operational</span>
+              <span className="sidebar-health-val">{t.operational || '100% Operational'}</span>
             </div>
           </div>
         </nav>

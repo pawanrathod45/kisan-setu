@@ -6,14 +6,8 @@ import {
 } from 'react-icons/fa';
 import { GiWheat, GiFertilizerBag } from 'react-icons/gi';
 import '../styles/Settings.css';
-
+import { useLanguage } from '../context/LanguageContext';
 import ConfirmModal from '../components/common/ConfirmModal';
-
-const LANGUAGES = [
-  { code: 'en', label: 'English', native: 'English (IN)' },
-  { code: 'hi', label: 'Hindi', native: 'हिन्दी' },
-  { code: 'mr', label: 'Marathi', native: 'मराठी' },
-];
 
 /* Reusable Toggle */
 const Toggle = ({ checked, onChange, disabled }) => (
@@ -29,8 +23,10 @@ const Toggle = ({ checked, onChange, disabled }) => (
 );
 
 const SettingsPage = () => {
+  /* ── Global Language Context ── */
+  const { language, setLanguage, t, languages } = useLanguage();
+
   /* ── State ── */
-  const [language, setLanguage]             = useState(localStorage.getItem('language') || 'en');
   const [darkMode, setDarkMode]             = useState(localStorage.getItem('darkMode') === 'true');
   const [notifications, setNotifs]          = useState(localStorage.getItem('notifications') !== 'false');
   const [marketAlerts, setMarket]           = useState(localStorage.getItem('marketAlerts') !== 'false');
@@ -56,7 +52,6 @@ const SettingsPage = () => {
 
   const handleLanguage = (code) => {
     setLanguage(code);
-    localStorage.setItem('language', code);
   };
 
   const handleSave = () => {
@@ -114,10 +109,10 @@ const SettingsPage = () => {
     <div className="settings-page">
       <ConfirmModal
         isOpen={showLogoutConfirm}
-        title="Terminate Farm Session?"
-        message="Are you sure you want to logout of Kisan Setu on this device?"
-        confirmText="Yes, Logout"
-        cancelText="Cancel"
+        title={t.signOutTitle || "Terminate Farm Session?"}
+        message={t.signOutDesc || "Are you sure you want to logout of Kisan Setu on this device?"}
+        confirmText={t.yesLogout || "Yes, Logout"}
+        cancelText={t.cancel || "Cancel"}
         type="danger"
         onConfirm={confirmLogout}
         onCancel={() => setShowLogoutConfirm(false)}
@@ -130,14 +125,14 @@ const SettingsPage = () => {
             <FaCog />
           </div>
           <div className="settings-hero-titles">
-            <h1>Farm & System Configuration</h1>
-            <p>Customize language dialects, precision AI thresholds, alert radars, and security preferences.</p>
+            <h1>{t.settingsTitle || 'Farm & System Configuration'}</h1>
+            <p>{t.settingsSubtitle || 'Customize language dialects, precision AI thresholds, alert radars, and security preferences.'}</p>
           </div>
         </div>
 
         <button className="settings-btn-save" onClick={handleSave}>
           {saved ? <FaCheck style={{ color: '#15803d' }} /> : <FaSave />}
-          <span>{saved ? 'Preferences Saved!' : 'Save All Preferences'}</span>
+          <span>{saved ? (t.preferencesSaved || 'Preferences Saved!') : (t.savePreferences || 'Save All Preferences')}</span>
         </button>
       </motion.div>
 
@@ -145,23 +140,24 @@ const SettingsPage = () => {
       <div className="settings-grid">
         
         {/* 1. Regional & Language */}
-        <Section icon={<FaGlobe />} iconBg="#dcfce7" iconColor="#15803d" title="Regional Dialect & Currency">
+        <Section icon={<FaGlobe />} iconBg="#dcfce7" iconColor="#15803d" title={t.regionalLanguage || "Regional Dialect & Currency"}>
           <div className="settings-lang-grid">
-            {LANGUAGES.map(l => (
+            {languages.map(l => (
               <button
                 key={l.code}
                 className={`settings-lang-card ${language === l.code ? 'active' : ''}`}
                 onClick={() => handleLanguage(l.code)}
+                type="button"
               >
+                <span className="settings-lang-native">{l.native || l.name}</span>
+                <span className="settings-lang-name">{l.label || l.name}</span>
                 {language === l.code && <FaCheck className="settings-lang-check" />}
-                <span className="settings-lang-native">{l.native}</span>
-                <span className="settings-lang-name">{l.label}</span>
               </button>
             ))}
           </div>
 
           <Row
-            label="Mandi Price Currency"
+            label={t.mandiCurrency || "Mandi Price Currency"}
             sub="Indian Rupee (₹ / Quintal) standardized across APMC markets"
           >
             <span style={{ fontSize: '13px', fontWeight: 800, color: '#15803d', background: '#dcfce7', padding: '4px 10px', borderRadius: '8px' }}>
