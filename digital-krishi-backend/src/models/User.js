@@ -4,16 +4,44 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
   },
-  phone: {
+  email: {
     type: String,
-    unique: true,
     required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
   },
-  email: String,
   password: {
     type: String,
     required: true,
+  },
+  phone: {
+    type: String,
+    required: false,
+    trim: true,
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailOtp: {
+    hash: String,
+    expiresAt: Date,
+    attempts: {
+      type: Number,
+      default: 0,
+    },
+    lastSentAt: Date,
+  },
+  passwordResetOtp: {
+    hash: String,
+    expiresAt: Date,
+    attempts: {
+      type: Number,
+      default: 0,
+    },
   },
   role: {
     type: String,
@@ -25,14 +53,21 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "suspended", "inactive"],
     default: "active",
   },
-  location: String,
-  crop: String,
+  location: {
+    type: String,
+    default: "Maharashtra, India",
+  },
+  crop: {
+    type: String,
+    default: "Wheat",
+  },
   crops: [String],
   profileImage: String,
   landArea: Number,
   farmingType: {
     type: String,
     enum: ["organic", "traditional"],
+    default: "traditional",
   },
   language: {
     type: String,
@@ -52,4 +87,4 @@ const userSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("User", userSchema);

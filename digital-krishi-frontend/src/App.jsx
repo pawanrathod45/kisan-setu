@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 // Pages
 import Login from './pages/login';
 import Register from './pages/Register';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import Dashboard from './pages/Dashboard';
 
 // Layout
@@ -53,6 +54,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
 
           {/* Backward compatibility */}
           <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />

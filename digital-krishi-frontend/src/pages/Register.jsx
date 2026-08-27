@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaLock, FaMobileAlt, FaArrowRight, FaEye, FaEyeSlash,
+  FaLock, FaEnvelope, FaArrowRight, FaEye, FaEyeSlash,
   FaUser, FaMapMarkerAlt, FaSeedling, FaCloudSun, FaChartLine, FaRobot
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
@@ -20,7 +20,7 @@ const Register = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
-    phone: '',
+    email: '',
     password: '',
     confirmPassword: '',
     location: 'Pune, Maharashtra',
@@ -44,15 +44,16 @@ const Register = () => {
     setSuccess('');
     setLoading(true);
 
-    const cleanPhone = formData.phone.trim().replace(/\D/g, '');
+    const cleanEmail = formData.email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (cleanPhone.length !== 10) {
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
       setError(
         language === 'en'
-          ? 'Please enter a valid 10-digit Indian mobile number'
+          ? 'Please enter a valid email address'
           : language === 'mr'
-          ? 'कृपया 10 अंकी वैध मोबाईल नंबर टाका'
-          : 'कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें'
+          ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा'
+          : 'कृपया मान्य ईमेल पता दर्ज करें'
       );
       setLoading(false);
       return;
@@ -97,30 +98,27 @@ const Register = () => {
     try {
       const response = await API.post('/auth/register', {
         name: formData.name.trim(),
-        phone: cleanPhone,
+        email: cleanEmail,
         password: formData.password,
         role: 'farmer',
         location: formData.location.trim() || 'Maharashtra, India',
         crop: formData.crop.trim() || 'Wheat (गेहूं)'
       });
 
-      if (response.data?.token) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
+      if (response.data?.requiresVerification) {
         setSuccess(
           language === 'en'
-            ? 'Account created successfully! Loading dashboard...'
+            ? 'Verification code sent to your email! Redirecting...'
             : language === 'mr'
-            ? 'नोंदणी यशस्वी! डॅशबोर्ड सुरू होत आहे...'
-            : 'पंजीकरण सफल! डैशबोर्ड लोड हो रहा है...'
+            ? 'पडताळणी कोड आपल्या ईमेलवर पाठवला आहे! कृपया प्रतीक्षा करा...'
+            : 'सत्यापन कोड आपके ईमेल पर भेजा गया है! कृपया प्रतीक्षा करें...'
         );
 
         setTimeout(() => {
-          navigate('/farmer/dashboard');
+          navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
         }, 700);
       } else {
-        throw new Error('Missing registration token');
+        navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
       }
     } catch (err) {
       setError(err.response?.data?.message || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
@@ -160,15 +158,15 @@ const Register = () => {
         ))}
       </div>
 
-      {/* ── Central Floating Executive Glassmorphic Auth Card ── */}
+      {/* ── Central Floating Glassmorphic Auth Card (Compact Executive View) ── */}
       <motion.div
         className="ks-floating-card-container"
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
+        transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
         
-        {/* Left Side: Brand Narrative & Feature Highlights */}
+        {/* Left Side: Brand Narrative & Capability Badges */}
         <div className="ks-card-brand-panel">
           <div className="ks-brand-top">
             <div className="ks-brand-logo-badge">
@@ -182,29 +180,59 @@ const Register = () => {
 
           <div className="ks-card-narrative">
             <span className="ks-narrative-tag">
-              🌾 {language === 'en' ? 'New Farmer Portal' : 'नवीन शेतकरी नोंदणी'}
+              🌾 {language === 'en' ? 'Verified Farmer Registration' : 'शेतकरी नोंदणी'}
             </span>
-            <h1>{t.registerHeading || 'New Farmer Registration'}</h1>
+            <h1>{language === 'en' ? 'Join Kisan Setu' : language === 'mr' ? 'किसान सेतू मध्ये सामील व्हा' : 'किसान सेतु से जुड़ें'}</h1>
             <p className="ks-companion-subtitle">
-              {t.registerSubheading || 'Fill in your details and start your digital farm account in 1 minute.'}
+              {language === 'en'
+                ? 'Your Smart Digital Farming Companion'
+                : language === 'mr'
+                ? 'आपला डिजिटल शेती साथी'
+                : 'आपका स्मार्ट डिजिटल कृषि साथी'}
+            </p>
+            <p className="ks-narrative-desc">
+              {language === 'en'
+                ? 'Register with your verified email to access AI plant diagnostics, live APMC mandi prices, and micro-climate advisories.'
+                : 'एआय पीक रोग निदान, थेट बाजारभाव आणि हवामान सल्ल्यासाठी आपल्या ईमेलद्वारे नोंदणी करा.'}
             </p>
           </div>
 
-          {/* 3 Value Pillars */}
+          {/* Feature Badges Grid */}
           <div className="ks-card-badges-grid">
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaCloudSun /></div>
-              <span className="ks-glass-title">100% Free Kisan Access</span>
+              <div className="ks-glass-icon-box">
+                <FaCloudSun />
+              </div>
+              <span className="ks-glass-title">
+                ⛅ {language === 'en' ? 'Live Weather' : language === 'mr' ? 'हवामान अंदाज' : 'लाइव मौसम'}
+              </span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaRobot /></div>
-              <span className="ks-glass-title">24/7 AI Agronomist</span>
+              <div className="ks-glass-icon-box">
+                <FaChartLine />
+              </div>
+              <span className="ks-glass-title">
+                📈 {language === 'en' ? 'Mandi Prices' : language === 'mr' ? 'थेट बाजारभाव' : 'लाइव मंडी भाव'}
+              </span>
             </div>
 
             <div className="ks-glass-badge">
-              <div className="ks-glass-icon-box"><FaChartLine /></div>
-              <span className="ks-glass-title">Direct APMC Mandi Rates</span>
+              <div className="ks-glass-icon-box">
+                <FaRobot />
+              </div>
+              <span className="ks-glass-title">
+                🤖 {language === 'en' ? 'AI Krishi Officer' : language === 'mr' ? 'एआय कृषी सल्ला' : 'एआई कृषि अधिकारी'}
+              </span>
+            </div>
+
+            <div className="ks-glass-badge">
+              <div className="ks-glass-icon-box">
+                <FaSeedling />
+              </div>
+              <span className="ks-glass-title">
+                🌱 {language === 'en' ? 'Crop Guidance' : language === 'mr' ? 'स्मार्ट पीक सल्ला' : 'सटीक फसल सलाह'}
+              </span>
             </div>
           </div>
         </div>
@@ -212,8 +240,12 @@ const Register = () => {
         {/* Right Side: Registration Form */}
         <div className="ks-card-form-panel">
           <div className="ks-form-header">
-            <h2 className="ks-form-title">{t.registerHeading || 'New Farmer Registration'}</h2>
-            <p className="ks-form-sub">{t.registerSubheading || 'Fill in your details and start your digital farm account.'}</p>
+            <h2 className="ks-form-title">
+              {language === 'en' ? 'Create Farmer Account' : language === 'mr' ? 'नवीन शेतकरी खाते' : 'नया किसान खाता बनाएं'}
+            </h2>
+            <p className="ks-form-sub">
+              {language === 'en' ? 'Enter your details. We will verify your account via email OTP.' : 'आपली माहिती भरा. आम्ही ईमेल कोडद्वारे खात्याची पडताळणी करू.'}
+            </p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -226,11 +258,11 @@ const Register = () => {
                   background: '#fee2e2',
                   border: '1.5px solid #fca5a5',
                   color: '#dc2626',
-                  padding: '10px 14px',
-                  borderRadius: '12px',
-                  fontSize: '13px',
+                  padding: '9px 12px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
                   fontWeight: 650,
-                  marginBottom: '16px'
+                  marginBottom: '12px'
                 }}
               >
                 ⚠️ {error}
@@ -276,58 +308,20 @@ const Register = () => {
               />
             </div>
 
-            {/* Mobile Number - Two distinct side-by-side boxes (Zero overlap possible) */}
+            {/* Email Address */}
             <div className="ks-input-group">
               <label className="ks-input-label">
-                <FaMobileAlt style={{ color: '#15803d' }} /> {t.mobile || 'Mobile Number'} *
+                <FaEnvelope style={{ color: '#15803d' }} /> {t.email || 'Email Address'} *
               </label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    background: '#dcfce7',
-                    border: '1.5px solid #86efac',
-                    borderRadius: '12px',
-                    padding: '10px 12px',
-                    color: '#15803d',
-                    fontWeight: 800,
-                    fontSize: '14px',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap',
-                    userSelect: 'none',
-                    lineHeight: 1
-                  }}
-                >
-                  <span style={{ fontSize: '15px' }}>🇮🇳</span>
-                  <span>+91</span>
-                </div>
-
-                <input
-                  type="tel"
-                  name="phone"
-                  style={{
-                    flex: '1 1 auto',
-                    minWidth: 0,
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '12px',
-                    border: '1.5px solid #cbd5e1',
-                    background: '#f8fafc',
-                    fontSize: '15px',
-                    color: '#0f172a',
-                    fontWeight: 600,
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                  placeholder={t.mobilePlaceholder || '10-digit mobile number'}
-                  value={formData.phone}
-                  onChange={(e) => setFormData(p => ({ ...p, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
-                  required
-                />
-              </div>
+              <input
+                type="email"
+                name="email"
+                className="ks-text-input"
+                placeholder="farmer@example.com"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
             </div>
 
             {/* District & Primary Crop Row */}
@@ -474,7 +468,7 @@ const Register = () => {
                     type="button"
                     className="ks-password-toggle-btn"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    aria-label="Toggle confirm password visibility"
+                    aria-label="Toggle password visibility"
                     style={{
                       flexShrink: 0,
                       background: 'transparent',
@@ -501,21 +495,20 @@ const Register = () => {
               disabled={loading}
             >
               {loading ? (
-                <span>{t.creatingAccount || 'Creating farm account...'}</span>
+                <span>{language === 'en' ? 'Sending verification code...' : 'पडताळणी कोड पाठवत आहे...'}</span>
               ) : (
                 <>
-                  <span>{t.registerBtn || 'Complete Registration'}</span>
+                  <span>{language === 'en' ? 'Continue to Email Verification' : 'ईमेल पडताळणीकडे पुढे जा'}</span>
                   <FaArrowRight />
                 </>
               )}
             </button>
           </form>
 
-          {/* Footer Sign In Link */}
           <div className="ks-auth-footer-prompt">
-            <span>{t.alreadyAccount || 'Already have an account?'}</span>
+            <span>{t.alreadyHaveAccount || 'Already registered on Kisan Setu?'}</span>
             <Link to="/login" className="ks-footer-link">
-              {t.signInLink || 'Sign In Here'}
+              {t.loginLink || 'Sign In Here'}
             </Link>
           </div>
 

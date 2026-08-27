@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FaLock, FaMobileAlt, FaArrowRight, FaEye, FaEyeSlash,
+  FaLock, FaEnvelope, FaArrowRight, FaEye, FaEyeSlash,
   FaCloudSun, FaChartLine, FaRobot, FaSeedling
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
@@ -18,7 +18,7 @@ const FARMER_POSTER_IMAGE =
 
 const Login = () => {
   const navigate                        = useNavigate();
-  const [phone, setPhone]               = useState('');
+  const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
   const [error, setError]               = useState('');
   const [success, setSuccess]           = useState('');
@@ -28,8 +28,14 @@ const Login = () => {
   const { language, setLanguage, t, languages } = useLanguage();
 
   const fillDemoCredentials = () => {
-    setPhone('7972822860');
+    setEmail('farmer.demo@kisansetu.com');
     setPassword('password123');
+    setError('');
+  };
+
+  const fillAdminCredentials = () => {
+    setEmail('admin@kisansetu.com');
+    setPassword('AdminPassword@123');
     setError('');
   };
 
@@ -39,15 +45,16 @@ const Login = () => {
     setSuccess('');
     setLoading(true);
 
-    const cleanPhone = phone.trim().replace(/\D/g, '');
+    const cleanEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (cleanPhone.length !== 10) {
+    if (!cleanEmail || !emailRegex.test(cleanEmail)) {
       setError(
         language === 'en'
-          ? 'Please enter a valid 10-digit Indian mobile number'
+          ? 'Please enter a valid email address'
           : language === 'mr'
-          ? 'कृपया 10 अंकी वैध मोबाईल नंबर टाका'
-          : 'कृपया मान्य 10-अंकीय मोबाइल नंबर दर्ज करें'
+          ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा'
+          : 'कृपया मान्य ईमेल पता दर्ज करें'
       );
       setLoading(false);
       return;
@@ -67,12 +74,17 @@ const Login = () => {
 
     try {
       const response = await API.post('/auth/login', {
-        phone: cleanPhone,
+        email: cleanEmail,
         password: password.trim()
       });
 
-      if (response.data?.token) {
-        localStorage.setItem('token', response.data.token);
+      const authToken = response.data?.accessToken || response.data?.token;
+
+      if (authToken) {
+        localStorage.setItem('token', authToken);
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken);
+        }
         localStorage.setItem('user', JSON.stringify(response.data.user));
 
         setSuccess(
@@ -95,13 +107,18 @@ const Login = () => {
       }
     } catch (err) {
       if (err.response) {
-        if (err.response.status === 400 || err.response.status === 401) {
+        if (err.response.status === 403 && err.response.data?.requiresVerification) {
+          setError('Email verification required. Redirecting to verification...');
+          setTimeout(() => {
+            navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
+          }, 800);
+        } else if (err.response.status === 400 || err.response.status === 401) {
           setError(
             language === 'en'
-              ? 'Invalid mobile number or password'
+              ? 'Invalid email or password'
               : language === 'mr'
-              ? 'अवैध मोबाईल नंबर किंवा पासवर्ड'
-              : 'अमान्य मोबाइल नंबर या पासवर्ड'
+              ? 'अवैध ईमेल किंवा पासवर्ड'
+              : 'अमान्य ईमेल या पासवर्ड'
           );
         } else if (err.response.status === 404) {
           setError(
@@ -118,7 +135,9 @@ const Login = () => {
         setError(
           language === 'en'
             ? 'Network error. Please check your connection'
-            : 'सर्वर से कनेक्ट करने में असमर्थ'
+            : language === 'mr'
+            ? 'नेटवर्क त्रुटी. कृपया आपले इंटरनेट तपासा'
+            : 'नेटवर्क त्रुटि। कृपया अपना इंटरनेट कनेक्शन जांचें'
         );
       }
     } finally {
@@ -129,6 +148,7 @@ const Login = () => {
   return (
     <div className="ks-auth-viewport">
 
+      {/* ── Background Video covering whole window ── */}
       <video
         autoPlay
         muted
@@ -140,8 +160,10 @@ const Login = () => {
         <source src={FARMER_WELCOME_VIDEO_URL} type="video/mp4" />
       </video>
 
+      {/* ── Dark Green Gradient Overlay across entire window ── */}
       <div className="ks-fullscreen-video-overlay" />
 
+      {/* ── Floating Language Switcher Top Right ── */}
       <div className="ks-lang-top-floating">
         {languages.map((l) => (
           <button
@@ -235,7 +257,7 @@ const Login = () => {
         <div className="ks-card-form-panel">
           <div className="ks-form-header">
             <h2 className="ks-form-title">{t.loginHeading || 'Farmer Account Login'}</h2>
-            <p className="ks-form-sub">{t.loginSubheading || 'Enter your registered mobile number and password.'}</p>
+            <p className="ks-form-sub">{language === 'en' ? 'Enter your registered email and password.' : 'आपला नोंदणीकृत ईमेल आणि पासवर्ड प्रविष्ट करा.'}</p>
           </div>
 
           <AnimatePresence mode="wait">
@@ -282,64 +304,26 @@ const Login = () => {
 
           <form onSubmit={handleSubmit} className="ks-form-stack">
             
-            {/* Mobile Number - Two distinct side-by-side boxes (Zero overlap possible) */}
+            {/* Email Address */}
             <div className="ks-input-group">
               <label className="ks-input-label">
-                <FaMobileAlt style={{ color: '#15803d' }} /> {t.mobile || 'Mobile Number'}
+                <FaEnvelope style={{ color: '#15803d' }} /> {t.email || 'Email Address'} *
               </label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '4px',
-                    background: '#dcfce7',
-                    border: '1.5px solid #86efac',
-                    borderRadius: '12px',
-                    padding: '10px 12px',
-                    color: '#15803d',
-                    fontWeight: 800,
-                    fontSize: '14px',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap',
-                    userSelect: 'none',
-                    lineHeight: 1
-                  }}
-                >
-                  <span style={{ fontSize: '15px' }}>🇮🇳</span>
-                  <span>+91</span>
-                </div>
-
-                <input
-                  type="tel"
-                  style={{
-                    flex: '1 1 auto',
-                    minWidth: 0,
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '12px',
-                    border: '1.5px solid #cbd5e1',
-                    background: '#f8fafc',
-                    fontSize: '15px',
-                    color: '#0f172a',
-                    fontWeight: 600,
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                  placeholder={t.mobilePlaceholder || '10-digit mobile number'}
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  required
-                />
-              </div>
+              <input
+                type="email"
+                className="ks-text-input"
+                placeholder="farmer@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
 
             {/* Password */}
             <div className="ks-input-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label className="ks-input-label">
-                  <FaLock style={{ color: '#15803d' }} /> {t.password || 'Password'}
+                  <FaLock style={{ color: '#15803d' }} /> {t.password || 'Password'} *
                 </label>
                 <Link
                   to="/forgot-password"
@@ -427,15 +411,27 @@ const Login = () => {
           </form>
 
           {/* 1-Click Demo Login Pill */}
-          <div className="ks-demo-box">
-            <span>{t.demoBadge || '💡 Instant Test Account (Demo)'}</span>
-            <button
-              type="button"
-              className="ks-demo-btn"
-              onClick={fillDemoCredentials}
-            >
-              {t.demoFill || '1-Click Auto-Fill'}
-            </button>
+          <div className="ks-demo-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+            <span>{t.demoBadge || '💡 Instant Demo:'}</span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                type="button"
+                className="ks-demo-btn"
+                onClick={fillDemoCredentials}
+                title="Fill Farmer Demo Email"
+              >
+                Farmer
+              </button>
+              <button
+                type="button"
+                className="ks-demo-btn"
+                onClick={fillAdminCredentials}
+                title="Fill Admin Demo Email"
+                style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fcd34d' }}
+              >
+                Admin
+              </button>
+            </div>
           </div>
 
           <div className="ks-auth-footer-prompt">

@@ -25,6 +25,7 @@ const seedAdmin = async () => {
     if (admin) {
       admin.role = "admin";
       admin.status = "active";
+      admin.isEmailVerified = true;
       admin.password = hashedPassword;
       admin.name = "Kisan Setu Super Admin";
       await admin.save();
@@ -37,6 +38,7 @@ const seedAdmin = async () => {
         password: hashedPassword,
         role: "admin",
         status: "active",
+        isEmailVerified: true,
         location: "Kisan Setu Command Center, Pune",
         crop: "Precision Agriculture",
         farmingType: "organic"
