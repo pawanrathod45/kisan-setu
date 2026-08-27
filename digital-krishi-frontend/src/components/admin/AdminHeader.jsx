@@ -13,11 +13,12 @@ import {
 import ConfirmModal from "../common/ConfirmModal";
 
 const ADMIN_PAGE_META = {
-  "/admin/dashboard": { title: "Executive Command Center", subtitle: "Real-time ecosystem metrics & analytics", emoji: "📊", badge: "Live System" },
-  "/admin/users":     { title: "User Directory & Access",   subtitle: "Manage farmer and officer accounts",       emoji: "👥", badge: "MongoDB Users" },
-  "/admin/crops":     { title: "Agricultural Monitoring",  subtitle: "Crops, acreages & AI disease diagnostics", emoji: "🌱", badge: "Crop Health" },
-  "/admin/alerts":    { title: "Broadcast & Alert Radar",   subtitle: "Dispatched system warnings & advisories", emoji: "🔔", badge: "Live Dispatch" },
-  "/admin/system":    { title: "Database & Node Health",    subtitle: "MongoDB connection & memory diagnostics",  emoji: "🖥️", badge: "Infrastructure" },
+  "/admin/dashboard": { title: "Command Center", subtitle: "Real-time ecosystem metrics & analytics", emoji: "📊", badge: "Live" },
+  "/admin/users":     { title: "User Directory",   subtitle: "Manage farmer and officer accounts",       emoji: "👥", badge: "Users" },
+  "/admin/crops":     { title: "Agricultural Monitoring",  subtitle: "Crops, acreages & AI diagnostics", emoji: "🌱", badge: "Crops" },
+  "/admin/alerts":    { title: "Broadcast & Alerts", subtitle: "Dispatched warnings & advisories", emoji: "🔔", badge: "Alerts" },
+  "/admin/reports":   { title: "Analytics & Reports", subtitle: "MongoDB aggregated metrics & audit history", emoji: "📈", badge: "Reports" },
+  "/admin/system":    { title: "Database Health",    subtitle: "MongoDB connection & diagnostics",  emoji: "🖥️", badge: "Database" },
 };
 
 const AdminHeader = ({ toggleSidebar, sidebarOpen }) => {
