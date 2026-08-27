@@ -153,12 +153,19 @@
   scrollbar-color: rgba(21, 94, 45, 0.15) transparent;
 }
 
+.admin-nav-group-box {
+  margin-bottom: 12px;
+}
+
 .admin-section-header {
-  padding: 8px 8px 5px;
+  padding: 6px 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .admin-group-label {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   color: #64748b;
   letter-spacing: 0.08em;

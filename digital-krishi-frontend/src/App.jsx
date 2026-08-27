@@ -30,6 +30,7 @@ import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminCropsPage from './pages/admin/AdminCropsPage';
 import AdminAlertsPage from './pages/admin/AdminAlertsPage';
+import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminSystemPage from './pages/admin/AdminSystemPage';
 
 // 🔐 Protected Routes
@@ -101,6 +102,7 @@ function App() {
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="crops" element={<AdminCropsPage />} />
             <Route path="alerts" element={<AdminAlertsPage />} />
+            <Route path="reports" element={<AdminReportsPage />} />
             <Route path="system" element={<AdminSystemPage />} />
           </Route>
 

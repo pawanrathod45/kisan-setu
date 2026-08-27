@@ -6,6 +6,7 @@ import {
   FaUsers,
   FaSeedling,
   FaBell,
+  FaChartBar,
   FaServer,
   FaShieldAlt,
   FaSignOutAlt,
@@ -16,12 +17,34 @@ import {
 import { GiWheat } from "react-icons/gi";
 import ConfirmModal from "../common/ConfirmModal";
 
-const ADMIN_NAV = [
-  { path: "/admin/dashboard", icon: FaChartPie, label: "Command Center", badge: "Live", badgeColor: "#4ade80", iconColor: "#4ade80" },
-  { path: "/admin/users", icon: FaUsers, label: "User Directory", iconColor: "#60a5fa" },
-  { path: "/admin/crops", icon: FaSeedling, label: "Crop Monitoring", iconColor: "#34d399" },
-  { path: "/admin/alerts", icon: FaBell, label: "Alert Dispatch", iconColor: "#f87171" },
-  { path: "/admin/system", icon: FaServer, label: "Database & Health", badge: "MongoDB", badgeColor: "#a78bfa", iconColor: "#a78bfa" },
+const ADMIN_SECTIONS = [
+  {
+    group: "MAIN",
+    items: [
+      { path: "/admin/dashboard", icon: FaChartPie, label: "Overview", badge: "Live", badgeColor: "#15803d", iconColor: "#15803d" },
+    ]
+  },
+  {
+    group: "MANAGEMENT",
+    items: [
+      { path: "/admin/users", icon: FaUsers, label: "User Directory", iconColor: "#2563eb" },
+      { path: "/admin/alerts", icon: FaBell, label: "Alerts & Broadcasts", iconColor: "#dc2626" },
+      { path: "/admin/crops", icon: FaSeedling, label: "Crop Database", iconColor: "#16a34a" },
+    ]
+  },
+  {
+    group: "INSIGHTS & REPORTS",
+    items: [
+      { path: "/admin/reports", icon: FaChartBar, label: "Analytics & Reports", badge: "Real", badgeColor: "#7c3aed", iconColor: "#7c3aed" },
+    ]
+  },
+  {
+    group: "SYSTEM",
+    items: [
+      { path: "/admin/system", icon: FaServer, label: "Database Health", badge: "MongoDB", badgeColor: "#059669", iconColor: "#059669" },
+      { path: "/farmer/dashboard", icon: FaExternalLinkAlt, label: "Farmer Portal View", iconColor: "#16a34a", isExternal: true },
+    ]
+  }
 ];
 
 const AdminSidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
@@ -58,7 +81,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
               <div className="admin-title-row">
                 <h2 className="admin-brand-title">Kisan Setu</h2>
                 <span className="admin-shield-badge">
-                  <FaShieldAlt style={{ fontSize: "10px" }} /> ADMIN
+                  <FaShieldAlt style={{ fontSize: "9px" }} /> ADMIN
                 </span>
               </div>
               <p className="admin-brand-tagline">Central Operations Command</p>
@@ -74,70 +97,55 @@ const AdminSidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
           </button>
         </div>
 
-        {/* Scrollable Nav Items */}
+        {/* Scrollable Nav Items with Clear Semantic Groups */}
         <nav className="admin-sidebar-nav ks-scroll">
-          <div className="admin-section-header">
-            <span className="admin-group-label">ADMINISTRATION</span>
-          </div>
+          {ADMIN_SECTIONS.map((section, sIdx) => (
+            <div key={section.group} className="admin-nav-group-box">
+              <div className="admin-section-header">
+                <span className="admin-group-label">{section.group}</span>
+              </div>
 
-          <div className="admin-nav-list">
-            {ADMIN_NAV.map((item, index) => (
-              <motion.div
-                key={item.path}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.02, duration: 0.16 }}
-              >
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) => `admin-nav-item ${isActive ? "active" : ""}`}
-                  onClick={() => {
-                    if (closeSidebar) closeSidebar();
-                  }}
-                >
-                  <div className="admin-nav-icon-box" style={{ background: `${item.iconColor}18` }}>
-                    <item.icon style={{ color: item.iconColor }} />
-                  </div>
-
-                  <span className="admin-nav-label">{item.label}</span>
-
-                  {item.badge && (
-                    <span
-                      className="admin-nav-badge"
-                      style={{
-                        color: item.badgeColor,
-                        background: `${item.badgeColor}20`,
-                        border: `1px solid ${item.badgeColor}40`
+              <div className="admin-nav-list">
+                {section.items.map((item, index) => (
+                  <motion.div
+                    key={item.path}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: (sIdx * 2 + index) * 0.015, duration: 0.15 }}
+                  >
+                    <NavLink
+                      to={item.path}
+                      className={({ isActive }) => `admin-nav-item ${isActive ? "active" : ""}`}
+                      onClick={() => {
+                        if (closeSidebar) closeSidebar();
                       }}
                     >
-                      {item.badge}
-                    </span>
-                  )}
+                      <div className="admin-nav-icon-box">
+                        <item.icon style={{ color: item.iconColor }} />
+                      </div>
 
-                  <FaChevronRight className="admin-nav-arrow" />
-                </NavLink>
-              </motion.div>
-            ))}
-          </div>
+                      <span className="admin-nav-label">{item.label}</span>
 
-          <div className="admin-section-header" style={{ marginTop: "20px" }}>
-            <span className="admin-group-label">QUICK SWITCH</span>
-          </div>
+                      {item.badge && (
+                        <span
+                          className="admin-nav-badge"
+                          style={{
+                            color: item.badgeColor,
+                            background: `${item.badgeColor}18`,
+                            border: `1px solid ${item.badgeColor}35`
+                          }}
+                        >
+                          {item.badge}
+                        </span>
+                      )}
 
-          <div className="admin-nav-list">
-            <NavLink
-              to="/farmer/dashboard"
-              className="admin-nav-item"
-              onClick={() => {
-                if (closeSidebar) closeSidebar();
-              }}
-            >
-              <div className="admin-nav-icon-box" style={{ background: "rgba(34, 197, 94, 0.15)" }}>
-                <FaExternalLinkAlt style={{ color: "#22c55e", fontSize: "12px" }} />
+                      <FaChevronRight className="admin-nav-arrow" />
+                    </NavLink>
+                  </motion.div>
+                ))}
               </div>
-              <span className="admin-nav-label">Farmer Portal View</span>
-            </NavLink>
-          </div>
+            </div>
+          ))}
 
           {/* Database Live Pulse Indicator */}
           <div className="admin-system-pulse-card">
@@ -155,9 +163,7 @@ const AdminSidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
         <div className="admin-sidebar-footer">
           <div className="admin-user-pill">
             <div className="admin-user-avatar-box">
-              <span className="admin-user-initials">
-                {(user?.name || "Admin").charAt(0).toUpperCase()}
-              </span>
+              <span>{(user?.name || "Admin").charAt(0).toUpperCase()}</span>
               <span className="admin-user-online-dot" />
             </div>
 
@@ -169,8 +175,8 @@ const AdminSidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
             <button
               className="admin-logout-icon-btn"
               onClick={() => setShowLogoutConfirm(true)}
-              title="Logout"
-              aria-label="Logout"
+              title="Sign Out"
+              aria-label="Sign Out"
             >
               <FaSignOutAlt />
             </button>

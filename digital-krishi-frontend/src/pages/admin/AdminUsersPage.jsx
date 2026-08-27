@@ -31,6 +31,7 @@ const AdminUsersPage = () => {
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [role, setRole] = useState(searchParams.get("role") || "all");
   const [status, setStatus] = useState(searchParams.get("status") || "all");
+  const [verified, setVerified] = useState(searchParams.get("verified") || "all");
   const [page, setPage] = useState(parseInt(searchParams.get("page") || "1"));
 
   // Details Modal State
@@ -55,6 +56,7 @@ const AdminUsersPage = () => {
         search,
         role,
         status,
+        verified,
         page,
         limit: 10
       });
@@ -66,7 +68,7 @@ const AdminUsersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [search, role, status, page]);
+  }, [search, role, status, verified, page]);
 
   useEffect(() => {
     fetchUsers();
@@ -204,6 +206,22 @@ const AdminUsersPage = () => {
               <option value="all">All Statuses</option>
               <option value="active">Active Only</option>
               <option value="suspended">Suspended Only</option>
+            </select>
+          </div>
+
+          {/* Email Verification Filter */}
+          <div className="admin-filter-item">
+            <FaCheckCircle className="admin-filter-icon" />
+            <select
+              value={verified}
+              onChange={(e) => {
+                setVerified(e.target.value);
+                setPage(1);
+              }}
+            >
+              <option value="all">All Verification</option>
+              <option value="true">Verified Email</option>
+              <option value="false">Pending Verification</option>
             </select>
           </div>
 

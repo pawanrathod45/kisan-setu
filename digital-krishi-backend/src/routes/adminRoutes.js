@@ -25,7 +25,10 @@ router.get("/alerts", adminController.getAlerts);
 router.post("/alerts/broadcast", adminController.createBroadcastAlert);
 router.delete("/alerts/:id", adminController.deleteAlert);
 
-// 5. Database Diagnostics & System Health
+// 5. Reports & System Analytics
+router.get("/reports", adminController.getReportsAndAnalytics);
+
+// 6. Database Diagnostics & System Health
 router.get("/system-health", adminController.getSystemHealth);
 
 module.exports = router;

@@ -296,12 +296,19 @@ background:rgba(21,94,45,0.15);
 border-radius:4px;
 }
 
+.sidebar-nav-group-box{
+margin-bottom:12px;
+}
+
 .sidebar-section-header{
-padding:8px 8px 5px;
+padding:6px 8px 4px;
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
 
 .sidebar-group-label{
-font-size:10.5px;
+font-size:10px;
 font-weight:800;
 color:#64748b;
 text-transform:uppercase;

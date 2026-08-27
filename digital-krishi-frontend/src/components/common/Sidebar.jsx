@@ -13,9 +13,9 @@ import ConfirmModal from './ConfirmModal';
 
 const SidebarItem = ({ item, index, closeSidebar }) => (
   <motion.div
-    initial={{ opacity: 0, x: -8 }}
+    initial={{ opacity: 0, x: -6 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ delay: index * 0.012, duration: 0.16 }}
+    transition={{ delay: index * 0.012, duration: 0.15 }}
   >
     <NavLink
       to={item.path}
@@ -24,7 +24,7 @@ const SidebarItem = ({ item, index, closeSidebar }) => (
         if (closeSidebar) closeSidebar();
       }}
     >
-      <div className="sidebar-icon-container" style={{ background: `${item.iconColor}16` }}>
+      <div className="sidebar-icon-container">
         <item.icon className="sidebar-icon" style={{ color: item.iconColor }} />
       </div>
 
@@ -34,9 +34,9 @@ const SidebarItem = ({ item, index, closeSidebar }) => (
         <span
           className="sidebar-badge"
           style={{
-            color: item.badgeColor || '#ffffff',
-            background: item.badgeBg || 'rgba(255,255,255,0.12)',
-            border: `1px solid ${item.badgeColor ? `${item.badgeColor}40` : 'rgba(255,255,255,0.15)'}`
+            color: item.badgeColor || '#15803d',
+            background: item.badgeBg || '#dcfce7',
+            border: `1px solid ${item.badgeColor ? `${item.badgeColor}35` : '#bbf7d0'}`
           }}
         >
           {item.badge}
@@ -54,23 +54,35 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const primaryNav = [
-    { path: '/farmer/dashboard',        icon: FaHome,          label: t.dashboard || 'Dashboard',                     iconColor: '#4ade80' },
-    { path: '/farmer/crops',            icon: FaSeedling,      label: t.myCrops || 'My Crops',                        iconColor: '#22c55e' },
-    { path: '/farmer/tasks',            icon: FaCalendarCheck, label: t.tasksSowing || 'Tasks & Sowing',              iconColor: '#c084fc', badge: 'Daily', badgeColor: '#c084fc', badgeBg: 'rgba(192, 132, 252, 0.18)' },
-    { path: '/farmer/weather',          icon: FaCloudSun,      label: t.weatherAdvisory || 'Weather Advisory',        iconColor: '#38bdf8', badge: 'Live',  badgeColor: '#38bdf8', badgeBg: 'rgba(56, 189, 248, 0.18)' },
-    { path: '/farmer/market',           icon: FaChartLine,     label: t.marketIntelligence || 'Market Intelligence',  iconColor: '#fbbf24', badge: 'Mandi', badgeColor: '#fbbf24', badgeBg: 'rgba(251, 191, 36, 0.18)' },
-    { path: '/farmer/ai-assistant',     icon: FaRobot,         label: t.aiKrishiOfficer || 'AI Krishi Officer',       iconColor: '#2dd4bf', badge: '✨ AI',  badgeColor: '#2dd4bf', badgeBg: 'rgba(45, 212, 191, 0.22)' },
-    { path: '/farmer/disease-detection',icon: FaCamera,        label: t.diseaseDetection || 'Disease Detection',      iconColor: '#f472b6', badge: 'Scan',  badgeColor: '#f472b6', badgeBg: 'rgba(244, 114, 182, 0.18)' },
-    { path: '/farmer/alerts',           icon: FaBell,          label: t.smartAlerts || 'Smart Alerts',                iconColor: '#f87171', badge: '2 New', badgeColor: '#f87171', badgeBg: 'rgba(248, 113, 113, 0.22)' },
-    { path: '/farmer/calendar',         icon: FaCalendarAlt,   label: t.cropCalendar || 'Crop Calendar',             iconColor: '#34d399' },
-    { path: '/farmer/analytics',        icon: FaChartBar,      label: t.farmAnalytics || 'Farm Analytics',            iconColor: '#818cf8' },
-    { path: '/farmer/voice',            icon: FaMicrophone,    label: t.voiceAssistant || 'Voice Assistant',          iconColor: '#a78bfa', badge: 'Mic',   badgeColor: '#a78bfa', badgeBg: 'rgba(167, 139, 250, 0.18)' },
-  ];
-
-  const secondaryNav = [
-    { path: '/farmer/profile',  icon: FaUser, label: t.farmerProfile || 'Farmer Profile',  iconColor: '#60a5fa' },
-    { path: '/farmer/settings', icon: FaCog,  label: t.farmSettings || 'Farm Settings',   iconColor: '#cbd5e1' },
+  const navGroups = [
+    {
+      group: t.mainWorkspace || 'MAIN WORKSPACE',
+      items: [
+        { path: '/farmer/dashboard',        icon: FaHome,          label: t.dashboard || 'Dashboard',                     iconColor: '#15803d' },
+        { path: '/farmer/crops',            icon: FaSeedling,      label: t.myCrops || 'My Crops',                        iconColor: '#16a34a' },
+        { path: '/farmer/tasks',            icon: FaCalendarCheck, label: t.tasksSowing || 'Tasks & Sowing',              iconColor: '#7c3aed', badge: 'Daily', badgeColor: '#7c3aed', badgeBg: 'rgba(124, 58, 237, 0.12)' },
+        { path: '/farmer/calendar',         icon: FaCalendarAlt,   label: t.cropCalendar || 'Crop Calendar',             iconColor: '#059669' },
+      ]
+    },
+    {
+      group: t.intelligenceGroup || 'FARM INTELLIGENCE',
+      items: [
+        { path: '/farmer/weather',          icon: FaCloudSun,      label: t.weatherAdvisory || 'Weather Advisory',        iconColor: '#0284c7', badge: 'Live',  badgeColor: '#0284c7', badgeBg: 'rgba(2, 132, 199, 0.12)' },
+        { path: '/farmer/market',           icon: FaChartLine,     label: t.marketIntelligence || 'Market Intelligence',  iconColor: '#d97706', badge: 'Mandi', badgeColor: '#d97706', badgeBg: 'rgba(217, 119, 6, 0.12)' },
+        { path: '/farmer/ai-assistant',     icon: FaRobot,         label: t.aiKrishiOfficer || 'AI Krishi Officer',       iconColor: '#0d9488', badge: '✨ AI',  badgeColor: '#0d9488', badgeBg: 'rgba(13, 148, 136, 0.14)' },
+        { path: '/farmer/disease-detection',icon: FaCamera,        label: t.diseaseDetection || 'Disease Detection',      iconColor: '#db2777', badge: 'Scan',  badgeColor: '#db2777', badgeBg: 'rgba(219, 39, 119, 0.12)' },
+        { path: '/farmer/alerts',           icon: FaBell,          label: t.smartAlerts || 'Smart Alerts',                iconColor: '#dc2626', badge: 'Alerts', badgeColor: '#dc2626', badgeBg: 'rgba(220, 38, 38, 0.12)' },
+        { path: '/farmer/voice',            icon: FaMicrophone,    label: t.voiceAssistant || 'Voice Assistant',          iconColor: '#9333ea', badge: 'Mic',   badgeColor: '#9333ea', badgeBg: 'rgba(147, 51, 234, 0.12)' },
+        { path: '/farmer/analytics',        icon: FaChartBar,      label: t.farmAnalytics || 'Farm Analytics',            iconColor: '#4f46e5' },
+      ]
+    },
+    {
+      group: t.preferencesAccount || 'ACCOUNT & SETTINGS',
+      items: [
+        { path: '/farmer/profile',  icon: FaUser, label: t.farmerProfile || 'Farmer Profile',  iconColor: '#2563eb' },
+        { path: '/farmer/settings', icon: FaCog,  label: t.farmSettings || 'Farm Settings',   iconColor: '#475569' },
+      ]
+    }
   ];
 
   const confirmLogout = () => {
@@ -121,37 +133,26 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
           </button>
         </div>
 
-        {/* Scrollable Nav Section */}
+        {/* Scrollable Nav Section with Clear Semantic Hierarchy */}
         <nav className="sidebar-nav ks-scroll">
-          <div className="sidebar-section-header">
-            <span className="sidebar-group-label">{t.mainWorkspace || 'MAIN WORKSPACE'}</span>
-          </div>
+          {navGroups.map((groupObj, gIdx) => (
+            <div key={groupObj.group} className="sidebar-nav-group-box">
+              <div className="sidebar-section-header">
+                <span className="sidebar-group-label">{groupObj.group}</span>
+              </div>
 
-          <div className="sidebar-items-list">
-            {primaryNav.map((item, i) => (
-              <SidebarItem
-                key={item.path}
-                item={item}
-                index={i}
-                closeSidebar={closeSidebar}
-              />
-            ))}
-          </div>
-
-          <div className="sidebar-section-header" style={{ marginTop: '18px' }}>
-            <span className="sidebar-group-label">{t.preferencesAccount || 'PREFERENCES & ACCOUNT'}</span>
-          </div>
-
-          <div className="sidebar-items-list">
-            {secondaryNav.map((item, i) => (
-              <SidebarItem
-                key={item.path}
-                item={item}
-                index={primaryNav.length + i}
-                closeSidebar={closeSidebar}
-              />
-            ))}
-          </div>
+              <div className="sidebar-items-list">
+                {groupObj.items.map((item, i) => (
+                  <SidebarItem
+                    key={item.path}
+                    item={item}
+                    index={gIdx * 4 + i}
+                    closeSidebar={closeSidebar}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
 
           {/* Quick Farm Health Pulse Badge */}
           <div className="sidebar-health-card">
@@ -170,7 +171,7 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
           <div className="sidebar-user-pill">
             <div className="sidebar-user-avatar-wrap">
               <img
-                src={user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Farmer')}&background=d97706&color=fff&size=100&bold=true`}
+                src={user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Farmer')}&background=15803d&color=fff&size=100&bold=true`}
                 alt={user?.name || 'Farmer'}
                 className="sidebar-user-avatar"
               />
@@ -215,4 +216,3 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
 };
 
 export default Sidebar;
-

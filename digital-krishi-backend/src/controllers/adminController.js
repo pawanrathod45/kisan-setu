@@ -138,7 +138,7 @@ exports.getUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const { search, role, status, sortBy = "createdAt", sortOrder = "desc" } = req.query;
+    const { search, role, status, verified, sortBy = "createdAt", sortOrder = "desc" } = req.query;
 
     const filter = {};
 
@@ -148,6 +148,10 @@ exports.getUsers = async (req, res) => {
 
     if (status && status !== "all") {
       filter.status = status;
+    }
+
+    if (verified && verified !== "all") {
+      filter.isEmailVerified = verified === "true";
     }
 
     if (search && search.trim()) {
@@ -488,6 +492,121 @@ exports.getSystemHealth = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Admin System Health Error:", err);
-    res.status(500).json({ message: "Failed to retrieve system health metrics", error: err.message });
+// 11. COMPREHENSIVE REPORTS & AUDIT ANALYTICS (REAL DATABASE AGGREGATIONS)
+exports.getReportsAndAnalytics = async (req, res) => {
+  try {
+    const [
+      totalUsers,
+      verifiedUsersCount,
+      unverifiedUsersCount,
+      activeUsersCount,
+      suspendedUsersCount,
+      totalCropsCount,
+      totalAlertsCount,
+      totalTasksCount
+    ] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ isEmailVerified: true }),
+      User.countDocuments({ isEmailVerified: false }),
+      User.countDocuments({ status: "active" }),
+      User.countDocuments({ status: "suspended" }),
+      Crop.countDocuments(),
+      Alert.countDocuments(),
+      Task.countDocuments()
+    ]);
+
+    // Role breakdown
+    const roleStats = await User.aggregate([
+      {
+        $group: {
+          _id: "$role",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Registration growth timeline (Daily)
+    const userGrowth = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
+          },
+          registrations: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } },
+      { $limit: 30 }
+    ]);
+
+    // Regional distribution (Locations)
+    const regionalDistribution = await User.aggregate([
+      {
+        $group: {
+          _id: { $ifNull: ["$location", "Maharashtra, India"] },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // Crop Distribution & Acreage
+    const cropDistribution = await Crop.aggregate([
+      {
+        $group: {
+          _id: "$name",
+          totalPlots: { $sum: 1 },
+          totalAcreage: { $sum: { $ifNull: ["$area", 0] } }
+        }
+      },
+      { $sort: { totalPlots: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // Alert Severity Distribution
+    const alertSeverityStats = await Alert.aggregate([
+      {
+        $group: {
+          _id: "$severity",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Recent System Audit Activity (Latest 8 user signups & status updates)
+    const recentAuditActivity = await User.find()
+      .select("name email role status isEmailVerified createdAt lastLogin")
+      .sort({ updatedAt: -1 })
+      .limit(8);
+
+    res.json({
+      success: true,
+      data: {
+        summary: {
+          totalUsers,
+          verifiedUsersCount,
+          unverifiedUsersCount,
+          verificationRate: totalUsers > 0 ? ((verifiedUsersCount / totalUsers) * 100).toFixed(1) : 0,
+          activeUsersCount,
+          suspendedUsersCount,
+          totalCropsCount,
+          totalAlertsCount,
+          totalTasksCount
+        },
+        roleStats,
+        userGrowth,
+        regionalDistribution,
+        cropDistribution,
+        alertSeverityStats,
+        recentAuditActivity
+      }
+    });
+  } catch (err) {
+    console.error("❌ Admin Reports & Analytics Error:", err);
+    res.status(500).json({ message: "Failed to generate analytics reports", error: err.message });
   }
 };
+
