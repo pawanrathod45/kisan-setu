@@ -1,5 +1,5 @@
 // ============================================================
-// KISAN SETU — PWA SERVICE WORKER REGISTRATION
+// KISAN SETU — PWA SERVICE WORKER REGISTRATION & AUTO-UPDATE
 // ============================================================
 
 export const registerServiceWorker = () => {
@@ -8,14 +8,17 @@ export const registerServiceWorker = () => {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          // Check for service worker updates periodically
+          // Check for service worker updates
           registration.addEventListener('updatefound', () => {
             const installingWorker = registration.installing;
             if (installingWorker) {
               installingWorker.addEventListener('statechange', () => {
                 if (installingWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    console.log('[Kisan Setu PWA] New version available. Ready to update.');
+                    console.log('[Kisan Setu PWA] New version detected, updating active caches...');
+                    if (registration.waiting) {
+                      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
                   } else {
                     console.log('[Kisan Setu PWA] Content cached for offline use.');
                   }
@@ -25,8 +28,17 @@ export const registerServiceWorker = () => {
           });
         })
         .catch((error) => {
-          console.warn('[Kisan Setu PWA] Service Worker registration failed:', error);
+          console.warn('[Kisan Setu PWA] Service Worker registration note:', error);
         });
+
+      // Handle controller change seamlessly
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
     });
   }
 };
