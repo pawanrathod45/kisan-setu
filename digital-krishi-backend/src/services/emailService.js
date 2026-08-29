@@ -1,13 +1,26 @@
 const nodemailer = require("nodemailer");
 
+// Helper to mask email for safe logs: e.g. "pa***@gmail.com"
+const maskEmail = (email) => {
+  if (!email || typeof email !== "string" || !email.includes("@")) return "unknown";
+  const [name, domain] = email.split("@");
+  if (name.length <= 2) return `${name}***@${domain}`;
+  return `${name.substring(0, 2)}***${name.slice(-1)}@${domain}`;
+};
+
 // Create dynamic SMTP transporter from environment variables
 const createTransporter = () => {
-  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER;
-  const emailPass = process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD;
-  const emailHost = process.env.SMTP_HOST || process.env.EMAIL_HOST;
-  const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587");
-  const emailService = process.env.EMAIL_SERVICE;
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
+  const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
+  const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
+  const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587", 10);
+  const emailService = (process.env.EMAIL_SERVICE || "").trim().toLowerCase();
 
+  if (!emailUser || !emailPass) {
+    return null;
+  }
+
+  // 1. If explicit service (e.g., 'gmail', 'SendGrid', 'Brevo') is provided
   if (emailService) {
     return nodemailer.createTransport({
       service: emailService,
@@ -18,7 +31,8 @@ const createTransporter = () => {
     });
   }
 
-  if (emailHost && emailUser && emailPass) {
+  // 2. If SMTP Host is provided
+  if (emailHost) {
     return nodemailer.createTransport({
       host: emailHost,
       port: emailPort,
@@ -27,18 +41,81 @@ const createTransporter = () => {
         user: emailUser,
         pass: emailPass,
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
   }
 
-  return null;
+  // 3. Fallback: Default to Gmail if email ends with @gmail.com or no host specified
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: emailUser,
+      pass: emailPass,
+    },
+  });
+};
+
+/**
+ * Diagnostic helper to verify SMTP credentials on startup (without logging secrets)
+ */
+const verifyEmailConfig = async () => {
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
+  const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
+  const emailService = (process.env.EMAIL_SERVICE || "").trim();
+  const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
+
+  if (!emailUser || !emailPass) {
+    console.warn("⚠️ [EmailService] SMTP credentials not fully configured (EMAIL_USER/EMAIL_PASS missing).");
+    return { configured: false, reason: "Missing EMAIL_USER or EMAIL_PASS" };
+  }
+
+  try {
+    const transporter = createTransporter();
+    if (!transporter) {
+      console.warn("⚠️ [EmailService] Could not create email transporter.");
+      return { configured: false, reason: "Failed to initialize transporter" };
+    }
+
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (8s)")), 8000);
+      transporter.verify((err, success) => {
+        clearTimeout(timer);
+        if (err) reject(err);
+        else resolve(success);
+      });
+    });
+
+    console.log(`✅ [EmailService] SMTP connection verified successfully for ${maskEmail(emailUser)} (Service/Host: ${emailService || emailHost || "gmail"})`);
+    return { configured: true, user: maskEmail(emailUser) };
+  } catch (err) {
+    console.error("❌ [EmailService] SMTP verification failed on startup:", err.message);
+    return { configured: false, error: err.message };
+  }
 };
 
 /**
  * Send Official Account Verification OTP Email
+ * @param {string} email - Recipient email address
+ * @param {string} otp - 6-digit numeric OTP code
+ * @param {string} name - Farmer / User name
+ * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
  */
 const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
-  const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER || "pavanrathod9405@gmail.com";
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
+  const fromAddress = (process.env.EMAIL_FROM || emailUser || "").trim();
   const transporter = createTransporter();
+
+  if (!transporter || !emailUser) {
+    const errMsg = "Email transporter not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.";
+    console.error("OTP email failed", errMsg);
+    return { success: false, error: errMsg };
+  }
+
+  const formattedFrom = fromAddress.includes("<")
+    ? fromAddress
+    : `"🌾 Kisan Setu Official" <${emailUser}>`;
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -173,41 +250,25 @@ Portal: https://kisan-setu54.vercel.app/login
 ============================================================
   `.trim();
 
-  if (transporter) {
-    try {
-      const info = await transporter.sendMail({
-        from: `"🌾 किसान सेतु Official | Kisan Setu" <${fromAddress}>`,
-        to: email,
-        subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
-        text: plainTextContent,
-        html: htmlContent,
-      });
+  try {
+    console.log("OTP email attempted", { recipient: email });
+    const info = await transporter.sendMail({
+      from: formattedFrom,
+      to: email,
+      subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
+      text: plainTextContent,
+      html: htmlContent,
+    });
 
-      console.log(`✉️ Official Kisan Setu verification email sent to ${email} (Message ID: ${info.messageId})`);
-      return { success: true, messageId: info.messageId };
-    } catch (error) {
-      console.error(`❌ SMTP Email dispatch error to ${email}:`, error.message);
-      logOtpFallback(email, otp, "Official Account Verification");
-      return { success: true, fallback: true };
-    }
-  } else {
-    logOtpFallback(email, otp, "Official Account Verification (SMTP credentials logged)");
-    return { success: true, mode: "dev_logged" };
+    console.log("OTP email sent", { messageId: info.messageId });
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error("OTP email failed", error.message);
+    return { success: false, error: error.message };
   }
-};
-
-/**
- * Diagnostic Console Logger for Development
- */
-const logOtpFallback = (email, otp, purpose) => {
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`📧 [KISAN SETU OFFICIAL EMAIL SERVICE - ${purpose.toUpperCase()}]`);
-  console.log(`📬 Recipient: ${email}`);
-  console.log(`🔑 OTP Code:  >>> ${otp} <<<`);
-  console.log(`⏱️ Expiry:    10 Minutes`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 };
 
 module.exports = {
   sendVerificationOtpEmail,
+  verifyEmailConfig,
 };

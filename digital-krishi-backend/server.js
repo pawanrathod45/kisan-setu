@@ -148,9 +148,16 @@ if (mongoUri) {
   console.warn("⚠️ MONGO_URI is not defined. Please configure MONGO_URI in your environment.");
 }
 
+const { verifyEmailConfig } = require("./src/services/emailService");
+
 // Start Server
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Kisan Setu Server running on port ${PORT}`);
+  // Diagnostic SMTP verification without printing secrets
+  verifyEmailConfig().catch(err => {
+    console.error("⚠️ SMTP verification warning:", err.message);
+  });
 });
+

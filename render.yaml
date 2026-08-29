@@ -23,3 +23,12 @@ services:
         sync: false
       - key: DATA_GOV_API_KEY
         sync: false
+      - key: EMAIL_SERVICE
+        value: gmail
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+

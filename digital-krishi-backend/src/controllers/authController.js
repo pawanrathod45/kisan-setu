@@ -94,24 +94,32 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Send real email OTP safely
-    try {
-      await sendVerificationOtpEmail(cleanEmail, otp, name);
-    } catch (emailErr) {
-      console.warn("⚠️ OTP email dispatch warning:", emailErr.message);
+    // Attempt real email OTP dispatch
+    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, name.trim());
+
+    if (!emailResult.success) {
+      // User is kept in MongoDB; return clear guidance to resend OTP
+      return res.status(201).json({
+        success: true,
+        requiresVerification: true,
+        emailSent: false,
+        email: cleanEmail,
+        message: "Account created, but verification email could not be sent. Please resend OTP.",
+      });
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       requiresVerification: true,
+      emailSent: true,
       email: cleanEmail,
       message: `Verification code dispatched to ${cleanEmail}. Please verify your account.`,
     });
   } catch (err) {
-    console.error("❌ Registration error:", err);
+    console.error("❌ Registration error:", err.message);
     if (err.code === 11000) {
-      const field = Object.keys(err.keyPattern || {})[0] || 'email';
-      if (field === 'phone') {
+      const field = Object.keys(err.keyPattern || {})[0] || "email";
+      if (field === "phone") {
         try {
           await mongoose.connection.collection("users").dropIndex("phone_1");
         } catch (e) {}
@@ -120,7 +128,7 @@ exports.register = async (req, res) => {
         message: "An account with this email address already exists. Please sign in.",
       });
     }
-    res.status(500).json({ message: err.message || "Registration failed" });
+    return res.status(500).json({ message: err.message || "Registration failed" });
   }
 };
 
@@ -204,7 +212,7 @@ exports.verifyEmailOtp = async (req, res) => {
       { expiresIn: "30d" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Email verified successfully! Welcome to Kisan Setu.",
       accessToken,
@@ -220,8 +228,8 @@ exports.verifyEmailOtp = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ OTP verification error:", err);
-    res.status(500).json({ message: err.message || "OTP verification failed" });
+    console.error("❌ OTP verification error:", err.message);
+    return res.status(500).json({ message: err.message || "OTP verification failed" });
   }
 };
 
@@ -245,7 +253,7 @@ exports.resendEmailOtp = async (req, res) => {
       return res.status(400).json({ message: "Account is already verified. Please sign in." });
     }
 
-    // 60-Second Cooldown Enforcement
+    // 60-Second Cooldown Enforcement to prevent spam
     if (user.emailOtp && user.emailOtp.lastSentAt) {
       const timeSinceLast = Date.now() - new Date(user.emailOtp.lastSentAt).getTime();
       if (timeSinceLast < 60000) {
@@ -256,7 +264,7 @@ exports.resendEmailOtp = async (req, res) => {
       }
     }
 
-    // Generate fresh OTP
+    // Generate fresh OTP & 10-minute expiry
     const otp = generateOtp();
     const hashedOtp = hashOtp(otp);
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
@@ -270,15 +278,21 @@ exports.resendEmailOtp = async (req, res) => {
     await user.save();
 
     // Dispatch email
-    await sendVerificationOtpEmail(cleanEmail, otp, user.name);
+    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
 
-    res.status(200).json({
+    if (!emailResult.success) {
+      return res.status(500).json({
+        message: "Failed to send verification email. Please check your email configuration or try again in a few moments.",
+      });
+    }
+
+    return res.status(200).json({
       success: true,
       message: `A fresh 6-digit verification code was sent to ${cleanEmail}.`,
     });
   } catch (err) {
-    console.error("❌ Resend OTP error:", err);
-    res.status(500).json({ message: err.message || "Failed to resend verification code" });
+    console.error("❌ Resend OTP error:", err.message);
+    return res.status(500).json({ message: err.message || "Failed to resend verification code" });
   }
 };
 
@@ -322,10 +336,20 @@ exports.login = async (req, res) => {
       };
       await user.save();
 
-      await sendVerificationOtpEmail(cleanEmail, otp, user.name);
+      const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
+
+      if (!emailResult.success) {
+        return res.status(403).json({
+          requiresVerification: true,
+          emailSent: false,
+          email: cleanEmail,
+          message: "Your email is not verified yet. Verification email could not be sent, please resend OTP.",
+        });
+      }
 
       return res.status(403).json({
         requiresVerification: true,
+        emailSent: true,
         email: cleanEmail,
         message: "Your email is not verified yet. We have sent a verification code to your email.",
       });
@@ -357,7 +381,7 @@ exports.login = async (req, res) => {
 
     console.log(`✅ Successful login for: ${cleanEmail} (${user.role})`);
 
-    res.json({
+    return res.json({
       success: true,
       accessToken,
       refreshToken,
@@ -372,7 +396,7 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("❌ Login error:", err);
-    res.status(500).json({ message: err.message || "Login failed" });
+    console.error("❌ Login error:", err.message);
+    return res.status(500).json({ message: err.message || "Login failed" });
   }
 };
