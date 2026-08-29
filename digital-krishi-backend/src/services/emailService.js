@@ -128,113 +128,146 @@ const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
     ? fromAddress
     : `"🌾 Kisan Setu Official" <${emailUser}>`;
 
+  const otpDigits = String(otp).trim().split("");
+  const otpBoxesHtml = otpDigits
+    .map(
+      (digit) => `
+      <td align="center" valign="middle" style="width: 44px; min-width: 40px; height: 54px; background-color: #ffffff; border: 2px solid #16a34a; border-radius: 10px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Consolas, monospace; font-size: 32px; font-weight: 900; color: #064e3b; text-align: center; vertical-align: middle;">
+        ${digit}
+      </td>`
+    )
+    .join('<td style="width: 6px; min-width: 6px;"></td>');
+
   const htmlContent = `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Kisan Setu Official One-Time Verification Code</title>
-      <style>
-        body { margin: 0; padding: 0; background-color: #f0fdf4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
-        .wrapper { width: 100%; background-color: #f0fdf4; padding: 30px 12px; box-sizing: border-box; }
-        .main-card { max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 40px rgba(7, 39, 20, 0.1); border: 1px solid #dcfce7; }
-        
-        /* Header */
-        .header { background: linear-gradient(135deg, #052e16 0%, #0d4a23 50%, #15803d 100%); padding: 36px 28px 30px; text-align: center; color: #ffffff; position: relative; }
-        .badge-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: #86efac; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
-        .logo-title { font-size: 28px; font-weight: 900; margin: 0; color: #ffffff; letter-spacing: -0.5px; }
-        .logo-subtitle { font-size: 12.5px; color: #bbf7d0; margin: 6px 0 0; font-weight: 500; letter-spacing: 0.5px; }
-        
-        /* Content Body */
-        .body-section { padding: 36px 32px 28px; color: #0f172a; text-align: left; }
-        .salutation { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 12px; }
-        .intro-text { font-size: 14.5px; line-height: 1.65; color: #334155; margin: 0 0 24px; }
-        
-        /* OTP Box */
-        .otp-container { background: #f8fafc; border: 2px dashed #16a34a; border-radius: 14px; padding: 24px; text-align: center; margin: 24px 0; }
-        .otp-label { font-size: 11.5px; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px; }
-        .otp-digits { font-size: 40px; font-weight: 900; letter-spacing: 12px; color: #0f172a; font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; padding-left: 12px; margin: 4px 0; }
-        .otp-timer { font-size: 12px; font-weight: 700; color: #dc2626; margin-top: 8px; }
-        
-        /* Security Notice */
-        .security-box { background: #fef2f2; border: 1px solid #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 14px 16px; margin: 24px 0 16px; }
-        .sec-title { font-size: 13px; font-weight: 800; color: #991b1b; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-        .sec-desc { font-size: 12px; line-height: 1.5; color: #7f1d1d; margin: 0; }
-        
-        /* Support & Help */
-        .support-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px; font-size: 12.5px; color: #166534; line-height: 1.5; margin-top: 16px; }
-        
-        /* Footer */
-        .footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 24px 28px; text-align: center; color: #64748b; font-size: 11.5px; line-height: 1.6; }
-        .footer-links { margin-bottom: 8px; }
-        .footer-links a { color: #15803d; text-decoration: none; font-weight: 600; margin: 0 6px; }
-        .footer-copy { color: #94a3b8; font-size: 11px; margin: 0; }
-      </style>
-    </head>
-    <body>
-      <div class="wrapper">
-        <div class="main-card">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kisan Setu One-Time Verification Code</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4fbf6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4fbf6; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <!-- Main Card Container -->
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 560px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #dcfce7; box-shadow: 0 8px 30px rgba(6, 78, 59, 0.08);">
           
-          <!-- Top Header -->
-          <div class="header">
-            <div class="badge-pill">
-              🛡️ Official Verification Notice
-            </div>
-            <h1 class="logo-title">🌾 किसान सेतु • Kisan Setu</h1>
-            <p class="logo-subtitle">National Digital Agriculture Platform & Farm Intelligence Engine</p>
-          </div>
+          <!-- Top Header Banner -->
+          <tr>
+            <td align="center" style="background: #052e16; background: linear-gradient(135deg, #052e16 0%, #14532d 60%, #16a34a 100%); padding: 32px 24px; text-align: center;">
+              <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center">
+                <tr>
+                  <td align="center" style="background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 700; color: #86efac; text-transform: uppercase; letter-spacing: 1px;">
+                    🛡️ Official Security Verification
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 10px;">
+                    <h1 style="margin: 0; font-size: 26px; font-weight: 900; color: #ffffff; letter-spacing: -0.3px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                      🌾 किसान सेतु • Kisan Setu
+                    </h1>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 4px;">
+                    <p style="margin: 0; font-size: 12px; color: #bbf7d0; font-weight: 500;">
+                      National Digital Agriculture Platform
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-          <!-- Body -->
-          <div class="body-section">
-            <div class="salutation">Namaste, ${name} 🙏</div>
-            <p class="intro-text">
-              Welcome to <strong>Kisan Setu</strong>. You recently registered or requested sign-in access to your smart digital farming portal.
-            </p>
-            <p class="intro-text">
-              Please use the official One-Time Password (OTP) below to authenticate your account:
-            </p>
-
-            <!-- OTP Box -->
-            <div class="otp-container">
-              <div class="otp-label">ONE-TIME VERIFICATION CODE</div>
-              <div class="otp-digits">${otp}</div>
-              <div class="otp-timer">⏱️ Code expires in exactly 10 minutes</div>
-            </div>
-
-            <!-- Security Advisory -->
-            <div class="security-box">
-              <div class="sec-title">⚠️ Security Guidelines:</div>
-              <p class="sec-desc">
-                • Do not share this code with anyone under any circumstances.<br>
-                • Official Kisan Setu personnel, Krishi Officers, and APMC representatives will <strong>NEVER</strong> ask you for your OTP or password over phone or message.<br>
-                • If you did not initiate this request, please disregard this email or secure your account.
+          <!-- Body Content Area -->
+          <tr>
+            <td style="padding: 32px 28px 24px; color: #0f172a; text-align: left;">
+              
+              <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">
+                Namaste, ${name} 🙏
+              </div>
+              
+              <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0 0 20px;">
+                Welcome to <strong>Kisan Setu</strong>. Please use the official 6-digit One-Time Password (OTP) below to authenticate and verify your farmer account:
               </p>
-            </div>
 
-            <!-- Support Helpline -->
-            <div class="support-info">
-              🌾 <strong>Empowering Indian Agriculture:</strong> Access real-time AGMARKNET APMC mandi rates, AI crop disease diagnostics, and precision meteorological forecasts on Kisan Setu.
-            </div>
-          </div>
+              <!-- OTP Digits Box Container -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f0fdf4; border: 2px dashed #16a34a; border-radius: 14px; margin: 24px 0; padding: 20px 12px; text-align: center;">
+                <tr>
+                  <td align="center">
+                    <div style="font-size: 11px; font-weight: 800; color: #15803d; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 14px;">
+                      ONE-TIME VERIFICATION CODE
+                    </div>
+
+                    <!-- 6-Digit Individual Badges Table (No Wrap) -->
+                    <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" style="margin: 0 auto; white-space: nowrap;">
+                      <tr>
+                        ${otpBoxesHtml}
+                      </tr>
+                    </table>
+
+                    <div style="font-size: 13px; font-weight: 700; color: #b91c1c; margin-top: 14px;">
+                      ⏱️ Code expires in exactly 10 minutes
+                    </div>
+
+                    <div style="margin-top: 10px; font-size: 12px; color: #475569; font-weight: 600;">
+                      Plain Code: <span style="font-family: Consolas, monospace; font-size: 14px; font-weight: 800; color: #166534; letter-spacing: 2px;">${otp}</span>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Security Guidelines Box -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #fef2f2; border: 1px solid #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; margin: 20px 0 16px; padding: 12px 14px;">
+                <tr>
+                  <td>
+                    <div style="font-size: 13px; font-weight: 800; color: #991b1b; margin-bottom: 4px;">
+                      ⚠️ Security Guidelines:
+                    </div>
+                    <div style="font-size: 12px; line-height: 1.5; color: #7f1d1d;">
+                      • Do not share this OTP with anyone under any circumstances.<br>
+                      • Official Kisan Setu personnel will <strong>NEVER</strong> ask for your verification code.<br>
+                      • If you did not initiate this registration, please disregard this email.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Highlights Box -->
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; margin-top: 16px; padding: 12px 14px;">
+                <tr>
+                  <td style="font-size: 12px; color: #166534; line-height: 1.5;">
+                    🌾 <strong>Empowering Indian Agriculture:</strong> Access real-time AGMARKNET APMC mandi rates, AI crop disease diagnostics, and precision meteorological forecasts on Kisan Setu.
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
 
           <!-- Footer -->
-          <div class="footer">
-            <div class="footer-links">
-              <a href="https://kisan-setu54.vercel.app/login">Portal Sign In</a> • 
-              <a href="https://kisan-setu54.vercel.app">Official Website</a>
-            </div>
-            <p class="footer-copy">
-              © ${new Date().getFullYear()} Kisan Setu Digital Agriculture Engine. All rights reserved.<br>
-              This is an automated system notification. Please do not reply directly to this email.
-            </p>
-          </div>
+          <tr>
+            <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
+              <div style="font-size: 12px; margin-bottom: 8px;">
+                <a href="https://kisan-setu54.vercel.app/login" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Portal Sign In</a> •
+                <a href="https://kisan-setu54.vercel.app" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Official Website</a>
+              </div>
+              <p style="margin: 0; font-size: 11px; color: #94a3b8; line-height: 1.5;">
+                © ${new Date().getFullYear()} Kisan Setu Digital Agriculture Engine. All rights reserved.<br>
+                This is an automated system notification. Please do not reply directly to this email.
+              </p>
+            </td>
+          </tr>
 
-        </div>
-      </div>
-    </body>
-    </html>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
   `;
+
 
   const plainTextContent = `
 ============================================================
