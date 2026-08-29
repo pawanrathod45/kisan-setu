@@ -32,9 +32,9 @@ const createTransporter = () => {
     maxConnections: 3,
     maxMessages: 100,
     family: 4, // Enforce IPv4 to avoid cloud DNS IPv6 hangs
-    connectionTimeout: 8000,
-    greetingTimeout: 8000,
-    socketTimeout: 12000,
+    connectionTimeout: 4000,
+    greetingTimeout: 4000,
+    socketTimeout: 5000,
   };
 
   // 1. If explicit custom host is provided (e.g., Brevo, SendGrid, Amazon SES)
@@ -94,7 +94,7 @@ const verifyEmailConfig = async () => {
     }
 
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (8s)")), 8000);
+      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (4s)")), 4000);
       transporter.verify((err, success) => {
         clearTimeout(timer);
         if (err) reject(err);
@@ -272,7 +272,6 @@ const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
 </html>
   `;
 
-
   const plainTextContent = `
 ============================================================
 🌾 किसान सेतु • KISAN SETU (OFFICIAL)
@@ -309,7 +308,7 @@ Portal: https://kisan-setu54.vercel.app/login
     });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email dispatch timed out after 12 seconds")), 12000)
+      setTimeout(() => reject(new Error("Email dispatch timed out after 5s")), 5000)
     );
 
     const info = await Promise.race([sendMailPromise, timeoutPromise]);
@@ -320,8 +319,8 @@ Portal: https://kisan-setu54.vercel.app/login
     console.error("OTP email failed", error.message);
     return { success: false, error: error.message };
   }
-
 };
+
 
 module.exports = {
   sendVerificationOtpEmail,
