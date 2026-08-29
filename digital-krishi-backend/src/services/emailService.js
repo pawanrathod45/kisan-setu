@@ -8,14 +8,8 @@ const maskEmail = (email) => {
   return `${name.substring(0, 2)}***${name.slice(-1)}@${domain}`;
 };
 
-let cachedTransporter = null;
-
-// Create or reuse dynamic high-performance SMTP transporter
+// Create dynamic high-performance SMTP transporter
 const createTransporter = () => {
-  if (cachedTransporter) {
-    return cachedTransporter;
-  }
-
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
@@ -26,12 +20,9 @@ const createTransporter = () => {
     return null;
   }
 
-  // Fast options: direct SSL port 465, IPv4 enforcement, connection pooling
+  // Fast options: direct SSL port 465, IPv4 enforcement
   const commonOptions = {
-    pool: true,
-    maxConnections: 3,
-    maxMessages: 100,
-    family: 4, // Enforce IPv4 to avoid cloud DNS IPv6 hangs
+    family: 4, // Enforce IPv4
     connectionTimeout: 4000,
     greetingTimeout: 4000,
     socketTimeout: 5000,
@@ -39,7 +30,7 @@ const createTransporter = () => {
 
   // 1. If explicit custom host is provided (e.g., Brevo, SendGrid, Amazon SES)
   if (emailHost && emailHost !== "smtp.gmail.com") {
-    cachedTransporter = nodemailer.createTransport({
+    return nodemailer.createTransport({
       host: emailHost,
       port: emailPort,
       secure: emailPort === 465,
@@ -52,11 +43,10 @@ const createTransporter = () => {
       },
       ...commonOptions,
     });
-    return cachedTransporter;
   }
 
   // 2. Default to high-speed direct SSL Gmail SMTP (port 465)
-  cachedTransporter = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
@@ -66,9 +56,8 @@ const createTransporter = () => {
     },
     ...commonOptions,
   });
-
-  return cachedTransporter;
 };
+
 
 
 

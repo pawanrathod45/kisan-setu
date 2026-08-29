@@ -94,24 +94,23 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Dispatch real verification OTP email
-    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, name.trim());
-
-    if (!emailResult.success) {
-      // User is safely stored in MongoDB; return clear guidance
-      return res.status(201).json({
-        success: true,
-        requiresVerification: true,
-        emailSent: false,
-        email: cleanEmail,
-        message: "Account created, but verification email could not be sent. Please click Resend OTP on the next screen.",
-      });
+    // Attempt fast email dispatch (up to 3.5s). If cloud SMTP is slow, it continues in background.
+    let emailSent = true;
+    try {
+      const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, name.trim());
+      const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
+      const outcome = await Promise.race([emailPromise, fastTimer]);
+      if (outcome && outcome.success === false && !outcome.timeout) {
+        emailSent = false;
+      }
+    } catch (e) {
+      console.warn("OTP email dispatch notice:", e.message);
     }
 
     return res.status(201).json({
       success: true,
       requiresVerification: true,
-      emailSent: true,
+      emailSent,
       email: cleanEmail,
       message: `Verification code dispatched to ${cleanEmail}. Please verify your account.`,
     });
@@ -270,13 +269,13 @@ exports.resendEmailOtp = async (req, res) => {
     };
     await user.save();
 
-    // Dispatch email
-    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        message: "Failed to send verification email. Please try again in a few moments.",
-      });
+    // Attempt fast email dispatch (up to 3.5s)
+    try {
+      const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, user.name);
+      const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
+      await Promise.race([emailPromise, fastTimer]);
+    } catch (e) {
+      console.warn("Resend email dispatch notice:", e.message);
     }
 
     return res.status(200).json({
@@ -329,15 +328,12 @@ exports.login = async (req, res) => {
       };
       await user.save();
 
-      const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
-
-      if (!emailResult.success) {
-        return res.status(403).json({
-          requiresVerification: true,
-          emailSent: false,
-          email: cleanEmail,
-          message: "Your email is not verified yet. Verification email could not be sent, please resend OTP.",
-        });
+      try {
+        const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, user.name);
+        const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
+        await Promise.race([emailPromise, fastTimer]);
+      } catch (e) {
+        console.warn("Login email dispatch notice:", e.message);
       }
 
       return res.status(403).json({
