@@ -94,14 +94,14 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Dispatch email in background via setImmediate so HTTP response is instant (< 150ms)
-    setImmediate(async () => {
+    // Dispatch email in background after HTTP response is fully flushed
+    setTimeout(async () => {
       try {
         await sendVerificationOtpEmail(cleanEmail, otp, name.trim());
       } catch (err) {
         console.error("Background OTP email dispatch error:", err.message);
       }
-    });
+    }, 50);
 
     return res.status(201).json({
       success: true,
