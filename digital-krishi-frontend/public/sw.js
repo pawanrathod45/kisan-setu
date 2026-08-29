@@ -3,7 +3,7 @@
 // Offline First, Network-First Fallback, Auto-Cache Invalidation
 // ============================================================
 
-const CACHE_NAME = 'kisan-setu-v1.0.3';
+const CACHE_NAME = 'kisan-setu-v1.0.4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
