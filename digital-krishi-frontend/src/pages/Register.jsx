@@ -121,7 +121,16 @@ const Register = () => {
         navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
+      let msg = err.response?.data?.message || '';
+      // Sanitize raw MongoDB/database errors — never expose internals
+      if (!msg || msg.includes('E11000') || msg.includes('duplicate key') || msg.includes('MongoServer')) {
+        msg = language === 'en'
+          ? 'This email is already registered. Please use another email or sign in.'
+          : language === 'mr'
+          ? 'हा ईमेल आधीच नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा किंवा साइन इन करा.'
+          : 'यह ईमेल पहले से पंजीकृत है। कृपया दूसरा ईमेल उपयोग करें या साइन इन करें।';
+      }
+      setError(msg || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
     } finally {
       setLoading(false);
     }
@@ -130,17 +139,15 @@ const Register = () => {
   return (
     <div className="ks-auth-viewport">
 
-      {/* ── Background Video covering whole window ── */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster={FARMER_POSTER_IMAGE}
+      {/* ── High-Res Farming Hero Background ── */}
+      <div
         className="ks-fullscreen-video-bg"
-      >
-        <source src={FARMER_WELCOME_VIDEO_URL} type="video/mp4" />
-      </video>
+        style={{
+          backgroundImage: `url(${FARMER_POSTER_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      />
 
       {/* ── Dark Green Gradient Overlay across entire window ── */}
       <div className="ks-fullscreen-video-overlay" />
@@ -325,7 +332,7 @@ const Register = () => {
             </div>
 
             {/* District & Primary Crop Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="ks-register-row-2col">
               <div className="ks-input-group">
                 <label className="ks-input-label">
                   <FaMapMarkerAlt style={{ color: '#15803d' }} /> {t.district || 'District'}
@@ -356,7 +363,7 @@ const Register = () => {
             </div>
 
             {/* Password & Confirm Password Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="ks-register-row-2col">
               <div className="ks-input-group">
                 <label className="ks-input-label">
                   <FaLock style={{ color: '#15803d' }} /> {t.password || 'Password'} *

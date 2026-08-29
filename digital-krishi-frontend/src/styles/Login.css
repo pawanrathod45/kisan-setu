@@ -495,20 +495,27 @@
   text-decoration: underline;
 }
 
+/* ── Register Page: 2-Column Row (District/Crop, Password/Confirm) ── */
+.ks-register-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 /* ============================================================
-   MOBILE & TABLET RESPONSIVE PERFECTION
+   RESPONSIVE — TABLET  (≤ 860px)
    ============================================================ */
 @media (max-width: 860px) {
   .ks-auth-viewport {
     padding: 12px 10px !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: center !important;
   }
 
   .ks-floating-card-container {
     grid-template-columns: 1fr !important;
-    max-width: 440px !important;
-    width: 100% !important;
+    max-width: 520px !important;
+    width: calc(100% - 20px) !important;
     border-radius: 20px !important;
     margin: 36px auto 12px !important;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4) !important;
@@ -552,7 +559,7 @@
 
   /* Mobile Form Padding - Clean & Compact */
   .ks-card-form-panel {
-    padding: 16px 16px 18px !important;
+    padding: 18px 16px 20px !important;
   }
 
   .ks-form-header {
@@ -611,3 +618,62 @@
     font-size: 11px !important;
   }
 }
+
+/* ============================================================
+   RESPONSIVE — SMALL MOBILE  (≤ 480px)
+   Stack 2-column rows, tighten spacing
+   ============================================================ */
+@media (max-width: 480px) {
+  .ks-auth-viewport {
+    padding: 8px 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .ks-floating-card-container {
+    max-width: none !important;
+    width: calc(100% - 24px) !important;
+    margin: 44px auto 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .ks-card-form-panel {
+    padding: 14px 14px 16px !important;
+  }
+
+  /* Stack District/Crop and Password/Confirm rows on small screens */
+  .ks-register-row-2col {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .ks-form-stack {
+    gap: 10px !important;
+  }
+
+  .ks-form-title,
+  .ks-form-header h2,
+  .ks-form-header h3 {
+    font-size: 17px !important;
+  }
+
+  .ks-text-input {
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  .ks-lang-top-floating {
+    top: 6px !important;
+    right: 6px !important;
+    left: auto !important;
+    max-width: calc(100vw - 12px) !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+  }
+
+  .ks-lang-btn {
+    padding: 3px 7px !important;
+    font-size: 10.5px !important;
+  }
+}
+

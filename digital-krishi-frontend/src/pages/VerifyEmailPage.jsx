@@ -178,17 +178,15 @@ const VerifyEmailPage = () => {
 
   return (
     <div className="ks-login-viewport">
-      {/* Background Video */}
-      <video
+      {/* Background Poster */}
+      <div
         className="ks-video-bg"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster={FARMER_POSTER_IMAGE}
-      >
-        <source src={FARMER_WELCOME_VIDEO_URL} type="video/mp4" />
-      </video>
+        style={{
+          backgroundImage: `url(${FARMER_POSTER_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      />
 
       <div className="ks-video-overlay" />
 

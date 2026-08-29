@@ -3,7 +3,7 @@
 // Offline First, Network-First Fallback, Auto-Cache Invalidation
 // ============================================================
 
-const CACHE_NAME = 'kisan-setu-v1.0.0';
+const CACHE_NAME = 'kisan-setu-v1.0.1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -15,14 +15,12 @@ const STATIC_ASSETS = [
 
 // 1. Install Event: Pre-cache Essential App Shell
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[ServiceWorker] Pre-cache error:', err);
+        console.warn('[ServiceWorker] Pre-cache warning:', err);
       });
-    }).then(() => {
-      // Force the waiting service worker to become the active service worker
-      return self.skipWaiting();
     })
   );
 });
@@ -37,75 +35,91 @@ self.addEventListener('activate', (event) => {
           .map((name) => caches.delete(name))
       );
     }).then(() => {
-      // Claim control of all clients immediately
       return self.clients.claim();
     })
   );
 });
 
-// 3. Fetch Event Strategy
+// 3. Fetch Handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and browser extensions
+  // Ignore non-GET, chrome-extension, and third-party media streams
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
     return;
   }
 
-  // A. For API Requests: Network-First with Cache Fallback
+  // Bypass CDN video / media requests to prevent CORS issues
+  if (url.pathname.endsWith('.mp4') || url.pathname.endsWith('.webm') || url.hostname.includes('mixkit')) {
+    return;
+  }
+
+  // A. Navigation Requests (Page Routes like /register, /login, /farmer/...)
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const cachedIndex = await cache.match('/index.html') || await cache.match('/');
+        if (cachedIndex) return cachedIndex;
+        return new Response('<!DOCTYPE html><html><body><h3>Kisan Setu Offline</h3><p>Please check your internet connection.</p></body></html>', {
+          headers: { 'Content-Type': 'text/html' }
+        });
+      })
+    );
+    return;
+  }
+
+  // B. API Requests
   if (url.pathname.startsWith('/api') || url.pathname.includes('/api/')) {
     event.respondWith(
       fetch(request)
         .then((networkResponse) => {
-          // Cache successful GET API responses for offline resilience
           if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
           }
           return networkResponse;
         })
-        .catch(() => {
-          // Return cached API response if offline
-          return caches.match(request).then((cachedResponse) => {
-            if (cachedResponse) return cachedResponse;
-            return new Response(
-              JSON.stringify({
-                offline: true,
-                message: 'You are currently offline. Displaying cached farm data.'
-              }),
-              { headers: { 'Content-Type': 'application/json' } }
-            );
-          });
+        .catch(async () => {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+          return new Response(
+            JSON.stringify({ offline: true, message: 'You are currently offline.' }),
+            { status: 503, headers: { 'Content-Type': 'application/json' } }
+          );
         })
     );
     return;
   }
 
-  // B. For Static Assets (JS, CSS, Images, Fonts): Stale-While-Revalidate
+  // C. Static Assets: Stale-While-Revalidate with Safe Fallback
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      const fetchPromise = fetch(request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // If offline and request is navigation, return index.html
-          if (request.mode === 'navigate') {
-            return caches.match('/index.html') || caches.match('/');
-          }
-          return cachedResponse;
-        });
+    caches.match(request).then(async (cachedResponse) => {
+      if (cachedResponse) {
+        // Fetch in background to update cache
+        fetch(request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const copy = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+            }
+          })
+          .catch(() => {});
+        return cachedResponse;
+      }
 
-      return cachedResponse || fetchPromise;
+      try {
+        const networkResponse = await fetch(request);
+        if (networkResponse && networkResponse.status === 200) {
+          const copy = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+        }
+        return networkResponse;
+      } catch (err) {
+        // Fallback for missing resources
+        return new Response('', { status: 408, statusText: 'Network request failed' });
+      }
     })
   );
 });
@@ -116,7 +130,7 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'Kisan Setu Alert', body: event.data ? event.data.text() : 'New weather or mandi update available.' };
+    data = { title: 'Kisan Setu Alert', body: event.data ? event.data.text() : 'New advisory update available.' };
   }
 
   const options = {

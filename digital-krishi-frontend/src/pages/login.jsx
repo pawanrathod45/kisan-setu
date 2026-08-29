@@ -136,17 +136,15 @@ const Login = () => {
   return (
     <div className="ks-auth-viewport">
 
-      {/* ── Background Video covering whole window ── */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster={FARMER_POSTER_IMAGE}
+      {/* ── High-Res Farming Hero Background ── */}
+      <div
         className="ks-fullscreen-video-bg"
-      >
-        <source src={FARMER_WELCOME_VIDEO_URL} type="video/mp4" />
-      </video>
+        style={{
+          backgroundImage: `url(${FARMER_POSTER_IMAGE})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      />
 
       {/* ── Dark Green Gradient Overlay across entire window ── */}
       <div className="ks-fullscreen-video-overlay" />

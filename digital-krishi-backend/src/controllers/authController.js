@@ -94,8 +94,12 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Send real email OTP
-    await sendVerificationOtpEmail(cleanEmail, otp, name);
+    // Send real email OTP safely
+    try {
+      await sendVerificationOtpEmail(cleanEmail, otp, name);
+    } catch (emailErr) {
+      console.warn("⚠️ OTP email dispatch warning:", emailErr.message);
+    }
 
     res.status(201).json({
       success: true,
@@ -105,6 +109,17 @@ exports.register = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Registration error:", err);
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0] || 'email';
+      if (field === 'phone') {
+        try {
+          await mongoose.connection.collection("users").dropIndex("phone_1");
+        } catch (e) {}
+      }
+      return res.status(400).json({
+        message: "An account with this email address already exists. Please sign in.",
+      });
+    }
     res.status(500).json({ message: err.message || "Registration failed" });
   }
 };

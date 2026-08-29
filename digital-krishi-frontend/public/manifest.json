@@ -13,33 +13,33 @@
   "categories": ["agriculture", "productivity", "utilities", "business"],
   "icons": [
     {
-      "src": "/icon-192.svg",
+      "src": "/icon-192.jpg",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/icon-192.svg",
+      "src": "/icon-192.jpg",
       "sizes": "192x192",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "maskable"
     },
     {
-      "src": "/icon-512.svg",
+      "src": "/icon-512.jpg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.svg",
+      "src": "/icon-512.jpg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "maskable"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/favicon.jpg",
       "sizes": "48x48 72x72 96x96 128x128",
-      "type": "image/svg+xml"
+      "type": "image/jpeg"
     }
   ],
   "shortcuts": [
@@ -48,29 +48,28 @@
       "short_name": "AI Officer",
       "description": "Ask Google Gemini AI agriculture questions",
       "url": "/farmer/ai-assistant",
-      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
     },
     {
       "name": "Mandi APMC Rates",
       "short_name": "Mandi Rates",
       "description": "Live commodity prices and APMC market trends",
       "url": "/farmer/market",
-      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
     },
     {
       "name": "Weather Advisory",
       "short_name": "Weather",
-      "description": "Hyperlocal 7-day spray and rain forecast",
+      "description": "Real-time weather forecast and crop alerts",
       "url": "/farmer/weather",
-      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
     },
     {
       "name": "Voice Assistant",
-      "short_name": "Voice AI",
-      "description": "Hands-free voice consultation in Hindi/Marathi/English",
-      "url": "/farmer/voice",
-      "icons": [{ "src": "/icon-192.svg", "sizes": "192x192" }]
+      "short_name": "Voice",
+      "description": "Talk to your farm assistant in Hindi/Marathi/English",
+      "url": "/farmer/voice-assistant",
+      "icons": [{ "src": "/icon-192.jpg", "sizes": "192x192" }]
     }
-  ],
-  "prefer_related_applications": false
+  ]
 }
