@@ -6,19 +6,22 @@
 .ks-custom-select-wrap {
   position: relative;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   font-family: inherit;
+  min-width: 0;
 }
 
 .ks-custom-select-btn {
   width: 100%;
+  max-width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   background: #f8fafc;
-  border: 1.5px solid #e2ece3;
-  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 600;
@@ -28,6 +31,7 @@
   transition: all 0.18s ease;
   box-sizing: border-box;
   text-align: left;
+  min-width: 0;
 }
 
 .ks-custom-select-btn:hover {
@@ -38,7 +42,7 @@
 .ks-custom-select-btn.open {
   background: #ffffff;
   border-color: #15803d;
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
 }
 
 .ks-custom-select-left {
@@ -47,6 +51,7 @@
   gap: 8px;
   min-width: 0;
   flex: 1;
+  overflow: hidden;
 }
 
 .ks-custom-select-icon {
@@ -65,6 +70,8 @@
   font-size: 13px;
   font-weight: 650;
   color: #0f172a;
+  min-width: 0;
+  flex: 1;
 }
 
 .ks-custom-select-chevron {
@@ -92,6 +99,7 @@
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
   max-height: 220px;
   overflow-y: auto;
+  overflow-x: hidden;
   z-index: 1050;
   padding: 4px;
   box-sizing: border-box;
@@ -122,6 +130,8 @@
   cursor: pointer;
   transition: all 0.12s ease;
   user-select: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .ks-custom-select-item:hover {
@@ -135,8 +145,35 @@
   font-weight: 750;
 }
 
+.ks-custom-select-item-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
 .ks-custom-select-check {
   font-size: 11px;
   color: #15803d;
   flex-shrink: 0;
+}
+
+/* Custom Scrollbar */
+.ks-custom-select-menu::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ks-custom-select-menu::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.ks-custom-select-menu::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.ks-custom-select-menu::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

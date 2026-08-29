@@ -10,33 +10,6 @@ import marketService from '../services/marketService';
 import { useLanguage } from '../context/LanguageContext';
 import './AnalyticsPage.css';
 
-const DEFAULT_CROPS_PORTFOLIO = [
-  {
-    name: 'Wheat',
-    variety: 'HD-2967',
-    area: 4.5,
-    yieldPerAcre: 22, // 22 qtl/acre
-    baseCostPerAcre: 14200,
-    healthIndex: 92,
-  },
-  {
-    name: 'Cotton',
-    variety: 'Bt RCH-2',
-    area: 3.0,
-    yieldPerAcre: 8, // 8 qtl/acre
-    baseCostPerAcre: 22500,
-    healthIndex: 84,
-  },
-  {
-    name: 'Tomato',
-    variety: 'Hybrid-01',
-    area: 1.5,
-    yieldPerAcre: 40, // 40 qtl/acre
-    baseCostPerAcre: 18000,
-    healthIndex: 78,
-  }
-];
-
 const COMMODITY_PRICE_FALLBACK = {
   Wheat: 2450,
   Cotton: 7150,
@@ -61,15 +34,18 @@ const AnalyticsPage = () => {
   useEffect(() => {
     const fetchUserCrops = async () => {
       try {
+        setLoading(true);
         const res = await API.get('/crops');
-        if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+        if (res.data && Array.isArray(res.data)) {
           setUserCrops(res.data);
-          if (res.data[0]?.name) {
+          if (res.data.length > 0 && res.data[0]?.name) {
             setSelectedCrop(res.data[0].name);
           }
         }
       } catch (err) {
-        console.warn('Using default farm portfolio for analytics');
+        console.warn('Could not load user crops:', err.message);
+      } finally {
+        setLoading(false);
       }
     };
     fetchUserCrops();
@@ -79,7 +55,6 @@ const AnalyticsPage = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        setLoading(true);
         const hist = await marketService.getPriceHistory({
           commodity: selectedCrop,
           state: user.state || 'Maharashtra',
@@ -88,73 +63,58 @@ const AnalyticsPage = () => {
         });
         if (Array.isArray(hist) && hist.length > 0) {
           setPriceHistory(hist);
+        } else {
+          setPriceHistory([]);
         }
       } catch (e) {
-        console.warn('Using simulated price history for chart');
-      } finally {
-        setLoading(false);
+        setPriceHistory([]);
       }
     };
-    fetchHistory();
+    if (selectedCrop) {
+      fetchHistory();
+    }
   }, [selectedCrop, user.state, user.location]);
 
-  // 3. Compute dynamic portfolio matrix
+  // 3. Compute dynamic portfolio matrix strictly from user's registered crops
   const portfolioList = useMemo(() => {
-    if (userCrops.length > 0) {
-      return userCrops.map(c => {
-        const cropName = c.name || 'Wheat';
-        const modalPrice = livePrices[cropName] || COMMODITY_PRICE_FALLBACK[cropName] || 2400;
-        const areaNum = Number(c.area) || 1.5;
-        const yieldPerAcre = cropName === 'Cotton' ? 8 : cropName === 'Tomato' ? 40 : 20;
-        const totalYield = Math.round(areaNum * yieldPerAcre);
-        const estRevenue = Math.round(totalYield * modalPrice);
-        const healthPct = c.healthStatus === 'Healthy' ? 92 : c.healthStatus === 'Warning' ? 74 : 85;
-
-        return {
-          crop: `${cropName} (${c.variety || 'Certified'})`,
-          rawCropName: cropName,
-          area: `${areaNum} Acres`,
-          yieldEst: `${totalYield} Quintals`,
-          currentPrice: `₹${modalPrice.toLocaleString('en-IN')} / qtl`,
-          projectedRevenue: `₹${estRevenue.toLocaleString('en-IN')}`,
-          rawRevenue: estRevenue,
-          profitMargin: '+28.4%',
-          healthIndex: healthPct
-        };
-      });
+    if (!userCrops || userCrops.length === 0) {
+      return [];
     }
 
-    // Default portfolio with real calculated numbers
-    return DEFAULT_CROPS_PORTFOLIO.map(item => {
-      const modalPrice = livePrices[item.name] || COMMODITY_PRICE_FALLBACK[item.name] || 2400;
-      const totalYield = Math.round(item.area * item.yieldPerAcre);
+    return userCrops.map(c => {
+      const cropName = c.name || 'Crop';
+      const modalPrice = livePrices[cropName] || COMMODITY_PRICE_FALLBACK[cropName] || 2400;
+      const areaNum = Number(c.area) || 1;
+      const yieldPerAcre = cropName === 'Cotton' ? 8 : cropName === 'Tomato' ? 40 : 20;
+      const totalYield = Math.round(areaNum * yieldPerAcre);
       const estRevenue = Math.round(totalYield * modalPrice);
+      const healthPct = c.healthStatus === 'Healthy' ? 92 : c.healthStatus === 'Warning' ? 74 : 85;
 
       return {
-        crop: `${item.name} (${item.variety})`,
-        rawCropName: item.name,
-        area: `${item.area} Acres`,
+        crop: `${cropName} ${c.variety ? `(${c.variety})` : ''}`,
+        rawCropName: cropName,
+        area: `${areaNum} Acres`,
         yieldEst: `${totalYield} Quintals`,
         currentPrice: `₹${modalPrice.toLocaleString('en-IN')} / qtl`,
         projectedRevenue: `₹${estRevenue.toLocaleString('en-IN')}`,
         rawRevenue: estRevenue,
-        profitMargin: item.name === 'Wheat' ? '+32.4%' : item.name === 'Cotton' ? '+24.8%' : '+18.2%',
-        healthIndex: item.healthIndex
+        profitMargin: '+28.4%',
+        healthIndex: healthPct
       };
     });
   }, [userCrops, livePrices]);
 
   // Total Gross Revenue
   const totalRevenueNum = useMemo(() => {
-    return portfolioList.reduce((acc, curr) => acc + (curr.rawRevenue || 0), 0) || 522700;
+    return portfolioList.reduce((acc, curr) => acc + (curr.rawRevenue || 0), 0);
   }, [portfolioList]);
 
   // Total Acreage
   const totalAcres = useMemo(() => {
     if (userCrops.length > 0) {
-      return userCrops.reduce((acc, c) => acc + (Number(c.area) || 0), 0) || 9.0;
+      return userCrops.reduce((acc, c) => acc + (Number(c.area) || 0), 0);
     }
-    return 9.0;
+    return 0;
   }, [userCrops]);
 
   // Active prices array for the chart
@@ -299,35 +259,47 @@ const AnalyticsPage = () => {
           </div>
 
           <div className="analytics-holdings-list">
-            {portfolioList.map((item, idx) => (
-              <div key={idx} className="analytics-crop-row">
-                <div className="analytics-crop-row-header">
-                  <div>
-                    <h4 className="analytics-crop-name">{item.crop}</h4>
-                    <span className="analytics-crop-meta">{item.area} • Est. {item.yieldEst}</span>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="analytics-crop-rev">{item.projectedRevenue}</div>
-                    <span className="analytics-crop-margin">
-                      {item.profitMargin} Net
-                    </span>
-                  </div>
-                </div>
-
-                <div className="analytics-crop-health-box">
-                  <div className="analytics-crop-health-labels">
-                    <span style={{ color: '#475569' }}>Crop Health & Vigor</span>
-                    <span style={{ color: '#15803d' }}>{item.healthIndex}% Optimal</span>
-                  </div>
-                  <div className="analytics-health-bar-track">
-                    <div
-                      className="analytics-health-bar-fill"
-                      style={{ width: `${item.healthIndex}%` }}
-                    />
-                  </div>
-                </div>
+            {portfolioList.length === 0 ? (
+              <div style={{ padding: '32px 16px', textAlign: 'center', background: '#f8fafc', borderRadius: '14px', border: '1.5px dashed #cbd5e1' }}>
+                <FaLeaf style={{ color: '#16a34a', fontSize: '28px', marginBottom: '8px' }} />
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
+                  No Crop Holdings Registered
+                </h4>
+                <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+                  Register your crops in the Crop Portfolio to view tailored yield forecasts, revenue projections, and health metrics.
+                </p>
               </div>
-            ))}
+            ) : (
+              portfolioList.map((item, idx) => (
+                <div key={idx} className="analytics-crop-row">
+                  <div className="analytics-crop-row-header">
+                    <div>
+                      <h4 className="analytics-crop-name">{item.crop}</h4>
+                      <span className="analytics-crop-meta">{item.area} • Est. {item.yieldEst}</span>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div className="analytics-crop-rev">{item.projectedRevenue}</div>
+                      <span className="analytics-crop-margin">
+                        {item.profitMargin} Net
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="analytics-crop-health-box">
+                    <div className="analytics-crop-health-labels">
+                      <span style={{ color: '#475569' }}>Crop Health & Vigor</span>
+                      <span style={{ color: '#15803d' }}>{item.healthIndex}% Optimal</span>
+                    </div>
+                    <div className="analytics-health-bar-track">
+                      <div
+                        className="analytics-health-bar-fill"
+                        style={{ width: `${item.healthIndex}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

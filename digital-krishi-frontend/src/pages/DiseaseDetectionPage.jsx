@@ -132,40 +132,8 @@ const DiseaseDetectionPage = () => {
       });
       setResult(res.data);
     } catch (err) {
-      // High-yield fallback agronomy dataset
-      setResult({
-        crop: 'Wheat',
-        disease: 'Leaf Blight & Rust',
-        confidence: 94,
-        severity: 'medium',
-        pathogen: 'Fungal (Alternaria triticina / Puccinia)',
-        currentPrice: 2450,
-        priceTrend: '+2.8% ▲',
-        priceUnit: '₹/quintal',
-        aiReview: 'Google Gemini 2.0 AI Vision detected early chlorotic necrotic lesions on the upper leaf surface. Prompt foliar antifungal spray and balanced potassium fertilization is required to prevent yield loss.',
-        treatment: 'Apply Mancozeb 75% WP @ 2g/litre of water. Remove severely infected foliage. Ensure proper field drainage.',
-        pesticides: [
-          { name: 'Mancozeb 75% WP', dosage: '2 g / L water (500 g/acre)', type: 'Protective Contact Fungicide', timing: 'Morning / late afternoon' },
-          { name: 'Propiconazole 25% EC', dosage: '1 ml / L water (200 ml/acre)', type: 'Systemic Fungicide (Blight/Rust)', timing: 'Repeat after 12–14 days' },
-          { name: 'Azoxystrobin 18.2% + Difenoconazole 11.4% SC', dosage: '1 ml / L water', type: 'Broad-Spectrum Shield', timing: 'At first lesion spot' }
-        ],
-        organicRemedies: [
-          { name: 'Neem Oil Extract (1500 PPM)', dosage: '5 ml / L water + 1 ml soap', benefit: 'Inhibits fungal spore germination and repels vectors' },
-          { name: 'Trichoderma viride Bio-Fungicide', dosage: '5 g / L water', benefit: 'Suppresses fungal pathogens organically' },
-          { name: 'Sour Buttermilk (Khatta Chhachh) Spray', dosage: '50 ml / L water (5-day fermented)', benefit: 'Acidic lactobacillus natural fungicide' }
-        ],
-        fertilizerRecovery: [
-          { name: 'Foliar NPK (19:19:19 Balanced)', dosage: '5 g / L water', purpose: 'Rapid vegetative recovery & foliar chlorophyll restoration' },
-          { name: 'Zinc Sulphate (21% Ag Grade)', dosage: '2 g / L water + 1 g lime', purpose: 'Activates plant defense enzymes against stress' },
-          { name: 'Muriate of Potash (MOP / 0:0:50)', dosage: '3 g / L water', purpose: 'Thickens leaf cell walls against fungal hyphae' }
-        ],
-        culturalManagement: [
-          'Avoid overhead sprinkler irrigation; switch to furrow or drip to keep leaves dry.',
-          'Maintain 20–25 cm row spacing to ensure adequate sunlight penetration and airflow.',
-          'Eradicate volunteer weeds along field borders that harbor alternative fungal hosts.'
-        ],
-        mock: true,
-      });
+      console.error('Image analysis error:', err);
+      setError(err.response?.data?.message || 'Failed to analyze crop specimen. Please ensure the backend AI service is running and try again.');
     } finally {
       setLoading(false);
     }

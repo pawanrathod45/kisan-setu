@@ -12,14 +12,17 @@ const seedAdmin = async () => {
     }
 
     await mongoose.connect(mongoUri);
-    console.log("✅ Connected to MongoDB for Admin Setup");
+    console.log("✅ Connected to MongoDB for Admin Verification");
 
-    const adminPhone = "9999999999";
-    const adminEmail = "admin@kisansetu.com";
-    const adminPassword = "AdminPassword@123";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@kisansetu.com";
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    let admin = await User.findOne({ $or: [{ phone: adminPhone }, { email: adminEmail }] });
+    if (!adminPassword) {
+      console.log("ℹ️ No ADMIN_PASSWORD provided in environment. Skipping admin seed.");
+      process.exit(0);
+    }
 
+    let admin = await User.findOne({ email: adminEmail });
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
     if (admin) {
@@ -27,59 +30,23 @@ const seedAdmin = async () => {
       admin.status = "active";
       admin.isEmailVerified = true;
       admin.password = hashedPassword;
-      admin.name = "Kisan Setu Super Admin";
       await admin.save();
-      console.log("👑 Existing user promoted to Admin successfully!");
+      console.log("👑 Existing Admin account verified and updated successfully.");
     } else {
       admin = new User({
         name: "Kisan Setu Super Admin",
-        phone: adminPhone,
         email: adminEmail,
         password: hashedPassword,
         role: "admin",
         status: "active",
         isEmailVerified: true,
-        location: "Kisan Setu Command Center, Pune",
+        location: "Kisan Setu Command Center",
         crop: "Precision Agriculture",
         farmingType: "organic"
       });
       await admin.save();
-      console.log("👑 New Admin account created successfully!");
+      console.log("👑 New Admin account created successfully.");
     }
-
-    // Seed / Ensure Demo Farmer Account
-    const farmerEmail = "farmer.demo@kisansetu.com";
-    const farmerPassword = "password123";
-    const farmerHash = await bcrypt.hash(farmerPassword, 10);
-
-    let farmer = await User.findOne({ email: farmerEmail });
-    if (farmer) {
-      farmer.password = farmerHash;
-      farmer.isEmailVerified = true;
-      farmer.status = "active";
-      await farmer.save();
-      console.log("👨‍🌾 Existing Demo Farmer account updated successfully!");
-    } else {
-      farmer = new User({
-        name: "Ramesh Patil (Demo Farmer)",
-        email: farmerEmail,
-        password: farmerHash,
-        role: "farmer",
-        status: "active",
-        isEmailVerified: true,
-        location: "Pune, Maharashtra",
-        crop: "Wheat (गेहूं)",
-        farmingType: "traditional"
-      });
-      await farmer.save();
-      console.log("👨‍🌾 New Demo Farmer account created successfully!");
-    }
-
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log("🔑 CREDENTIALS CREATED & VERIFIED IN MONGODB:");
-    console.log(`👑 ADMIN:  ${adminEmail}  | Password: ${adminPassword}`);
-    console.log(`👨‍🌾 FARMER: ${farmerEmail} | Password: ${farmerPassword}`);
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     process.exit(0);
   } catch (err) {

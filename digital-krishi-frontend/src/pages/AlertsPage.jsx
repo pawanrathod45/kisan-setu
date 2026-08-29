@@ -10,69 +10,6 @@ import API from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import './AlertsPage.css';
 
-const DEFAULT_ALERTS = [
-  {
-    _id: '1',
-    title: 'Severe Thunderstorm & High Wind Advisory',
-    description: 'Heavy precipitation (>35mm) and 45 km/h gusts expected within 24 hours. Postpone chemical foliar spraying and clear drainage canals to prevent waterlogging.',
-    severity: 'high',
-    type: 'weather',
-    category: 'Weather Risk',
-    date: new Date().toISOString(),
-    read: false,
-    crop: 'Wheat & Mustard',
-    recommendedAction: 'Postpone spraying until Friday; clear drainage furrows.'
-  },
-  {
-    _id: '2',
-    title: 'Aphid & Whitefly Outbreak Warning',
-    description: 'Regional meteorological station reported rapid increase in aphid nymph population across northern districts due to high humidity (88%).',
-    severity: 'high',
-    type: 'pest',
-    category: 'Pest Alert',
-    date: new Date(Date.now() - 3600000 * 3).toISOString(),
-    read: false,
-    crop: 'Cotton & Tomato',
-    recommendedAction: 'Spray Neem Oil 1500 PPM @ 5ml/L or Imidacloprid 17.8% SL @ 0.5ml/L.'
-  },
-  {
-    _id: '3',
-    title: 'Onion APMC Modal Rate Surge (+6.8%)',
-    description: 'Modal price in Lasalgaon/Nashik mandi jumped to ₹2,450/qtl due to lower regional arrivals. Favorable selling window open for next 48 hours.',
-    severity: 'low',
-    type: 'market',
-    category: 'Market Trend',
-    date: new Date(Date.now() - 3600000 * 8).toISOString(),
-    read: false,
-    crop: 'Onion',
-    recommendedAction: 'Consider harvesting early grade-A bulbs for immediate market transit.'
-  },
-  {
-    _id: '4',
-    title: 'Soil Moisture Deficit in Block-B',
-    description: 'Soil probe indicates root zone moisture dropped below 28% field capacity. Critical flowering stage requires immediate light irrigation.',
-    severity: 'medium',
-    type: 'weather',
-    category: 'Irrigation Advisory',
-    date: new Date(Date.now() - 3600000 * 20).toISOString(),
-    read: false,
-    crop: 'Wheat',
-    recommendedAction: 'Apply 2-hour drip irrigation during early morning hours.'
-  },
-  {
-    _id: '5',
-    title: 'Foliar Rust Prevention Window Passed',
-    description: 'Foliar fungicide application for Wheat rust completed successfully across 4.5 acres.',
-    severity: 'low',
-    type: 'pest',
-    category: 'Agronomy Task',
-    date: new Date(Date.now() - 86400000 * 2).toISOString(),
-    read: true,
-    crop: 'Wheat',
-    recommendedAction: 'Inspect crop again after 10 days for sporulation.'
-  }
-];
-
 const SEVERITY_CONFIG = {
   high:   { label: 'Critical Alert', color: '#dc2626', bg: '#fee2e2', border: '#fca5a5', icon: <FaExclamationTriangle /> },
   medium: { label: 'Moderate Risk',  color: '#d97706', bg: '#fef3c7', border: '#fcd34d', icon: <FaBell /> },
@@ -112,8 +49,8 @@ const formatAlertDate = (dateVal) => {
 const AlertsPage = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  const [alerts, setAlerts]             = useState(DEFAULT_ALERTS);
-  const [loading, setLoading]           = useState(false);
+  const [alerts, setAlerts]             = useState([]);
+  const [loading, setLoading]           = useState(true);
   const [activeTab, setActiveTab]       = useState('all'); // all | unread | resolved
   const [selectedType, setSelectedType] = useState('all'); // all | weather | pest | market
   const [searchQuery, setSearchQuery]   = useState('');
@@ -127,11 +64,11 @@ const AlertsPage = () => {
     try {
       setLoading(true);
       const res = await API.get('/alerts');
-      if (res.data && res.data.length > 0) {
+      if (res.data && Array.isArray(res.data)) {
         setAlerts(res.data);
       }
     } catch (err) {
-      console.log('Using default high-fidelity alerts');
+      console.warn('Alerts service: loaded empty state');
     } finally {
       setLoading(false);
     }

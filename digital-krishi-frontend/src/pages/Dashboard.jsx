@@ -94,57 +94,6 @@ const MARKET_COMMODITIES = [
   { name: 'Onion', icon: '🧅', basePrice: 2280, trend: '+4.5%' }
 ];
 
-const DEFAULT_DEMO_CROPS = [
-  {
-    _id: 'c1',
-    name: 'Wheat (गेहूं)',
-    variety: 'HD-2967 High Yield',
-    area: 3.5,
-    sowingDate: '15 Nov 2025',
-    stage: 'Grain Filling',
-    stageIndex: 3,
-    healthStatus: '94% Excellent Vigor',
-    diseaseDetected: 'None detected',
-    currentPrice: 2425
-  },
-  {
-    _id: 'c2',
-    name: 'Mustard (सरसों)',
-    variety: 'Pusa Bold 45',
-    area: 2.0,
-    sowingDate: '28 Oct 2025',
-    stage: 'Pod Maturation',
-    stageIndex: 4,
-    healthStatus: '88% Good Vigor',
-    diseaseDetected: 'Minor Aphid Watch',
-    currentPrice: 5350
-  }
-];
-
-const DEFAULT_DEMO_TASKS = [
-  { _id: 'dt1', title: 'Schedule 2.5 hr Morning Drip Irrigation', category: 'irrigation', status: 'pending', done: false },
-  { _id: 'dt2', title: 'Inspect wheat leaf underside for early rust', category: 'protection', status: 'pending', done: false },
-  { _id: 'dt3', title: 'Check APMC mandi rate momentum for wheat lot', category: 'market', status: 'completed', done: true },
-  { _id: 'dt4', title: 'Apply Urea top-dressing @ 25 kg/acre', category: 'fertilizer', status: 'pending', done: false }
-];
-
-const DEFAULT_DEMO_ALERTS = [
-  {
-    _id: 'da1',
-    title: 'Optimal Agrochemical Spray Window Active',
-    description: 'Current wind speed 11 km/h is below 15 km/h threshold. Foliar spray safe until 11:30 AM.',
-    severity: 'medium',
-    type: 'Weather Precision'
-  },
-  {
-    _id: 'da2',
-    title: 'APMC Wheat Price Uptick Alert (+2.8%)',
-    description: 'District arrivals steady; modal rate crossed ₹2,425/Qtl in regional APMC.',
-    severity: 'low',
-    type: 'Market Momentum'
-  }
-];
-
 const CROP_STAGES = [
   { name: 'Sowing & Germination', advice: 'Ensure uniform moisture & seed treatment.' },
   { name: 'Vegetative Growth', advice: 'Apply nitrogen top-dressing & scout weeds.' },
@@ -209,10 +158,10 @@ const Dashboard = () => {
 
   const farmerName = user.name?.split(' ')[0] || t('farmerProfile', 'Farmer');
 
-  // Fallback crops / tasks / alerts if DB is empty to guarantee full interactive UX
-  const displayCrops = crops.length > 0 ? crops : DEFAULT_DEMO_CROPS;
-  const displayTasks = tasks.length > 0 ? tasks : DEFAULT_DEMO_TASKS;
-  const displayAlerts = alerts.length > 0 ? alerts : DEFAULT_DEMO_ALERTS;
+  // Real database crops, tasks, and alerts directly from backend API
+  const displayCrops = crops;
+  const displayTasks = tasks;
+  const displayAlerts = alerts;
 
   const completedTasksCount = displayTasks.filter(t => t.status === 'completed' || t.done).length;
   const taskProgressPct = displayTasks.length > 0 ? Math.round((completedTasksCount / displayTasks.length) * 100) : 0;
@@ -232,7 +181,7 @@ const Dashboard = () => {
     return true;
   });
 
-  const activeCrop = displayCrops[selectedCropIndex] || displayCrops[0];
+  const activeCrop = displayCrops[selectedCropIndex] || displayCrops[0] || null;
 
   // Dynamic hourly weather calculation from real weather data
   const baseTemp = weather?.temperature || 26;
@@ -1071,67 +1020,82 @@ const Dashboard = () => {
             </span>
           </div>
 
-          {/* Plot switcher pills */}
-          <div className="dashboard-pills-scroll">
-            {displayCrops.map((c, i) => (
-              <button
-                key={c._id || i}
-                onClick={() => {
-                  setSelectedCropIndex(i);
-                  setActiveStageIndex(c.stageIndex || 3);
-                }}
-                className={`dashboard-pill-btn ${selectedCropIndex === i ? 'active' : ''}`}
-              >
-                <span>🌱</span>
-                <span>{c.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Active Crop Details Card */}
-          <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '12px 14px', marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
-                  {activeCrop?.name} {activeCrop?.variety ? `(${activeCrop.variety})` : ''}
-                </h4>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>
-                  📍 Area: <strong>{activeCrop?.area || 2.5} Acres</strong> • Sown: <strong>{activeCrop?.sowingDate || 'Active'}</strong>
-                </span>
-              </div>
-              <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#15803d', background: '#dcfce7', padding: '3px 8px', borderRadius: '6px' }}>
-                {activeCrop?.healthStatus || '92% Healthy'}
-              </span>
+          {/* Plot switcher and Active Crop Details Card */}
+          {crops.length === 0 ? (
+            <div style={{ padding: '24px 16px', textAlign: 'center', background: '#f8fafc', borderRadius: '14px', border: '1.5px dashed #cbd5e1', marginBottom: '10px' }}>
+              <FaSeedling style={{ color: '#16a34a', fontSize: '26px', marginBottom: '6px' }} />
+              <h4 style={{ margin: '0 0 4px 0', fontSize: '13.5px', fontWeight: 800, color: '#0f172a' }}>
+                {t('noCropsYet', 'No Crop Holdings Registered')}
+              </h4>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
+                {t('addCropPrompt', 'Add your farm crop plots to track real growth stages, market rates, and disease protection.')}
+              </p>
             </div>
-
-            {/* Interactive 5-Stage Growth Journey */}
-            <div style={{ marginTop: '10px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
-                <span>1. Sowing</span>
-                <span>2. Vegetative</span>
-                <span>3. Flowering</span>
-                <span>4. Grain Fill</span>
-                <span>5. Harvest</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', height: '6px', borderRadius: '10px', overflow: 'hidden', background: '#e2e8f0' }}>
-                {[0, 1, 2, 3, 4].map(idx => (
-                  <div
-                    key={idx}
-                    onClick={() => setActiveStageIndex(idx)}
-                    style={{
-                      background: idx <= activeStageIndex ? 'linear-gradient(90deg, #22c55e, #15803d)' : '#cbd5e1',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s'
+          ) : (
+            <>
+              {/* Plot switcher pills */}
+              <div className="dashboard-pills-scroll">
+                {crops.map((c, i) => (
+                  <button
+                    key={c._id || i}
+                    onClick={() => {
+                      setSelectedCropIndex(i);
+                      setActiveStageIndex(c.stageIndex || 3);
                     }}
-                    title={CROP_STAGES[idx]?.name}
-                  />
+                    className={`dashboard-pill-btn ${selectedCropIndex === i ? 'active' : ''}`}
+                  >
+                    <span>🌱</span>
+                    <span>{c.name}</span>
+                  </button>
                 ))}
               </div>
-              <div style={{ marginTop: '6px', fontSize: '11px', color: '#166534', fontWeight: 700 }}>
-                Stage: <strong>{CROP_STAGES[activeStageIndex]?.name}</strong> — {CROP_STAGES[activeStageIndex]?.advice}
+
+              {/* Active Crop Details Card */}
+              <div style={{ background: '#f8fafc', border: '1.5px solid #e2e8f0', borderRadius: '14px', padding: '12px 14px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
+                      {activeCrop?.name} {activeCrop?.variety ? `(${activeCrop.variety})` : ''}
+                    </h4>
+                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                      📍 Area: <strong>{activeCrop?.area || 1} Acres</strong> • Sown: <strong>{activeCrop?.sowingDate || 'Active'}</strong>
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#15803d', background: '#dcfce7', padding: '3px 8px', borderRadius: '6px' }}>
+                    {activeCrop?.healthStatus || 'Healthy'}
+                  </span>
+                </div>
+
+                {/* Interactive 5-Stage Growth Journey */}
+                <div style={{ marginTop: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', fontWeight: 700, color: '#64748b', marginBottom: '4px' }}>
+                    <span>1. Sowing</span>
+                    <span>2. Vegetative</span>
+                    <span>3. Flowering</span>
+                    <span>4. Grain Fill</span>
+                    <span>5. Harvest</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px', height: '6px', borderRadius: '10px', overflow: 'hidden', background: '#e2e8f0' }}>
+                    {[0, 1, 2, 3, 4].map(idx => (
+                      <div
+                        key={idx}
+                        onClick={() => setActiveStageIndex(idx)}
+                        style={{
+                          background: idx <= activeStageIndex ? 'linear-gradient(90deg, #22c55e, #15803d)' : '#cbd5e1',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        title={CROP_STAGES[idx]?.name}
+                      />
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '6px', fontSize: '11px', color: '#166534', fontWeight: 700 }}>
+                    Stage: <strong>{CROP_STAGES[activeStageIndex]?.name}</strong> — {CROP_STAGES[activeStageIndex]?.advice}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
             {/* Card 5 Footer */}
             <div className="dashboard-card-footer">

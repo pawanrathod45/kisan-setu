@@ -8,6 +8,16 @@ import {
 } from 'react-icons/fa';
 import { GiWheat, GiSprout } from 'react-icons/gi';
 import API from '../services/api';
+import {
+  getLanguageLocale,
+  getLanguageDisplayName,
+  isSpeechRecognitionSupported,
+  isSecureVoiceContext,
+  requestMicrophonePermission,
+  startVoiceRecognitionSession,
+  speakTextWithSynthesis,
+  stopSpeechSynthesis
+} from '../services/voiceService';
 import { useLanguage } from '../context/LanguageContext';
 import './AIKrishiOfficer.css';
 
@@ -66,13 +76,14 @@ const AIKrishiOfficer = () => {
   const [input, setInput]                 = useState('');
   const [isLoading, setIsLoading]         = useState(false);
   const [isListening, setIsListening]     = useState(false);
+  const [voiceError, setVoiceError]       = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview]   = useState(null);
   const [copiedIdx, setCopiedIdx]         = useState(null);
   const [lastFailedPrompt, setLastFailedPrompt] = useState(null);
 
   const messagesEndRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const voiceSessionRef = useRef(null);
   const fileInputRef   = useRef(null);
 
   // Update initial greeting when language changes if no other conversation
@@ -93,39 +104,83 @@ const AIKrishiOfficer = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // Speech Recognition Setup
+  // Clean up voice session on unmount
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
+    return () => {
+      if (voiceSessionRef.current) {
+        voiceSessionRef.current.abort();
+      }
+      stopSpeechSynthesis();
+    };
+  }, []);
 
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setInput(transcript);
-        setIsListening(false);
-      };
+  const handleVoiceToggle = async () => {
+    setVoiceError(null);
 
-      recognitionRef.current.onerror = () => setIsListening(false);
-      recognitionRef.current.onend   = () => setIsListening(false);
-    }
-  }, [language]);
-
-  const handleVoiceToggle = () => {
-    if (!recognitionRef.current) {
-      alert(language === 'hi' ? 'इस ब्राउज़र में स्पीच रिकॉग्निशन समर्थित नहीं है। कृपया Google Chrome का उपयोग करें।' : 'Speech recognition is not supported in this browser. Please use Google Chrome.');
+    if (isListening) {
+      if (voiceSessionRef.current) {
+        voiceSessionRef.current.stop();
+        voiceSessionRef.current = null;
+      }
+      setIsListening(false);
       return;
     }
 
-    if (isListening) {
-      recognitionRef.current.stop();
+    if (!isSpeechRecognitionSupported()) {
+      setVoiceError(
+        language === 'hi'
+          ? 'इस ब्राउज़र में स्पीच रिकॉग्निशन समर्थित नहीं है। कृपया Chrome या Edge का उपयोग करें।'
+          : language === 'mr'
+          ? 'या ब्राउझरमध्ये स्पीच रेकग्निशन समर्थित नाही. कृपया Chrome किंवा Edge वापरा.'
+          : 'Speech recognition is not supported in this browser. Please use Chrome or Edge.'
+      );
+      return;
+    }
+
+    if (!isSecureVoiceContext()) {
+      setVoiceError('Microphone access requires HTTPS in production.');
+      return;
+    }
+
+    try {
+      // Request mic hardware permission explicitly for mobile Chrome
+      await requestMicrophonePermission();
+
+      if (voiceSessionRef.current) {
+        voiceSessionRef.current.abort();
+        voiceSessionRef.current = null;
+      }
+
+      const langLocale = getLanguageLocale(language);
+      const session = startVoiceRecognitionSession({
+        language: langLocale,
+        interimResults: true,
+        continuous: false,
+        onStart: () => {
+          setIsListening(true);
+        },
+        onResult: ({ full, final, interim }) => {
+          const spokenText = full || final || interim;
+          if (spokenText) {
+            setInput(spokenText);
+          }
+        },
+        onError: ({ code, message }) => {
+          if (code !== 'no-speech' && code !== 'aborted') {
+            setVoiceError(message);
+          }
+          setIsListening(false);
+        },
+        onEnd: () => {
+          setIsListening(false);
+        }
+      });
+
+      voiceSessionRef.current = session;
+    } catch (err) {
+      console.warn('Voice start error in AI officer:', err);
+      setVoiceError(err.message || 'Microphone access failed. Please grant mic permission.');
       setIsListening(false);
-    } else {
-      recognitionRef.current.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
-      recognitionRef.current.start();
-      setIsListening(true);
     }
   };
 
@@ -415,6 +470,76 @@ const AIKrishiOfficer = () => {
                 <p style={{ margin: 0, fontSize: '0.74rem', color: '#64748b' }}>Will be analyzed with Gemini Vision</p>
               </div>
               <button onClick={handleClearImage} className="clear-img-btn"><FaTimes /></button>
+            </div>
+          )}
+
+          {/* Voice Listening Active Indicator Bar */}
+          {isListening && (
+            <div style={{
+              background: '#fef2f2',
+              border: '1.5px solid #fecdd3',
+              borderRadius: '12px',
+              padding: '8px 14px',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '12px',
+              color: '#991b1b',
+              fontWeight: 700
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#dc2626', animation: 'ping 1s infinite' }} />
+                <span>
+                  {language === 'hi'
+                    ? '🔴 आवाज सुन रहे हैं (हिन्दी)... बोलिए'
+                    : language === 'mr'
+                    ? '🔴 आवाज ऐकत आहे (मराठी)... बोला'
+                    : '🔴 Listening in English... Speak your question'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleVoiceToggle}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '3px 8px',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer'
+                }}
+              >
+                Stop
+              </button>
+            </div>
+          )}
+
+          {/* Voice Error Banner */}
+          {voiceError && (
+            <div style={{
+              background: '#fff1f2',
+              border: '1.5px solid #fecdd3',
+              borderRadius: '12px',
+              padding: '8px 14px',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '12px',
+              color: '#9f1239',
+              fontWeight: 600
+            }}>
+              <span>{voiceError}</span>
+              <button
+                type="button"
+                onClick={() => setVoiceError(null)}
+                style={{ background: 'none', border: 'none', color: '#9f1239', fontWeight: 800, cursor: 'pointer' }}
+              >
+                ✕
+              </button>
             </div>
           )}
 

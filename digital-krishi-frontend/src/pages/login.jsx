@@ -27,18 +27,6 @@ const Login = () => {
   
   const { language, setLanguage, t, languages } = useLanguage();
 
-  const fillDemoCredentials = () => {
-    setEmail('farmer.demo@kisansetu.com');
-    setPassword('password123');
-    setError('');
-  };
-
-  const fillAdminCredentials = () => {
-    setEmail('admin@kisansetu.com');
-    setPassword('AdminPassword@123');
-    setError('');
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -409,30 +397,6 @@ const Login = () => {
               )}
             </button>
           </form>
-
-          {/* 1-Click Demo Login Pill */}
-          <div className="ks-demo-box" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
-            <span>{t.demoBadge || '💡 Instant Demo:'}</span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button
-                type="button"
-                className="ks-demo-btn"
-                onClick={fillDemoCredentials}
-                title="Fill Farmer Demo Email"
-              >
-                Farmer
-              </button>
-              <button
-                type="button"
-                className="ks-demo-btn"
-                onClick={fillAdminCredentials}
-                title="Fill Admin Demo Email"
-                style={{ background: '#fef3c7', color: '#92400e', borderColor: '#fcd34d' }}
-              >
-                Admin
-              </button>
-            </div>
-          </div>
 
           <div className="ks-auth-footer-prompt">
             <span>{t.newFarmerPrompt || 'Need a new farmer account?'}</span>

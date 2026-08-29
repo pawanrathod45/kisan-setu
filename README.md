@@ -58,7 +58,7 @@
 
 ### 6. 🎥 Cinematic Full-Viewport Video Auth Portal
 - **Realistic Indian Farmer Welcome:** Full-viewport continuous video background (`<video autoPlay muted loop playsInline>`) with dark emerald gradient overlay.
-- **Centered Glassmorphic Console:** Rounded 32px floating card with `🇮🇳 +91` mobile validation, eye password toggles, **1-Click Auto-Fill Demo Login**, and multi-language dialect switching (**English, हिन्दी, मराठी**).
+- **Centered Glassmorphic Console:** Rounded 32px floating card with secure email/password validation, eye password toggles, and multi-language dialect switching (**English, हिन्दी, मराठी**).
 
 ### 7. 💎 Universal React SaaS Confirmation Modals
 - **Zero Browser Popups:** Replaced all native `window.confirm()` and `window.alert()` calls with modern, spring-animated glassmorphic dialogs for safe logout and deletion workflows.
@@ -151,12 +151,6 @@ cd ../digital-krishi-frontend
 npm install
 npm run dev          # Starts Vite dev server on http://localhost:5173
 ```
-
-### 4. Demo Login Credentials
-For instant preview, use the built-in **1-Click Auto-Fill** button on `/login`:
-- **Mobile:** `7972822860`
-- **Password:** `password123`
-- **Role:** Farmer (Redirects to `/farmer/dashboard`)
 
 ---
 

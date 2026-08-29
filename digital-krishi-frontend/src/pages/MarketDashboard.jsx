@@ -20,6 +20,7 @@ import {
 } from 'react-icons/fa';
 import marketService from '../services/marketService';
 import { useLanguage } from '../context/LanguageContext';
+import CustomSelect from '../components/common/CustomSelect';
 import './MarketDashboard.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -406,29 +407,32 @@ const MarketDashboard = () => {
           <div className="filter-dropdowns-group">
             <div className="filter-item">
               <label><FaMapMarkerAlt /> {t('selectState', 'State')}</label>
-              <select value={selectedState} onChange={e => setSelectedState(e.target.value)}>
-                {(availableStates.length > 0 ? availableStates : ['Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Punjab', 'Karnataka', 'Rajasthan']).map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+              <CustomSelect
+                options={(availableStates.length > 0 ? availableStates : ['Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Punjab', 'Karnataka', 'Rajasthan']).map(s => ({ value: s, label: s }))}
+                value={selectedState}
+                onChange={setSelectedState}
+                icon={FaMapMarkerAlt}
+              />
             </div>
 
             <div className="filter-item">
               <label><FaStore /> {t('selectDistrict', 'District')}</label>
-              <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)}>
-                {(availableDistricts.length > 0 ? availableDistricts : MAHARASHTRA_DISTRICTS).slice(0, 15).map(d => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
-              </select>
+              <CustomSelect
+                options={(availableDistricts.length > 0 ? availableDistricts : MAHARASHTRA_DISTRICTS).map(d => ({ value: d, label: d }))}
+                value={selectedDistrict}
+                onChange={setSelectedDistrict}
+                icon={FaStore}
+              />
             </div>
 
             <div className="filter-item">
               <label><FaStore /> {t('selectMarket', 'Mandi APMC')}</label>
-              <select value={selectedMarket} onChange={e => setSelectedMarket(e.target.value)}>
-                {(availableMarkets.length > 0 ? availableMarkets : DEFAULT_MARKETS).slice(0, 15).map(m => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
+              <CustomSelect
+                options={(availableMarkets.length > 0 ? availableMarkets : DEFAULT_MARKETS).map(m => ({ value: m, label: m }))}
+                value={selectedMarket}
+                onChange={setSelectedMarket}
+                icon={FaStore}
+              />
             </div>
           </div>
 

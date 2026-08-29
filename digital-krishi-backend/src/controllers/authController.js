@@ -283,38 +283,7 @@ exports.login = async (req, res) => {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    let user = await User.findOne({ email: cleanEmail });
-
-    // Auto-seed demo accounts if missing
-    if (!user && cleanEmail === "admin@kisansetu.com" && password === "AdminPassword@123") {
-      const hashedPassword = await bcrypt.hash("AdminPassword@123", 10);
-      user = new User({
-        name: "Kisan Setu Super Admin",
-        email: "admin@kisansetu.com",
-        password: hashedPassword,
-        role: "admin",
-        status: "active",
-        isEmailVerified: true,
-        location: "Kisan Setu Command Center, Pune",
-        crop: "Precision Agriculture",
-        farmingType: "organic"
-      });
-      await user.save();
-    } else if (!user && cleanEmail === "farmer.demo@kisansetu.com" && password === "password123") {
-      const hashedPassword = await bcrypt.hash("password123", 10);
-      user = new User({
-        name: "Ramesh Patil (Demo Farmer)",
-        email: "farmer.demo@kisansetu.com",
-        password: hashedPassword,
-        role: "farmer",
-        status: "active",
-        isEmailVerified: true,
-        location: "Pune, Maharashtra",
-        crop: "Wheat (गेहूं)",
-        farmingType: "traditional"
-      });
-      await user.save();
-    }
+    const user = await User.findOne({ email: cleanEmail });
 
     if (!user) {
       return res.status(404).json({ message: "Account not found with this email. Please register." });

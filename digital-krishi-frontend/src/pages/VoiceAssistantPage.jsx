@@ -1,12 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaMicrophone, FaStop, FaVolumeUp, FaVolumeMute, FaTrash,
-  FaLeaf, FaPaperPlane, FaBroadcastTower, FaRedo, FaComments
+  FaLeaf, FaPaperPlane, FaBroadcastTower, FaRedo, FaComments,
+  FaExclamationTriangle, FaCheckCircle, FaSpinner
 } from 'react-icons/fa';
-import { GiSprout } from 'react-icons/gi';
 import API from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  getLanguageLocale,
+  getLanguageDisplayName,
+  isSpeechRecognitionSupported,
+  isSecureVoiceContext,
+  requestMicrophonePermission,
+  startVoiceRecognitionSession,
+  speakTextWithSynthesis,
+  stopSpeechSynthesis
+} from '../services/voiceService';
 import '../styles/VoiceAssistant.css';
 
 /* ── Language configs ── */
@@ -54,102 +64,65 @@ const VoiceAssistantPage = () => {
         : 'Welcome Farmer! I am your Digital Krishi Voice Officer. Tap the microphone button or type below to ask any questions about your crops, weather spray radar, or Mandi rates.'
     }
   ]);
-  const [listening, setListening]         = useState(false);
+  
+  // States: 'ready' | 'permission' | 'listening' | 'processing' | 'error'
+  const [voiceState, setVoiceState]       = useState('ready');
   const [loading, setLoading]             = useState(false);
   const [speaking, setSpeaking]           = useState(false);
-  const [langCode, setLangCode]           = useState(language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN');
+  const [langCode, setLangCode]           = useState(getLanguageLocale(language));
   const [supported, setSupported]         = useState(true);
-  const [error, setError]                 = useState(null);
+  const [errorMsg, setErrorMsg]           = useState(null);
 
   const quickPrompts = language === 'hi' ? QUICK_PROMPTS_HI : language === 'mr' ? QUICK_PROMPTS_MR : QUICK_PROMPTS_EN;
 
+  const sessionRef     = useRef(null);
+  const bottomRef      = useRef(null);
+  const activeLangRef  = useRef(langCode);
+  const capturedRef    = useRef('');
+
+  // Sync language with context
   useEffect(() => {
-    setLangCode(language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN');
+    const code = getLanguageLocale(language);
+    setLangCode(code);
+    activeLangRef.current = code;
   }, [language]);
 
-  const recognitionRef = useRef(null);
-  const bottomRef      = useRef(null);
-
-  /* ── Check Browser SpeechRecognition ── */
+  // Check hardware and browser support on mount
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setSupported(false);
-      return;
+    const isSupp = isSpeechRecognitionSupported();
+    setSupported(isSupp);
+    if (!isSupp) {
+      setErrorMsg('Speech recognition is not supported in this browser. Please use Chrome, Edge, or Android Chrome.');
     }
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = langCode;
-
-      recognition.onresult = (event) => {
-        const current = Array.from(event.results)
-          .map(r => r[0].transcript)
-          .join('');
-        setTranscript(current);
-      };
-
-      recognition.onend = () => {
-        setListening(false);
-      };
-
-      recognition.onerror = (e) => {
-        setListening(false);
-        if (e.error !== 'no-speech') {
-          console.warn('Speech recognition error:', e.error);
-        }
-      };
-
-      recognitionRef.current = recognition;
-    } catch (err) {
-      console.warn('Speech setup error:', err);
-    }
-  }, [langCode]);
+    return () => {
+      // Unmount cleanup
+      if (sessionRef.current) {
+        sessionRef.current.abort();
+      }
+      stopSpeechSynthesis();
+    };
+  }, []);
 
   /* ── Scroll on new message ── */
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history, loading]);
+  }, [history, loading, voiceState]);
 
-  /* ── Toggle Listening ── */
-  const toggleListening = () => {
-    if (listening) {
-      stopListening();
-    } else {
-      startListening();
+  /* ── Stop Voice Session ── */
+  const stopVoiceSession = useCallback((shouldSubmit = true) => {
+    if (sessionRef.current) {
+      sessionRef.current.stop();
+      sessionRef.current = null;
     }
-  };
+    setVoiceState('ready');
 
-  const startListening = () => {
-    setError(null);
-    setTranscript('');
-    stopSpeaking();
-
-    if (!recognitionRef.current) {
-      setError('Voice recognition is not supported in this browser. You can type your question below.');
-      return;
+    const finalText = capturedRef.current.trim();
+    if (shouldSubmit && finalText) {
+      capturedRef.current = '';
+      setTranscript('');
+      handleSendQuery(finalText);
     }
-
-    try {
-      recognitionRef.current.lang = langCode;
-      recognitionRef.current.start();
-      setListening(true);
-    } catch (err) {
-      console.warn('Mic start error:', err);
-    }
-  };
-
-  const stopListening = () => {
-    try {
-      recognitionRef.current?.stop();
-    } catch (err) {}
-    setListening(false);
-    if (transcript.trim()) {
-      handleSendQuery(transcript);
-    }
-  };
+  }, []);
 
   /* ── Send Query to Backend AI ── */
   const handleSendQuery = async (queryText) => {
@@ -158,20 +131,24 @@ const VoiceAssistantPage = () => {
 
     setTextInput('');
     setTranscript('');
+    capturedRef.current = '';
     setLoading(true);
-    setError(null);
+    setVoiceState('processing');
+    setErrorMsg(null);
 
     const userMsg = { role: 'user', text: q };
     setHistory(prev => [...prev, userMsg]);
 
     try {
-      // Connect to Google Gemini 2.5 Flash /api/chat
+      // Query Google Gemini Multi-Lingual Agronomy Assistant
+      const userObj = JSON.parse(localStorage.getItem('user') || '{}');
       const res = await API.post('/chat', {
         message: q,
         farmerContext: {
-          language: langCode,
-          name: 'Farmer',
-          crop: 'Wheat'
+          language: activeLangRef.current === 'hi-IN' ? 'Hindi' : activeLangRef.current === 'mr-IN' ? 'Marathi' : 'English',
+          name: userObj.name || 'Farmer',
+          location: userObj.location || 'Maharashtra',
+          crop: userObj.crop || 'Wheat'
         }
       });
 
@@ -179,50 +156,119 @@ const VoiceAssistantPage = () => {
       const botMsg = { role: 'bot', text: reply };
       setHistory(prev => [...prev, botMsg]);
 
-      // Speak response in voice
+      // Automatically speak the response in the chosen language
       speakCleanAudio(reply);
     } catch (err) {
-      console.warn('Chat API error:', err.message);
-      const fallback = 'फसल की सुरक्षा के लिए मैंकेब 75% WP @ 2g/L का छिड़काव करें। स्थानीय मौसम और मंडी भाव की जांच करें।';
+      console.error('Chat API error:', err);
+      const fallback = activeLangRef.current === 'hi-IN'
+        ? 'फसल की सुरक्षा के लिए मौसम और नमी अनुसार कीटनाशक की सही मात्रा का उपयोग करें।'
+        : activeLangRef.current === 'mr-IN'
+        ? 'पिकांच्या संरक्षणासाठी हवामानानुसार योग्य प्रमाणात फवारणी करा.'
+        : 'For optimal crop protection, apply certified organic bio-pesticides according to current weather humidity.';
       setHistory(prev => [...prev, { role: 'bot', text: fallback }]);
       speakCleanAudio(fallback);
     } finally {
       setLoading(false);
+      setVoiceState('ready');
+    }
+  };
+
+  /* ── Start Voice Recognition with Permission Handling ── */
+  const startListening = async () => {
+    setErrorMsg(null);
+    setTranscript('');
+    capturedRef.current = '';
+    stopSpeaking();
+
+    if (!isSpeechRecognitionSupported()) {
+      setErrorMsg('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      setVoiceState('error');
+      return;
+    }
+
+    // Step 1: Check HTTPS / Secure context
+    if (!isSecureVoiceContext()) {
+      setErrorMsg('Microphone access requires HTTPS in production. Please check your secure connection.');
+      setVoiceState('error');
+      return;
+    }
+
+    try {
+      setVoiceState('permission');
+      // Request mic permission explicitly
+      await requestMicrophonePermission();
+
+      // Step 2: Stop any existing session
+      if (sessionRef.current) {
+        sessionRef.current.abort();
+        sessionRef.current = null;
+      }
+
+      // Step 3: Launch SpeechRecognition session
+      const session = startVoiceRecognitionSession({
+        language: activeLangRef.current,
+        interimResults: true,
+        continuous: false,
+        onStart: () => {
+          setVoiceState('listening');
+        },
+        onResult: ({ final, interim, full }) => {
+          const display = full || final || interim;
+          setTranscript(display);
+          if (final) {
+            capturedRef.current = final;
+          } else if (full) {
+            capturedRef.current = full;
+          }
+        },
+        onError: ({ code, message }) => {
+          if (code !== 'no-speech' && code !== 'aborted') {
+            setErrorMsg(message);
+            setVoiceState('error');
+          } else {
+            setVoiceState('ready');
+          }
+        },
+        onEnd: () => {
+          const captured = capturedRef.current.trim();
+          if (captured) {
+            handleSendQuery(captured);
+          } else {
+            setVoiceState('ready');
+          }
+        }
+      });
+
+      sessionRef.current = session;
+    } catch (err) {
+      console.warn('Voice start exception:', err);
+      setErrorMsg(err.message || 'Failed to start microphone. Please check browser permissions.');
+      setVoiceState('error');
+    }
+  };
+
+  /* ── Toggle Listening Button ── */
+  const toggleListening = () => {
+    if (voiceState === 'listening' || voiceState === 'permission') {
+      stopVoiceSession(true);
+    } else {
+      startListening();
     }
   };
 
   /* ── Clean Speech Synthesizer ── */
   const speakCleanAudio = (rawText) => {
-    if (!window.speechSynthesis) return;
-
-    window.speechSynthesis.cancel();
-
-    // Strip markdown formatting for smooth speech synthesis
-    const cleanText = rawText
-      .replace(/\*\*/g, '')
-      .replace(/###/g, '')
-      .replace(/#/g, '')
-      .replace(/[-*•]/g, ' ')
-      .replace(/₹/g, 'रुपये ')
-      .replace(/\n+/g, '. ')
-      .trim();
-
-    const utter = new SpeechSynthesisUtterance(cleanText);
-    utter.lang = langCode;
-    utter.rate = 0.95;
-    utter.pitch = 1.0;
-
-    utter.onstart = () => setSpeaking(true);
-    utter.onend   = () => setSpeaking(false);
-    utter.onerror = () => setSpeaking(false);
-
-    window.speechSynthesis.speak(utter);
+    speakTextWithSynthesis({
+      text: rawText,
+      language: activeLangRef.current,
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+      onError: () => setSpeaking(false)
+    });
   };
 
   const stopSpeaking = () => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
+    stopSpeechSynthesis();
     setSpeaking(false);
   };
 
@@ -231,11 +277,19 @@ const VoiceAssistantPage = () => {
     setHistory([
       {
         role: 'bot',
-        text: 'नमस्ते किसान भाई! बातचीत साफ़ कर दी गई है। नया सवाल पूछें।'
+        text: language === 'hi'
+          ? 'नमस्ते किसान भाई! बातचीत साफ़ कर दी गई है। नया सवाल पूछें।'
+          : language === 'mr'
+          ? 'नमस्कार शेतकरी मित्र! संवाद साफ केला आहे. नवीन प्रश्न विचारा.'
+          : 'Chat history cleared. Tap the mic to ask a new question.'
       }
     ]);
     setTranscript('');
+    capturedRef.current = '';
+    setErrorMsg(null);
   };
+
+  const isListening = voiceState === 'listening' || voiceState === 'permission';
 
   return (
     <div className="va-page">
@@ -248,7 +302,13 @@ const VoiceAssistantPage = () => {
           </div>
           <div className="va-hero-titles">
             <h1>{t('voiceAssistant', 'Voice Assistant')}</h1>
-            <p>{language === 'hi' ? 'Google Gemini 2.5 AI द्वारा संचालित प्राकृतिक आवाज संवाद।' : language === 'mr' ? 'Google Gemini 2.5 AI द्वारे समर्थित नैसर्गिक आवाज संवाद.' : 'Hands-free natural language voice dialogue powered by Google Gemini 2.5 Flash AI.'}</p>
+            <p>
+              {language === 'hi'
+                ? 'Google Gemini AI द्वारा संचालित प्राकृतिक आवाज संवाद।'
+                : language === 'mr'
+                ? 'Google Gemini AI द्वारे समर्थित नैसर्गिक आवाज संवाद.'
+                : 'Hands-free natural language voice dialogue powered by Google Gemini AI.'}
+            </p>
           </div>
         </div>
 
@@ -260,6 +320,7 @@ const VoiceAssistantPage = () => {
               className={`va-lang-btn ${langCode === l.code ? 'active' : ''}`}
               onClick={() => {
                 setLangCode(l.code);
+                activeLangRef.current = l.code;
                 setLanguage(l.code.split('-')[0]);
                 stopSpeaking();
               }}
@@ -269,6 +330,32 @@ const VoiceAssistantPage = () => {
           ))}
         </div>
       </motion.div>
+
+      {/* Error Alert Banner */}
+      {errorMsg && (
+        <div style={{
+          background: '#fff1f2',
+          border: '1.5px solid #fecdd3',
+          color: '#9f1239',
+          padding: '12px 16px',
+          borderRadius: '12px',
+          marginBottom: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          fontSize: '13px',
+          fontWeight: 600
+        }}>
+          <FaExclamationTriangle style={{ color: '#e11d48', flexShrink: 0 }} />
+          <span style={{ flex: 1 }}>{errorMsg}</span>
+          <button
+            onClick={() => setErrorMsg(null)}
+            style={{ background: 'none', border: 'none', color: '#9f1239', fontWeight: 800, cursor: 'pointer' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ─── Main Conversation Body ─── */}
       <div className="va-body">
@@ -302,7 +389,7 @@ const VoiceAssistantPage = () => {
                         className="va-speak-btn"
                         onClick={() => speakCleanAudio(msg.text)}
                       >
-                        <FaVolumeUp /> सुनें (Listen)
+                        <FaVolumeUp /> {language === 'hi' ? 'सुनें' : language === 'mr' ? 'ऐका' : 'Listen'}
                       </button>
                       <span style={{ fontSize: '10.5px', color: '#64748b' }}>Google Gemini AI</span>
                     </div>
@@ -314,8 +401,8 @@ const VoiceAssistantPage = () => {
             {loading && (
               <div className="va-msg-row bot">
                 <div className="va-msg-bubble bot" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#15803d', fontWeight: 700 }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e', animation: 'ping 1s infinite' }} />
-                  Google Gemini AI सोच रहा है (Processing voice query)…
+                  <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                  {language === 'hi' ? 'Google Gemini AI सोच रहा है…' : language === 'mr' ? 'Google Gemini AI प्रक्रिया करत आहे…' : 'Processing voice query…'}
                 </div>
               </div>
             )}
@@ -327,7 +414,7 @@ const VoiceAssistantPage = () => {
           <div style={{ padding: '12px 18px', borderTop: '1.5px solid #e2ece3', background: '#ffffff', display: 'flex', gap: '10px' }}>
             <input
               type="text"
-              placeholder="बोलें या यहाँ लिखें (Speak or type your question)…"
+              placeholder={language === 'hi' ? 'बोलें या यहाँ लिखें…' : language === 'mr' ? 'बोला किंवा येथे टाईप करा…' : 'Speak or type your question…'}
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendQuery(textInput)}
@@ -355,25 +442,38 @@ const VoiceAssistantPage = () => {
         <div className="va-console-card">
           <div className="va-console-head">
             <h3>Microphone Console</h3>
-            <p>{listening ? '🔴 Listening… Speak now' : 'Tap the microphone to speak'}</p>
+            <p>
+              {voiceState === 'permission'
+                ? 'Allow microphone access in browser prompt…'
+                : voiceState === 'listening'
+                ? `🔴 Listening in ${getLanguageDisplayName(langCode)}… Speak now`
+                : voiceState === 'processing'
+                ? '⏳ Processing your speech…'
+                : `Tap mic to speak (${getLanguageDisplayName(langCode)})`}
+            </p>
           </div>
 
           {/* Central Pulsing Mic */}
-          <div className={`va-mic-pulsing-wrap ${listening ? 'listening' : ''}`}>
+          <div className={`va-mic-pulsing-wrap ${isListening ? 'listening' : ''}`}>
             <div className="va-pulse-ring-1" />
             <div className="va-pulse-ring-2" />
             <button
-              className={`va-main-mic-btn ${listening ? 'listening' : ''}`}
+              className={`va-main-mic-btn ${isListening ? 'listening' : ''}`}
               onClick={toggleListening}
-              title={listening ? 'Stop listening' : 'Start speaking'}
+              title={isListening ? 'Stop listening' : 'Start speaking'}
+              aria-label="Toggle microphone"
             >
-              {listening ? <FaStop /> : <FaMicrophone />}
+              {isListening ? <FaStop /> : <FaMicrophone />}
             </button>
           </div>
 
           {/* Live Transcript Box */}
           <div className="va-transcript-preview">
-            {transcript ? `"${transcript}"` : listening ? 'Listening to your voice…' : 'Press mic and ask in Hindi, Marathi, or English.'}
+            {transcript
+              ? `"${transcript}"`
+              : voiceState === 'listening'
+              ? 'Listening to your voice…'
+              : `Press mic and ask in Hindi, Marathi, or English.`}
           </div>
 
           {/* Console Actions */}
