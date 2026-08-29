@@ -118,12 +118,6 @@ exports.register = async (req, res) => {
   } catch (err) {
     console.error("❌ Registration error:", err.message);
     if (err.code === 11000) {
-      const field = Object.keys(err.keyPattern || {})[0] || "email";
-      if (field === "phone") {
-        try {
-          await mongoose.connection.collection("users").dropIndex("phone_1");
-        } catch (e) {}
-      }
       return res.status(400).json({
         message: "An account with this email address already exists. Please sign in.",
       });
@@ -221,7 +215,6 @@ exports.verifyEmailOtp = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
         role: user.role,
         location: user.location,
         crop: user.crop,
@@ -389,7 +382,6 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
         role: user.role,
         location: user.location,
         crop: user.crop,

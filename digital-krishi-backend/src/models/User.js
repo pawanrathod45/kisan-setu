@@ -17,15 +17,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  phone: {
-    type: String,
-    required: false,
-    trim: true,
-  },
   isEmailVerified: {
     type: Boolean,
     default: false,
   },
+
   emailOtp: {
     hash: String,
     expiresAt: Date,
