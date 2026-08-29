@@ -129,9 +129,17 @@ if (mongoUri) {
   mongoose.connect(mongoUri, {
     serverSelectionTimeoutMS: 5000,
   })
-    .then(() => {
+    .then(async () => {
       console.log("✅ MongoDB Connected Successfully");
       console.log("📂 Connected Database:", mongoose.connection.name);
+      
+      // Auto-cleanup: drop stale phone_1 unique index if it exists
+      try {
+        await mongoose.connection.collection("users").dropIndex("phone_1");
+        console.log("🧹 Dropped stale phone_1 unique index");
+      } catch (e) {
+        // Index doesn't exist — all good
+      }
     })
     .catch(err => {
       console.error("❌ MongoDB Connection Error:", err.message);
