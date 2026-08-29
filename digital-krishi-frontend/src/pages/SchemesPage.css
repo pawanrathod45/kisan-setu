@@ -1,8 +1,3 @@
-/* ============================================================
-   KISAN SETU — MAHARASHTRA GOVERNMENT SCHEMES MODULE
-   Executive Responsive Styles (Desktop 3-col, Tablet 2-col, Mobile 1-col)
-   ============================================================ */
-
 .ks-schemes-page {
   display: flex;
   flex-direction: column;
@@ -14,7 +9,8 @@
   box-sizing: border-box;
 }
 
-/* ── Top Official Source Banner ── */
+
+
 .ks-official-header-banner {
   background: linear-gradient(135deg, #072712 0%, #0d4a23 50%, #155e2d 100%);
   border-radius: 20px;

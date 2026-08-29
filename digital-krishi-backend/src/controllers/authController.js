@@ -94,23 +94,19 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Attempt fast email dispatch (up to 3.5s). If cloud SMTP is slow, it continues in background.
-    let emailSent = true;
-    try {
-      const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, name.trim());
-      const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
-      const outcome = await Promise.race([emailPromise, fastTimer]);
-      if (outcome && outcome.success === false && !outcome.timeout) {
-        emailSent = false;
+    // Dispatch email in background via setImmediate so HTTP response is instant (< 150ms)
+    setImmediate(async () => {
+      try {
+        await sendVerificationOtpEmail(cleanEmail, otp, name.trim());
+      } catch (err) {
+        console.error("Background OTP email dispatch error:", err.message);
       }
-    } catch (e) {
-      console.warn("OTP email dispatch notice:", e.message);
-    }
+    });
 
     return res.status(201).json({
       success: true,
       requiresVerification: true,
-      emailSent,
+      emailSent: true,
       email: cleanEmail,
       message: `Verification code dispatched to ${cleanEmail}. Please verify your account.`,
     });
@@ -269,14 +265,14 @@ exports.resendEmailOtp = async (req, res) => {
     };
     await user.save();
 
-    // Attempt fast email dispatch (up to 3.5s)
-    try {
-      const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, user.name);
-      const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
-      await Promise.race([emailPromise, fastTimer]);
-    } catch (e) {
-      console.warn("Resend email dispatch notice:", e.message);
-    }
+    // Dispatch email in background via setImmediate
+    setImmediate(async () => {
+      try {
+        await sendVerificationOtpEmail(cleanEmail, otp, user.name);
+      } catch (err) {
+        console.error("Background Resend OTP email dispatch error:", err.message);
+      }
+    });
 
     return res.status(200).json({
       success: true,
@@ -328,13 +324,13 @@ exports.login = async (req, res) => {
       };
       await user.save();
 
-      try {
-        const emailPromise = sendVerificationOtpEmail(cleanEmail, otp, user.name);
-        const fastTimer = new Promise((resolve) => setTimeout(() => resolve({ timeout: true }), 3500));
-        await Promise.race([emailPromise, fastTimer]);
-      } catch (e) {
-        console.warn("Login email dispatch notice:", e.message);
-      }
+      setImmediate(async () => {
+        try {
+          await sendVerificationOtpEmail(cleanEmail, otp, user.name);
+        } catch (err) {
+          console.error("Background Login OTP email dispatch error:", err.message);
+        }
+      });
 
       return res.status(403).json({
         requiresVerification: true,
