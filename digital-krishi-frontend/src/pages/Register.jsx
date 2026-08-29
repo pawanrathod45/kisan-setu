@@ -118,19 +118,37 @@ const Register = () => {
         navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
       }
     } catch (err) {
-      let msg = err.response?.data?.message || '';
-      // Sanitize raw MongoDB/database errors — never expose internals
-      if (!msg || msg.includes('E11000') || msg.includes('duplicate key') || msg.includes('MongoServer')) {
-        msg = language === 'en'
-          ? 'This email is already registered. Please use another email or sign in.'
-          : language === 'mr'
-          ? 'हा ईमेल आधीच नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा किंवा साइन इन करा.'
-          : 'यह ईमेल पहले से पंजीकृत है। कृपया दूसरा ईमेल उपयोग करें या साइन इन करें।';
+      let msg = err.response?.data?.message;
+
+      if (!err.response) {
+        // Network timeout / connection error
+        msg =
+          language === 'mr'
+            ? 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.'
+            : language === 'hi'
+            ? 'सर्वर से संपर्क नहीं हो सका। कृपया कुछ समय बाद पुनः प्रयास करें।'
+            : 'Unable to connect to the server. Please check your internet connection or try again in a few moments.';
+      } else if (msg && (msg.includes('E11000') || msg.includes('duplicate key') || msg.includes('already exists'))) {
+        msg =
+          language === 'mr'
+            ? 'हा ईमेल आधीच नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा किंवा साइन इन करा.'
+            : language === 'hi'
+            ? 'यह ईमेल पहले से पंजीकृत है। कृपया दूसरा ईमेल उपयोग करें या साइन इन करें।'
+            : 'This email is already registered. Please use another email or sign in.';
+      } else if (!msg) {
+        msg =
+          language === 'mr'
+            ? 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.'
+            : language === 'hi'
+            ? 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'
+            : 'Registration failed. Please try again.';
       }
-      setError(msg || (language === 'en' ? 'Registration failed' : 'पंजीकरण विफल रहा'));
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
+
   };
 
   return (

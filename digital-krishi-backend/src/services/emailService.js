@@ -20,6 +20,13 @@ const createTransporter = () => {
     return null;
   }
 
+  // Common timeout options to prevent hanging on cloud servers (Render, AWS, etc.)
+  const timeoutOptions = {
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  };
+
   // 1. If explicit service (e.g., 'gmail', 'SendGrid', 'Brevo') is provided
   if (emailService) {
     return nodemailer.createTransport({
@@ -28,6 +35,7 @@ const createTransporter = () => {
         user: emailUser,
         pass: emailPass,
       },
+      ...timeoutOptions,
     });
   }
 
@@ -44,6 +52,7 @@ const createTransporter = () => {
       tls: {
         rejectUnauthorized: false,
       },
+      ...timeoutOptions,
     });
   }
 
@@ -54,8 +63,10 @@ const createTransporter = () => {
       user: emailUser,
       pass: emailPass,
     },
+    ...timeoutOptions,
   });
 };
+
 
 /**
  * Diagnostic helper to verify SMTP credentials on startup (without logging secrets)
@@ -252,7 +263,7 @@ Portal: https://kisan-setu54.vercel.app/login
 
   try {
     console.log("OTP email attempted", { recipient: email });
-    const info = await transporter.sendMail({
+    const sendMailPromise = transporter.sendMail({
       from: formattedFrom,
       to: email,
       subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
@@ -260,12 +271,19 @@ Portal: https://kisan-setu54.vercel.app/login
       html: htmlContent,
     });
 
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Email dispatch timed out after 12 seconds")), 12000)
+    );
+
+    const info = await Promise.race([sendMailPromise, timeoutPromise]);
+
     console.log("OTP email sent", { messageId: info.messageId });
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error("OTP email failed", error.message);
     return { success: false, error: error.message };
   }
+
 };
 
 module.exports = {
