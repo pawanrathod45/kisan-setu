@@ -7,7 +7,9 @@ import {
 import { GiWheat, GiFertilizerBag } from 'react-icons/gi';
 import '../styles/Settings.css';
 import { useLanguage } from '../context/LanguageContext';
+import { usePWA } from '../context/PWAContext';
 import ConfirmModal from '../components/common/ConfirmModal';
+import { FaMobileAlt, FaDownload } from 'react-icons/fa';
 
 /* Reusable Toggle */
 const Toggle = ({ checked, onChange, disabled }) => (
@@ -25,6 +27,7 @@ const Toggle = ({ checked, onChange, disabled }) => (
 const SettingsPage = () => {
   /* ── Global Language Context ── */
   const { language, setLanguage, t, languages } = useLanguage();
+  const { isInstallable, installPWA, isInstalled } = usePWA();
 
   /* ── State ── */
   const [darkMode, setDarkMode]             = useState(localStorage.getItem('darkMode') === 'true');
@@ -214,7 +217,44 @@ const SettingsPage = () => {
           </Row>
         </Section>
 
-        {/* 4. Account, Storage & Data Governance */}
+        {/* 4. Progressive Web App (PWA) Mobile Experience */}
+        <Section icon={<FaMobileAlt />} iconBg="#dcfce7" iconColor="#15803d" title="Mobile App & PWA Status">
+          <Row
+            label="Kisan Setu Mobile App"
+            sub={isInstalled ? "✓ App is installed on this device (Standalone Mode)" : "Install as an app on your Android, iOS, or Desktop device for 1-tap offline access"}
+          >
+            {isInstalled ? (
+              <span style={{ background: '#dcfce7', color: '#15803d', fontWeight: 800, fontSize: '12px', padding: '6px 12px', borderRadius: '8px' }}>
+                ✓ Installed
+              </span>
+            ) : isInstallable ? (
+              <button
+                onClick={installPWA}
+                style={{
+                  background: 'linear-gradient(135deg, #15803d 0%, #16a34a 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '7px 14px',
+                  borderRadius: '10px',
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <FaDownload /> Install App
+              </button>
+            ) : (
+              <span style={{ background: '#f1f5f9', color: '#64748b', fontWeight: 600, fontSize: '12px', padding: '6px 12px', borderRadius: '8px' }}>
+                PWA Ready (Use browser menu "Install" / "Add to Home Screen")
+              </span>
+            )}
+          </Row>
+        </Section>
+
+        {/* 5. Account, Storage & Data Governance */}
         <Section icon={<FaShieldAlt />} iconBg="#fef3c7" iconColor="#d97706" title="Account Security & Data Management">
           <Row
             label="Offline Farm Data Cache"

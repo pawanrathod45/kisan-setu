@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="ksBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#072712" />
+      <stop offset="45%" stop-color="#0d421f" />
+      <stop offset="100%" stop-color="#155e2d" />
+    </linearGradient>
+    <linearGradient id="ksGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <linearGradient id="ksSprout" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="50%" stop-color="#4ade80" />
+      <stop offset="100%" stop-color="#86efac" />
+    </linearGradient>
+    <filter id="ksGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#16a34a" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background Rounded Shield / App Icon Frame -->
+  <rect width="512" height="512" rx="115" fill="url(#ksBg)" />
+  <rect width="504" height="504" x="4" y="4" rx="111" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="6" />
+
+  <!-- Center Decorative Glow Circle -->
+  <circle cx="256" cy="245" r="150" fill="none" stroke="url(#ksSprout)" stroke-width="4" stroke-dasharray="12 12" opacity="0.4" />
+  <circle cx="256" cy="245" r="125" fill="rgba(34, 197, 94, 0.08)" />
+
+  <!-- Golden Wheat Stalks (Left & Right Arching) -->
+  <g filter="url(#ksGlow)">
+    <!-- Main Center Sprout Stalk -->
+    <path d="M 256 360 C 256 280 256 190 256 130" stroke="url(#ksGold)" stroke-width="12" stroke-linecap="round" fill="none" />
+
+    <!-- Center Grain Grains -->
+    <ellipse cx="256" cy="120" rx="14" ry="24" fill="url(#ksGold)" transform="rotate(0 256 120)" />
+    
+    <!-- Left Grains -->
+    <path d="M 256 160 C 230 145 205 160 215 180 C 230 185 250 170 256 165" fill="url(#ksGold)" />
+    <path d="M 256 210 C 220 195 190 215 205 238 C 225 242 248 225 256 218" fill="url(#ksGold)" />
+    <path d="M 256 260 C 210 248 180 272 195 295 C 220 300 245 278 256 270" fill="url(#ksGold)" />
+
+    <!-- Right Grains -->
+    <path d="M 256 160 C 282 145 307 160 297 180 C 282 185 262 170 256 165" fill="url(#ksGold)" />
+    <path d="M 256 210 C 292 195 322 215 307 238 C 287 242 264 225 256 218" fill="url(#ksGold)" />
+    <path d="M 256 260 C 302 248 332 272 317 295 C 292 300 267 278 256 270" fill="url(#ksGold)" />
+
+    <!-- Radiant Green Leaf Arch at Bottom -->
+    <path d="M 256 360 C 210 330 160 350 145 385 C 185 395 235 375 256 360 Z" fill="url(#ksSprout)" />
+    <path d="M 256 360 C 302 330 352 350 367 385 C 327 395 277 375 256 360 Z" fill="url(#ksSprout)" />
+  </g>
+
+  <!-- App Brand Text at Bottom -->
+  <text x="256" y="445" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="34" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="3">KISAN SETU</text>
+  <text x="256" y="475" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#86efac" text-anchor="middle" letter-spacing="4">DIGITAL KRISHI</text>
+</svg>

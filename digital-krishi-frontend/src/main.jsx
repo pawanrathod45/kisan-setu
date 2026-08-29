@@ -5,6 +5,10 @@ import './styles/Responsive.css'
 import App from './App.jsx'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { registerServiceWorker } from './registerServiceWorker';
+
+// Register PWA Service Worker for offline capability & mobile installation
+registerServiceWorker();
 
 // Global resilience handler for browser extension errors & unhandled promise rejections
 if (typeof window !== 'undefined') {

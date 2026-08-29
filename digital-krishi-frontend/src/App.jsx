@@ -41,15 +41,21 @@ import RoleProtectedRoute from './components/RoleProtectedRoute';
 // 🌐 Global Language Context
 import { LanguageProvider } from './context/LanguageContext';
 
+// 📲 Progressive Web App (PWA) Provider & Install Banner
+import { PWAProvider } from './context/PWAContext';
+import PWAInstallPrompt from './components/common/PWAInstallPrompt';
+
 // 📱 Master Responsive Overrides
 import './styles/Responsive.css';
 
 function App() {
   return (
     <ErrorBoundary title="Kisan Setu Application">
-      <LanguageProvider>
-        <BrowserRouter>
-          <Routes>
+      <PWAProvider>
+        <LanguageProvider>
+          <BrowserRouter>
+            <PWAInstallPrompt />
+            <Routes>
 
             {/* Default Redirect */}
             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -114,8 +120,9 @@ function App() {
           </Routes>
         </BrowserRouter>
       </LanguageProvider>
-    </ErrorBoundary>
-  );
+    </PWAProvider>
+  </ErrorBoundary>
+);
 }
 
 export default App;
