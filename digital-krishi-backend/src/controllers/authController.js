@@ -94,19 +94,10 @@ exports.register = async (req, res) => {
       await user.save();
     }
 
-    // Attempt real email OTP dispatch
-    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, name.trim());
-
-    if (!emailResult.success) {
-      // User is kept in MongoDB; return clear guidance to resend OTP
-      return res.status(201).json({
-        success: true,
-        requiresVerification: true,
-        emailSent: false,
-        email: cleanEmail,
-        message: "Account created, but verification email could not be sent. Please resend OTP.",
-      });
-    }
+    // Dispatch email asynchronously so HTTP response is instant (< 200ms)
+    sendVerificationOtpEmail(cleanEmail, otp, name.trim()).catch((err) => {
+      console.error("OTP email dispatch error:", err.message);
+    });
 
     return res.status(201).json({
       success: true,
@@ -270,14 +261,10 @@ exports.resendEmailOtp = async (req, res) => {
     };
     await user.save();
 
-    // Dispatch email
-    const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
-
-    if (!emailResult.success) {
-      return res.status(500).json({
-        message: "Failed to send verification email. Please check your email configuration or try again in a few moments.",
-      });
-    }
+    // Dispatch email asynchronously
+    sendVerificationOtpEmail(cleanEmail, otp, user.name).catch((err) => {
+      console.error("Resend OTP email dispatch error:", err.message);
+    });
 
     return res.status(200).json({
       success: true,
@@ -329,16 +316,9 @@ exports.login = async (req, res) => {
       };
       await user.save();
 
-      const emailResult = await sendVerificationOtpEmail(cleanEmail, otp, user.name);
-
-      if (!emailResult.success) {
-        return res.status(403).json({
-          requiresVerification: true,
-          emailSent: false,
-          email: cleanEmail,
-          message: "Your email is not verified yet. Verification email could not be sent, please resend OTP.",
-        });
-      }
+      sendVerificationOtpEmail(cleanEmail, otp, user.name).catch((err) => {
+        console.error("Login OTP email dispatch error:", err.message);
+      });
 
       return res.status(403).json({
         requiresVerification: true,
