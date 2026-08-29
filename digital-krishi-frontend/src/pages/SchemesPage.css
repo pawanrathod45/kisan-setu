@@ -1,0 +1,1180 @@
+/* ============================================================
+   KISAN SETU — MAHARASHTRA GOVERNMENT SCHEMES MODULE
+   Executive Responsive Styles (Desktop 3-col, Tablet 2-col, Mobile 1-col)
+   ============================================================ */
+
+.ks-schemes-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 4px 32px;
+  box-sizing: border-box;
+}
+
+/* ── Top Official Source Banner ── */
+.ks-official-header-banner {
+  background: linear-gradient(135deg, #072712 0%, #0d4a23 50%, #155e2d 100%);
+  border-radius: 20px;
+  padding: 22px 26px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 12px 32px rgba(7, 39, 18, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.ks-official-header-banner::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(74, 222, 128, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ks-banner-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  z-index: 2;
+}
+
+.ks-emblem-badge {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #86efac;
+  flex-shrink: 0;
+}
+
+.ks-banner-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.ks-gov-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(34, 197, 94, 0.22);
+  border: 1px solid rgba(134, 239, 172, 0.35);
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #bbf7d0;
+}
+
+.ks-verified-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.ks-schemes-main-title {
+  font-size: 23px;
+  font-weight: 850;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  line-height: 1.25;
+  letter-spacing: -0.4px;
+}
+
+.ks-schemes-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0;
+  line-height: 1.45;
+  max-width: 760px;
+}
+
+.ks-banner-right {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.ks-mahadbt-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  color: #155e2d;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ks-mahadbt-link-btn:hover {
+  background: #f0fdf4;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Summary Stats Cards ── */
+.ks-schemes-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.ks-stat-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ks-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+}
+
+.ks-stat-card.selected {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.18);
+}
+
+.ks-stat-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  flex-shrink: 0;
+}
+
+.ks-stat-count {
+  display: block;
+  font-size: 21px;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.ks-stat-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* ── Toolbar: Search & Selects ── */
+.ks-schemes-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ks-schemes-search-box {
+  flex: 1 1 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ks-search-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.ks-schemes-search-input {
+  width: 100%;
+  padding: 11px 36px 11px 40px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: #0f172a;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.ks-schemes-search-input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+.ks-clear-search-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.ks-filter-select-wrap {
+  flex: 0 0 170px;
+}
+
+.ks-filter-select {
+  width: 100%;
+  padding: 11px 12px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.ks-filter-select:focus {
+  border-color: #16a34a;
+}
+
+.ks-refresh-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ks-refresh-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.ks-refresh-btn .spinning {
+  animation: ksSpin 1s linear infinite;
+}
+
+@keyframes ksSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Category Chips Scrollbar ── */
+.ks-category-chips-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 8px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ks-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  flex-shrink: 0;
+}
+
+.ks-cat-chip:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.ks-cat-chip.active {
+  background: #15803d;
+  color: #ffffff;
+  border-color: #15803d;
+  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.25);
+}
+
+/* ── Schemes Grid (Desktop: 3-column) ── */
+.ks-schemes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.ks-scheme-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.22s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  height: auto;
+  box-sizing: border-box;
+}
+
+.ks-scheme-card:hover {
+  transform: translateY(-3px);
+  border-color: #86efac;
+  box-shadow: 0 10px 28px rgba(21, 128, 61, 0.12);
+}
+
+.ks-card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.ks-scheme-card-cat {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
+}
+
+.ks-card-bookmark-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.ks-card-bookmark-btn:hover {
+  transform: scale(1.18);
+}
+
+.ks-scheme-card-title {
+  font-size: 15.5px;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.35;
+  margin: 0 0 3px 0;
+  letter-spacing: -0.2px;
+  word-break: break-word;
+}
+
+.ks-scheme-card-en-ref {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  word-break: break-word;
+}
+
+.ks-scheme-card-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #475569;
+  margin: 0 0 10px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.ks-card-benefit-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.ks-card-benefit-pill .ks-b-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ks-card-eligibility-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid;
+  font-size: 11.5px;
+  font-weight: 750;
+  margin-bottom: 14px;
+}
+
+.ks-card-eligibility-badge .ks-badge-icon {
+  font-size: 13px;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.ks-card-actions-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.ks-card-details-btn {
+  flex: 1 1 auto;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1.5px solid #cbd5e1;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.ks-card-details-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+}
+
+.ks-card-apply-btn {
+  background: #15803d;
+  color: #ffffff;
+  border: none;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 40px;
+}
+
+.ks-card-apply-btn:hover {
+  background: #166534;
+  transform: translateY(-1px);
+}
+
+/* ── States: Loading, Error, Empty ── */
+.ks-schemes-loading,
+.ks-schemes-error-box,
+.ks-schemes-empty-box {
+  background: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 20px;
+  padding: 40px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ks-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3.5px solid #dcfce7;
+  border-top-color: #15803d;
+  border-radius: 50%;
+  animation: ksSpin 0.8s linear infinite;
+}
+
+.ks-retry-btn,
+.ks-reset-filters-btn {
+  background: #15803d;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+/* ── Official Disclaimer Footer ── */
+.ks-schemes-disclaimer-card {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ks-disc-icon {
+  font-size: 18px;
+  color: #64748b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ks-schemes-disclaimer-card h4 {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #334155;
+  margin: 0 0 3px 0;
+}
+
+.ks-schemes-disclaimer-card p {
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* ============================================================
+   SCHEME DETAIL MODAL STYLES
+   ============================================================ */
+
+.ks-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.ks-modal-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.ks-modal-header {
+  padding: 18px 20px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  background: #f8fafc;
+}
+
+.ks-modal-category-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.ks-scheme-cat-pill {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.ks-status-pill {
+  font-size: 10.5px;
+  font-weight: 750;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.status-open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.ks-modal-title {
+  font-size: 18px;
+  font-weight: 850;
+  color: #0f172a;
+  line-height: 1.3;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.3px;
+  word-break: break-word;
+}
+
+.ks-modal-sub-en {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 6px 0;
+  word-break: break-word;
+}
+
+.ks-modal-dept {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  word-break: break-word;
+}
+
+.ks-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ks-bookmark-btn,
+.ks-modal-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.2s ease;
+}
+
+.ks-bookmark-btn:hover,
+.ks-modal-close-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* Modal Body */
+.ks-modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 🎯 Real Profile Evaluation Card in Modal */
+.ks-eval-card {
+  border: 1.5px solid;
+  border-radius: 14px;
+  padding: 13px 15px;
+}
+
+.ks-eval-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ks-eval-icon {
+  flex-shrink: 0;
+  display: flex;
+}
+
+.ks-eval-status {
+  font-size: 14px;
+  font-weight: 850;
+  margin: 0;
+}
+
+.ks-eval-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.ks-eval-reasons {
+  margin: 8px 0 0 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ks-eval-reasons li {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.ks-modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ks-section-heading {
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ks-section-text {
+  font-size: 12.5px;
+  color: #334155;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.ks-benefits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ks-benefit-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 9px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ks-b-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.ks-b-val {
+  font-size: 12.5px;
+  font-weight: 850;
+  color: #15803d;
+}
+
+.ks-criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ks-crit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.ks-crit-item svg {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.ks-bullet-list {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ks-bullet-list li {
+  font-size: 11.5px;
+  color: #475569;
+  line-height: 1.4;
+}
+
+.ks-docs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ks-doc-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.ks-verification-box {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.ks-v-left {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ks-v-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #15803d;
+  margin: 0;
+}
+
+.ks-v-desc {
+  font-size: 10.5px;
+  color: #166534;
+  margin: 2px 0 0 0;
+}
+
+.ks-v-helpline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #15803d;
+  background: #ffffff;
+  padding: 3px 8px;
+  border-radius: 8px;
+  border: 1px solid #86efac;
+  white-space: nowrap;
+}
+
+/* Modal Footer */
+.ks-modal-footer {
+  padding: 13px 20px 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ks-disclaimer-note {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.ks-modal-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ks-gr-btn {
+  flex: 1 1 auto;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #334155;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  min-height: 42px;
+}
+
+.ks-gr-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.ks-apply-official-btn {
+  flex: 1.4 1 auto;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 850;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.3);
+  transition: all 0.2s ease;
+  min-height: 42px;
+}
+
+.ks-apply-official-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(21, 128, 61, 0.4);
+}
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS (Tablet ≤ 1024px, Mobile ≤ 768px & ≤ 480px)
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .ks-schemes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .ks-schemes-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .ks-official-header-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 18px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+
+  .ks-banner-left {
+    gap: 12px;
+  }
+
+  .ks-emblem-badge {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .ks-mahadbt-link-btn {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .ks-schemes-main-title {
+    font-size: 19px;
+  }
+
+  .ks-schemes-subtitle {
+    font-size: 12.5px;
+  }
+
+  .ks-schemes-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .ks-schemes-search-box {
+    flex: 1 1 100%;
+  }
+
+  .ks-filter-select-wrap {
+    flex: 1 1 calc(100% - 54px);
+  }
+
+  .ks-schemes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ks-benefits-grid,
+  .ks-docs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ks-verification-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ks-v-helpline {
+    align-self: flex-start;
+  }
+
+  .ks-modal-btn-row {
+    flex-direction: column;
+  }
+
+  .ks-gr-btn,
+  .ks-apply-official-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .ks-schemes-page {
+    padding: 0 0 24px;
+    gap: 14px;
+  }
+
+  .ks-schemes-stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .ks-stat-card {
+    padding: 9px 11px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+
+  .ks-stat-icon-wrap {
+    width: 34px;
+    height: 34px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  .ks-stat-count {
+    font-size: 17px;
+  }
+
+  .ks-stat-label {
+    font-size: 10.5px;
+  }
+
+  .ks-scheme-card {
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .ks-scheme-card-title {
+    font-size: 15px;
+  }
+
+  .ks-modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .ks-modal-card {
+    max-height: 94vh;
+    border-radius: 20px 20px 10px 10px;
+  }
+
+  .ks-modal-header {
+    padding: 14px 16px 10px;
+  }
+
+  .ks-modal-body {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .ks-modal-footer {
+    padding: 12px 16px 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .ks-official-header-banner {
+    padding: 12px 14px;
+  }
+
+  .ks-schemes-main-title {
+    font-size: 17px;
+  }
+
+  .ks-schemes-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ks-stat-card {
+    padding: 8px 10px;
+  }
+
+  .ks-card-actions-footer {
+    flex-direction: column;
+  }
+
+  .ks-card-details-btn,
+  .ks-card-apply-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

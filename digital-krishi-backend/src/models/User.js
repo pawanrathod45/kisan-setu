@@ -73,6 +73,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "en",
   },
+  district: String,
+  taluka: String,
+  village: String,
+  farmerCategory: {
+    type: String,
+    enum: ["general", "sc", "st", "obc", "women", "small", "marginal", ""],
+    default: "general",
+  },
+  hasIrrigation: {
+    type: Boolean,
+    default: false,
+  },
+  irrigationSource: {
+    type: String,
+    enum: ["well", "borewell", "canal", "river", "farm_pond", "rainfed", "none", ""],
+    default: "none",
+  },
   bio: String,
   notificationsEnabled: {
     type: Boolean,

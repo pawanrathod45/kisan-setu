@@ -32,6 +32,7 @@ const cropsRoutes = require("./src/routes/cropsRoutes");
 const tasksRoutes = require("./src/routes/tasksRoutes");
 const alertsRoutes = require("./src/routes/alertsRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
+const schemesRoutes = require("./src/routes/schemesRoutes");
 
 // Initialize Express
 const app = express();
@@ -108,6 +109,7 @@ app.use("/api/market", marketRoutes);
 app.use("/api", cropsRoutes);
 app.use("/api", tasksRoutes);
 app.use("/api", alertsRoutes);
+app.use("/api", schemesRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

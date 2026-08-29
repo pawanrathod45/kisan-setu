@@ -5,7 +5,7 @@ import {
   FaHome, FaCloudSun, FaChartLine, FaRobot, FaCamera,
   FaBell, FaCalendarAlt, FaChartBar, FaMicrophone,
   FaUser, FaCog, FaSeedling, FaCalendarCheck, FaSignOutAlt,
-  FaChevronRight, FaCheckCircle, FaTimes
+  FaChevronRight, FaCheckCircle, FaTimes, FaLandmark
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
 import { useLanguage } from '../../context/LanguageContext';
@@ -73,6 +73,7 @@ const Sidebar = ({ isOpen, toggleSidebar, closeSidebar }) => {
         { path: '/farmer/disease-detection',icon: FaCamera,        label: t.diseaseDetection || 'Disease Detection',      iconColor: '#db2777', badge: 'Scan',  badgeColor: '#db2777', badgeBg: 'rgba(219, 39, 119, 0.12)' },
         { path: '/farmer/alerts',           icon: FaBell,          label: t.smartAlerts || 'Smart Alerts',                iconColor: '#dc2626', badge: 'Alerts', badgeColor: '#dc2626', badgeBg: 'rgba(220, 38, 38, 0.12)' },
         { path: '/farmer/voice',            icon: FaMicrophone,    label: t.voiceAssistant || 'Voice Assistant',          iconColor: '#9333ea', badge: 'Mic',   badgeColor: '#9333ea', badgeBg: 'rgba(147, 51, 234, 0.12)' },
+        { path: '/farmer/schemes',          icon: FaLandmark,      label: t.govtSchemes || 'Govt Schemes',                iconColor: '#059669', badge: 'MahaDBT', badgeColor: '#059669', badgeBg: 'rgba(5, 150, 105, 0.12)' },
         { path: '/farmer/analytics',        icon: FaChartBar,      label: t.farmAnalytics || 'Farm Analytics',            iconColor: '#4f46e5' },
       ]
     },

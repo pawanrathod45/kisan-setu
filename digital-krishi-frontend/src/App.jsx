@@ -24,6 +24,7 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import CropsPage from './pages/CropsPage';
 import TasksPage from './pages/TasksPage';
+import SchemesPage from './pages/SchemesPage';
 
 // Admin Console
 import AdminLayout from './components/admin/AdminLayout';
@@ -88,6 +89,7 @@ function App() {
               <Route path="disease-detection" element={<DiseaseDetectionPage />} />
               <Route path="alerts" element={<AlertsPage />} />
               <Route path="calendar" element={<CropCalendarPage />} />
+              <Route path="schemes" element={<SchemesPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="voice" element={<VoiceAssistantPage />} />
               <Route path="profile" element={<ProfilePage />} />
