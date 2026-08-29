@@ -8,40 +8,38 @@ const maskEmail = (email) => {
   return `${name.substring(0, 2)}***${name.slice(-1)}@${domain}`;
 };
 
-// Create dynamic SMTP transporter from environment variables
+let cachedTransporter = null;
+
+// Create or reuse dynamic high-performance SMTP transporter
 const createTransporter = () => {
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
-  const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "587", 10);
+  const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "465", 10);
   const emailService = (process.env.EMAIL_SERVICE || "").trim().toLowerCase();
 
   if (!emailUser || !emailPass) {
     return null;
   }
 
-  // Common timeout options to prevent hanging on cloud servers (Render, AWS, etc.)
-  const timeoutOptions = {
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+  // Fast options: direct SSL port 465, IPv4 enforcement, connection pooling
+  const commonOptions = {
+    pool: true,
+    maxConnections: 3,
+    maxMessages: 100,
+    family: 4, // Enforce IPv4 to avoid cloud DNS IPv6 hangs
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 12000,
   };
 
-  // 1. If explicit service (e.g., 'gmail', 'SendGrid', 'Brevo') is provided
-  if (emailService) {
-    return nodemailer.createTransport({
-      service: emailService,
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-      ...timeoutOptions,
-    });
-  }
-
-  // 2. If SMTP Host is provided
-  if (emailHost) {
-    return nodemailer.createTransport({
+  // 1. If explicit custom host is provided (e.g., Brevo, SendGrid, Amazon SES)
+  if (emailHost && emailHost !== "smtp.gmail.com") {
+    cachedTransporter = nodemailer.createTransport({
       host: emailHost,
       port: emailPort,
       secure: emailPort === 465,
@@ -52,20 +50,26 @@ const createTransporter = () => {
       tls: {
         rejectUnauthorized: false,
       },
-      ...timeoutOptions,
+      ...commonOptions,
     });
+    return cachedTransporter;
   }
 
-  // 3. Fallback: Default to Gmail if email ends with @gmail.com or no host specified
-  return nodemailer.createTransport({
-    service: "gmail",
+  // 2. Default to high-speed direct SSL Gmail SMTP (port 465)
+  cachedTransporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
       user: emailUser,
       pass: emailPass,
     },
-    ...timeoutOptions,
+    ...commonOptions,
   });
+
+  return cachedTransporter;
 };
+
 
 
 /**
