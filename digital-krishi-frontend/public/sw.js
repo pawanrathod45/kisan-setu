@@ -3,14 +3,14 @@
 // Offline First, Network-First Fallback, Auto-Cache Invalidation
 // ============================================================
 
-const CACHE_NAME = 'kisan-setu-v1.0.1';
+const CACHE_NAME = 'kisan-setu-v1.0.3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg',
-  '/icon-192.svg',
-  '/icon-512.svg'
+  '/favicon.jpg',
+  '/icon-192.jpg',
+  '/icon-512.jpg'
 ];
 
 // 1. Install Event: Pre-cache Essential App Shell

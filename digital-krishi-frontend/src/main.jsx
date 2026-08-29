@@ -14,16 +14,20 @@ registerServiceWorker();
 if (typeof window !== 'undefined') {
   window.addEventListener('unhandledrejection', (event) => {
     const reason = event?.reason;
-    const isExtensionError =
-      (reason && typeof reason === 'object' && reason.errNo === -2) ||
-      (reason && typeof reason === 'object' && reason.errMsg?.includes('Service is currently unstable')) ||
-      (reason?.message && reason.message.includes('message channel closed')) ||
-      (reason?.message && reason.message.includes('startTime'));
+    if (!reason || typeof reason === 'object') {
+      const isExtensionError =
+        !reason ||
+        reason.errNo === -2 ||
+        reason.errMsg?.includes('Service is currently unstable') ||
+        reason.message?.includes('message channel closed') ||
+        reason.message?.includes('startTime') ||
+        Object.keys(reason).length === 0;
 
-    if (isExtensionError) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
+      if (isExtensionError) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
     }
   });
 

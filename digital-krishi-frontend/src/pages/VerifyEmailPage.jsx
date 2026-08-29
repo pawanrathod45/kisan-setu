@@ -7,8 +7,6 @@ import API from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 import "../styles/Login.css";
 
-const FARMER_WELCOME_VIDEO_URL =
-  "https://assets.mixkit.co/videos/preview/mixkit-farmer-walking-in-a-field-of-wheat-42617-large.mp4";
 const FARMER_POSTER_IMAGE =
   "https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?q=80&w=1200&auto=format&fit=crop";
 
@@ -177,10 +175,10 @@ const VerifyEmailPage = () => {
   };
 
   return (
-    <div className="ks-login-viewport">
+    <div className="ks-auth-viewport">
       {/* Background Poster */}
       <div
-        className="ks-video-bg"
+        className="ks-fullscreen-video-bg"
         style={{
           backgroundImage: `url(${FARMER_POSTER_IMAGE})`,
           backgroundSize: 'cover',
@@ -188,10 +186,10 @@ const VerifyEmailPage = () => {
         }}
       />
 
-      <div className="ks-video-overlay" />
+      <div className="ks-fullscreen-video-overlay" />
 
       {/* Language Switcher Bar */}
-      <div className="ks-lang-bar">
+      <div className="ks-lang-top-floating">
         {languages.map((lang) => (
           <button
             key={lang.code}
@@ -199,35 +197,34 @@ const VerifyEmailPage = () => {
             className={`ks-lang-btn ${language === lang.code ? "active" : ""}`}
             onClick={() => setLanguage(lang.code)}
           >
-            {lang.label}
+            {lang.name || lang.label}
           </button>
         ))}
       </div>
 
       {/* Central Floating Card */}
       <motion.div
-        className="ks-floating-card-container"
+        className="ks-auth-card"
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        style={{ maxWidth: "480px" }}
+        transition={{ duration: 0.35 }}
       >
-        <div className="ks-card-form-panel" style={{ width: "100%", padding: "28px 24px" }}>
+        <div>
           
           {/* Header */}
-          <div className="ks-form-header" style={{ textAlign: "center", marginBottom: "18px" }}>
+          <div className="ks-form-header" style={{ textAlign: "center", marginBottom: "16px" }}>
             <div
               style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "14px",
+                width: "46px",
+                height: "46px",
+                borderRadius: "12px",
                 background: "#dcfce7",
                 color: "#15803d",
-                fontSize: "24px",
+                fontSize: "20px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                margin: "0 auto 12px",
+                margin: "0 auto 10px",
                 boxShadow: "0 4px 12px rgba(21, 128, 61, 0.2)"
               }}
             >
