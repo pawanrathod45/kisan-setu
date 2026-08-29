@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fa';
 import { GiPlantRoots, GiChemicalDrop, GiWheat, GiTomato, GiCorn, GiCottonFlower } from 'react-icons/gi';
 import API from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/DiseaseDetection.css';
 
 const PRESET_SPECIMENS = [
@@ -19,6 +20,7 @@ const PRESET_SPECIMENS = [
 ];
 
 const DiseaseDetectionPage = () => {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [image, setImage]                     = useState(null);
   const [dragging, setDragging]               = useState(false);
@@ -225,9 +227,9 @@ const DiseaseDetectionPage = () => {
   };
 
   const severityConfig = {
-    low:    { color: '#15803d', bg: '#dcfce7', label: 'Low Risk',    icon: <FaCheckCircle /> },
-    medium: { color: '#d97706', bg: '#fef3c7', label: 'Moderate Risk', icon: <FaExclamationTriangle /> },
-    high:   { color: '#dc2626', bg: '#fee2e2', label: 'Critical Risk', icon: <FaExclamationTriangle /> },
+    low:    { color: '#15803d', bg: '#dcfce7', label: t('healthy', 'Low Risk'),    icon: <FaCheckCircle /> },
+    medium: { color: '#d97706', bg: '#fef3c7', label: t('needsCare', 'Moderate Risk'), icon: <FaExclamationTriangle /> },
+    high:   { color: '#dc2626', bg: '#fee2e2', label: t('critical', 'Critical Risk'), icon: <FaExclamationTriangle /> },
   };
   const sev = severityConfig[result?.severity] || severityConfig.medium;
 
@@ -240,9 +242,9 @@ const DiseaseDetectionPage = () => {
             <FaLeaf />
           </div>
           <div className="dd-hero-titles">
-            <h1>AI Crop Doctor & Disease Diagnostics</h1>
+            <h1>{t('aiCropDoctorTitle', 'AI Crop Doctor & Disease Diagnostics')}</h1>
             <p>
-              Google Gemini 2.0 AI Vision identifies crop foliage pathogens, provides clinical reviews, certified chemical dosages, organic bio-shields, and fertilizer recovery schedules.
+              {t('aiDoctorTag', 'Google Gemini AI Vision identifies crop foliage pathogens, provides clinical reviews, certified chemical dosages, organic bio-shields, and fertilizer recovery schedules.')}
             </p>
           </div>
         </div>
@@ -250,7 +252,7 @@ const DiseaseDetectionPage = () => {
         <div className="dd-hero-badges">
           <div className="dd-badge-ai">
             <span className="dd-pulse-dot" />
-            GEMINI 2.0 VISION ACTIVE
+            {t('instantDiagnosisBadge', 'GEMINI AI VISION ACTIVE')}
           </div>
         </div>
       </motion.div>
@@ -258,7 +260,7 @@ const DiseaseDetectionPage = () => {
       {/* ─── Quick Specimen Demo Chips ─── */}
       <div className="dd-samples-bar">
         <span className="dd-samples-label">
-          <FaShieldAlt /> 1-Click Samples:
+          <FaShieldAlt /> {t('presetSpecimens', 'Quick Test Samples')}:
         </span>
         <div className="dd-samples-chips">
           {PRESET_SPECIMENS.map((sample) => (
@@ -278,10 +280,10 @@ const DiseaseDetectionPage = () => {
         {/* ── Left: Image Upload Card ── */}
         <motion.div className="dd-upload-card" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}>
           <div className="dd-card-head">
-            <h3><FaCamera /> Specimen Leaf Scanner</h3>
+            <h3><FaCamera /> {t('uploadLeafPhoto', 'Specimen Leaf Scanner')}</h3>
             {image && (
               <button className="dd-retake-btn" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={handleClear}>
-                <FaTimes /> Clear
+                <FaTimes /> {t('close', 'Clear')}
               </button>
             )}
           </div>
@@ -297,23 +299,23 @@ const DiseaseDetectionPage = () => {
               <div className="dd-dropzone-icon-box">
                 <FaCamera />
               </div>
-              <p className="dd-dropzone-title">Upload or Snap Leaf Photo</p>
+              <p className="dd-dropzone-title">{t('uploadLeafPhoto', 'Upload or Snap Leaf Photo')}</p>
               <p className="dd-dropzone-subtitle">
-                Capture clear close-up photos of leaves, stems, or fruits for AI scanning
+                {t('dragDropLeaf', 'Capture clear close-up photos of leaves, stems, or fruits for AI scanning')}
               </p>
               <button
                 type="button"
                 className="dd-browse-btn"
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
               >
-                <FaUpload /> Choose Photo from Device
+                <FaUpload /> {t('cropImage', 'Choose Photo from Device')}
               </button>
             </div>
           ) : (
             <div className="dd-preview-box">
               <img src={image.previewUrl} alt="Crop specimen preview" className="dd-preview-img" />
               {loading && <div className="dd-scanner-line" />}
-              <button className="dd-preview-clear-btn" onClick={handleClear} title="Remove image">
+              <button className="dd-preview-clear-btn" onClick={handleClear} title={t('close', 'Remove image')}>
                 <FaTimes />
               </button>
             </div>
@@ -337,17 +339,17 @@ const DiseaseDetectionPage = () => {
                 {loading ? (
                   <>
                     <span className="dd-pulse-dot" />
-                    <span>Google AI Diagnosing Specimen…</span>
+                    <span>{t('loading', 'AI Diagnosing Specimen…')}</span>
                   </>
                 ) : (
                   <>
                     <FaLeaf />
-                    <span>Run AI Clinical Diagnosis</span>
+                    <span>{t('instantDiagnosis', 'Run AI Clinical Diagnosis')}</span>
                   </>
                 )}
               </button>
               <button className="dd-retake-btn" onClick={() => fileInputRef.current?.click()}>
-                <FaRedo /> Retake
+                <FaRedo /> {t('refresh', 'Retake')}
               </button>
             </div>
           )}
@@ -374,9 +376,9 @@ const DiseaseDetectionPage = () => {
                 <div className="dd-placeholder-icon">
                   <FaLeaf />
                 </div>
-                <h3>No Specimen Diagnosed Yet</h3>
+                <h3>{t('noSpecimenYet', 'No Specimen Diagnosed Yet')}</h3>
                 <p>
-                  Upload a leaf photo or pick one of the 1-click samples above to generate disease diagnoses, chemical/organic prescriptions, fertilizer recovery plans, and APMC Mandi rates.
+                  {t('diagnosePromptDesc', 'Upload a leaf photo or pick one of the 1-click samples above to generate disease diagnoses, chemical/organic prescriptions, fertilizer recovery plans, and APMC Mandi rates.')}
                 </p>
               </motion.div>
             )}
@@ -393,9 +395,9 @@ const DiseaseDetectionPage = () => {
                 <div className="dd-placeholder-icon" style={{ background: '#dcfce7' }}>
                   <FaLeaf style={{ animation: 'spin 2s linear infinite' }} />
                 </div>
-                <h3 style={{ color: '#15803d' }}>Google Gemini 2.0 AI Vision Analyzing Foliage…</h3>
+                <h3 style={{ color: '#15803d' }}>{t('loading', 'AI Vision Analyzing Foliage…')}</h3>
                 <p>
-                  Matching cellular necrosis, fungal hyphae patterns, pest bite marks, and local APMC market values...
+                  {t('matchingPathogens', 'Matching cellular necrosis, fungal hyphae patterns, pest bite marks, and local APMC market values...')}
                 </p>
               </motion.div>
             )}
@@ -413,16 +415,16 @@ const DiseaseDetectionPage = () => {
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                       <span className="dd-report-crop-tag">
-                        🌱 Crop: {result.crop || 'Crop'}
+                        🌱 {t('cropName', 'Crop')}: {result.crop || 'Crop'}
                       </span>
                       {result.pathogen && (
                         <span className="dd-report-pathogen-tag">
-                          🔬 {result.pathogen}
+                          🔬 {t('pathogen', 'Pathogen')}: {result.pathogen}
                         </span>
                       )}
                     </div>
                     <div className="dd-report-disease-title">
-                      {result.disease || 'Healthy Plant'}
+                      {result.disease || t('healthy', 'Healthy Plant')}
                     </div>
                   </div>
 
@@ -439,10 +441,10 @@ const DiseaseDetectionPage = () => {
                     </div>
                     <div>
                       <div className="dd-mandi-label">
-                        Live APMC Mandi Rate ({result.crop})
+                        {t('liveRates', 'Live APMC Mandi Rate')} ({result.crop})
                       </div>
                       <div className="dd-mandi-price-val">
-                        ₹{result.currentPrice || 2450} <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>{result.priceUnit || '₹/quintal'}</span>
+                        ₹{result.currentPrice || 2450} <span style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>{result.priceUnit || t('perQuintal', '₹/quintal')}</span>
                       </div>
                     </div>
                   </div>
@@ -455,10 +457,10 @@ const DiseaseDetectionPage = () => {
                 <div className="dd-clinical-box">
                   <div className="dd-clinical-head">
                     <div className="dd-clinical-title">
-                      <span>✨</span> Google Gemini 2.0 AI Clinical Assessment
+                      <span>✨</span> {t('aiAdvisor', 'AI Clinical Assessment')}
                     </div>
                     <span className="dd-confidence-badge">
-                      {result.confidence || 94}% Confidence
+                      {result.confidence || 94}% {t('confidence', 'Confidence')}
                     </span>
                   </div>
                   <p className="dd-clinical-text">
@@ -473,25 +475,25 @@ const DiseaseDetectionPage = () => {
                       className={`dd-remedy-tab-btn tab-pesticide ${activeRemedyTab === 'pesticide' ? 'active' : ''}`}
                       onClick={() => setActiveRemedyTab('pesticide')}
                     >
-                      <FaFlask /> Certified Chemical Sprays
+                      <FaFlask /> {t('chemicalRemedy', 'Certified Chemical Sprays')}
                     </button>
                     <button
                       className={`dd-remedy-tab-btn tab-organic ${activeRemedyTab === 'organic' ? 'active' : ''}`}
                       onClick={() => setActiveRemedyTab('organic')}
                     >
-                      <FaLeaf /> Organic Bio-Shields
+                      <FaLeaf /> {t('organicRemedy', 'Organic Bio-Shields')}
                     </button>
                     <button
                       className={`dd-remedy-tab-btn tab-fertilizer ${activeRemedyTab === 'fertilizer' ? 'active' : ''}`}
                       onClick={() => setActiveRemedyTab('fertilizer')}
                     >
-                      <GiPlantRoots /> Fertilizer Recovery Plan
+                      <GiPlantRoots /> {t('fertilizerTab', 'Fertilizer Recovery Plan')}
                     </button>
                     <button
                       className={`dd-remedy-tab-btn tab-cultural ${activeRemedyTab === 'cultural' ? 'active' : ''}`}
                       onClick={() => setActiveRemedyTab('cultural')}
                     >
-                      <FaTint /> Cultural Practices
+                      <FaTint /> {t('irrigationTab', 'Cultural Practices')}
                     </button>
                   </div>
 
@@ -556,7 +558,7 @@ const DiseaseDetectionPage = () => {
                   {activeRemedyTab === 'cultural' && (
                     <div style={{ background: '#fffbeb', border: '1.5px solid #fde68a', borderRadius: '14px', padding: '16px', marginTop: '12px' }}>
                       <h4 style={{ color: '#92400e', margin: '0 0 10px 0', fontSize: '14px', fontWeight: 800 }}>
-                        🌾 Farm Sanitation & Moisture Management:
+                        🌾 {t('culturalSanitation', 'Farm Sanitation & Moisture Management')}:
                       </h4>
                       <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', color: '#78350f', lineHeight: 1.6 }}>
                         {(result.culturalManagement || [
@@ -579,9 +581,9 @@ const DiseaseDetectionPage = () => {
                     disabled={savingCrop || savedSuccess}
                   >
                     {savedSuccess ? (
-                      <><FaCheckCircle /> Saved to My Crops Portfolio!</>
+                      <><FaCheckCircle /> {t('savedToPortfolio', 'Saved to My Crops Portfolio!')}</>
                     ) : (
-                      <><FaPlusCircle /> {savingCrop ? 'Saving…' : '🌱 Save Crop to My Crops Section'}</>
+                      <><FaPlusCircle /> {savingCrop ? t('loading', 'Saving…') : `🌱 ${t('savePlot', 'Save Crop to My Crops Section')}`}</>
                     )}
                   </button>
 
@@ -590,7 +592,7 @@ const DiseaseDetectionPage = () => {
                     onClick={handleScheduleTask}
                     disabled={schedulingTask}
                   >
-                    <FaCalendarPlus /> {taskScheduled ? '✓ Scheduled in Tasks!' : '📅 Schedule Spray in Planner'}
+                    <FaCalendarPlus /> {taskScheduled ? `✓ ${t('scheduled', 'Scheduled in Tasks!')}` : `📅 ${t('scheduleTask', 'Schedule Spray in Planner')}`}
                   </button>
 
                   <button
@@ -598,7 +600,7 @@ const DiseaseDetectionPage = () => {
                     style={{ background: '#faf5ff', borderColor: '#d8b4fe', color: '#7e22ce' }}
                     onClick={() => navigate('/farmer/ai-assistant')}
                   >
-                    <FaComments /> Consult AI Officer
+                    <FaComments /> {t('aiKrishiOfficer', 'Consult AI Officer')}
                   </button>
                 </div>
               </motion.div>

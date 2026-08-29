@@ -1,7 +1,15 @@
-# Environment variables
+# ============================================
+# KISAN SETU BACKEND — GITIGNORE
+# ============================================
+
+# Environment variables & secrets (CRITICAL)
 .env
+.env.*
+!.env.example
 .env.local
+.env.development
 .env.production
+.env.test
 
 # Dependencies
 node_modules/
@@ -15,11 +23,9 @@ logs
 *.log
 npm-debug.log*
 
-# OS files
+# OS & IDE
 .DS_Store
 Thumbs.db
-
-# IDE
 .vscode/
 .idea/
 *.swp

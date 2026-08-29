@@ -1,46 +1,93 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FaPaperPlane, FaMicrophone, FaCamera, FaCopy,
   FaCheck, FaVolumeUp, FaTrash, FaLightbulb, FaShieldAlt,
   FaSeedling, FaCloudSun, FaChartLine, FaLeaf, FaTimes,
-  FaBug, FaTint, FaFlask, FaLandmark, FaUserTie
+  FaBug, FaTint, FaFlask, FaLandmark, FaRedo
 } from 'react-icons/fa';
-import { GiWheat, GiSprout, GiPlantRoots, GiChemicalDrop } from 'react-icons/gi';
+import { GiWheat, GiSprout } from 'react-icons/gi';
 import API from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import './AIKrishiOfficer.css';
 
-const QUICK_PROMPTS = [
+const QUICK_PROMPTS_EN = [
   { icon: GiWheat, color: '#d97706', bg: '#fef3c7', label: 'Wheat Rust Treatment', prompt: 'What is the exact pesticide dosage and treatment protocol for Yellow/Brown Rust in Wheat?' },
   { icon: FaBug, color: '#e11d48', bg: '#ffe4e6', label: 'Cotton Bollworm Control', prompt: 'How to control Pink Bollworm in BT Cotton using bio-pesticides and chemical sprays?' },
-  { icon: FaTint, color: '#0284c7', bg: '#e0f2fe', label: 'Irrigation Scheduling', prompt: 'Based on current weather, when is the optimal irrigation schedule for tillering stage?' },
+  { icon: FaTint, color: '#0284c7', bg: '#e0f2fe', label: 'Irrigation Timing', prompt: 'Based on current weather, when is the optimal irrigation schedule for tillering stage?' },
   { icon: FaChartLine, color: '#16a34a', bg: '#dcfce7', label: 'APMC Price Forecast', prompt: 'What is the projected Mandi price trend for Onion over the next 10 days?' },
-  { icon: FaFlask, color: '#9333ea', bg: '#f3e8ff', label: 'Basal Fertilizer Ratio', prompt: 'What is the recommended NPK and Zinc fertilizer dosage per acre for Tomato?' },
-  { icon: FaLandmark, color: '#4f46e5', bg: '#e0e7ff', label: 'PM-Kisan & Subsidies', prompt: 'How can I apply for solar drip irrigation subsidy under government agriculture schemes?' },
+  { icon: FaFlask, color: '#9333ea', bg: '#f3e8ff', label: 'NPK Fertilizer Ratio', prompt: 'What is the recommended NPK and Zinc fertilizer dosage per acre for Tomato?' },
+  { icon: FaLandmark, color: '#4f46e5', bg: '#e0e7ff', label: 'PM-Kisan & Schemes', prompt: 'How can I apply for solar drip irrigation subsidy under government agriculture schemes?' },
+];
+
+const QUICK_PROMPTS_HI = [
+  { icon: GiWheat, color: '#d97706', bg: '#fef3c7', label: 'गेहूं रतुआ रोग उपचार', prompt: 'गेहूं में पीला और भूरा रतुआ (Rust) रोग की रोकथाम हेतु सटीक कीटनाशक एवं छिड़काव मात्रा क्या है?' },
+  { icon: FaBug, color: '#e11d48', bg: '#ffe4e6', label: 'कपास गुलाबी सुंडी', prompt: 'कपास में गुलाबी सुंडी (Pink Bollworm) की रोकथाम के लिए जैविक एवं रासायनिक उपाय बताएं?' },
+  { icon: FaTint, color: '#0284c7', bg: '#e0f2fe', label: 'सिंचाई का सही समय', prompt: 'मौसम और कल्ले फूटने (Tillering) के आधार पर सिंचाई का सर्वोत्तम समय क्या है?' },
+  { icon: FaChartLine, color: '#16a34a', bg: '#dcfce7', label: 'मंडी भाव पूर्वानुमान', prompt: 'अगले 10 दिनों में प्याज और सोयाबीन के APMC मंडी भाव का क्या अनुमान है?' },
+  { icon: FaFlask, color: '#9333ea', bg: '#f3e8ff', label: 'खाद एवं उर्वरक मात्रा', prompt: 'टमाटर और मिर्च की फसल में प्रति एकड़ NPK और सूक्ष्म पोषक तत्वों की अनुशंसित मात्रा क्या है?' },
+  { icon: FaLandmark, color: '#4f46e5', bg: '#e0e7ff', label: 'कृषि योजना सब्सिडी', prompt: 'सोलर पंप और ड्रिप सिंचाई पर सरकारी अनुदान (सब्सिडी) कैसे प्राप्त करें?' },
+];
+
+const QUICK_PROMPTS_MR = [
+  { icon: GiWheat, color: '#d97706', bg: '#fef3c7', label: 'गहू तांबेरा रोग उपाय', prompt: 'गव्हावरील पिवळा व तपकिरी तांबेरा रोगावर फवारणीचे अचूक औषध व प्रमाण काय आहे?' },
+  { icon: FaBug, color: '#e11d48', bg: '#ffe4e6', label: 'कापूस बोंडअळी नियंत्रण', prompt: 'कापसावरील गुलाबी बोंडअळीच्या नियंत्रणासाठी जैविक व रासायनिक उपाय कोणते?' },
+  { icon: FaTint, color: '#0284c7', bg: '#e0f2fe', label: 'पाणी व्यवस्थापन', prompt: 'हवामानाचा अंदाज पाहून पिकाला पाणी देण्याची योग्य वेळ कोणती?' },
+  { icon: FaChartLine, color: '#16a34a', bg: '#dcfce7', label: 'बाजारभाव अंदाज', prompt: 'पुढील १० दिवसांत कांदा व सोयाबीनच्या बाजारभावाचा अंदाज काय आहे?' },
+  { icon: FaFlask, color: '#9333ea', bg: '#f3e8ff', label: 'खत व्यवस्थापन', prompt: 'टोमॅटो आणि भाजीपाला पिकासाठी प्रति एकर खतांची मात्रा काय असावी?' },
+  { icon: FaLandmark, color: '#4f46e5', bg: '#e0e7ff', label: 'कृषी योजना व अनुदान', prompt: 'सौर कृषी पंप आणि ठिबक सिंचनासाठी शासकीय अनुदानाचा लाभ कसा घ्यावा?' },
 ];
 
 const AIKrishiOfficer = () => {
+  const { language, t } = useLanguage();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const location = user.location || 'Pune';
   const crop = user.crop || 'Wheat';
 
+  const quickPrompts = language === 'hi' ? QUICK_PROMPTS_HI : language === 'mr' ? QUICK_PROMPTS_MR : QUICK_PROMPTS_EN;
+
+  const getInitialGreeting = useCallback(() => {
+    if (language === 'hi') {
+      return `🙏 नमस्कार ${user.name || 'किसान भाई'}! मैं आपका **Google Gemini AI Krishi Officer** हूँ।\n\nमैं आपके **${location}** फार्म (मुख्य फसल: **${crop}**) से जुड़ा हूँ। फसल रोग, कीटनाशक मात्रा, मौसम या मंडी भाव से जुड़ा कोई भी सवाल पूछें!`;
+    }
+    if (language === 'mr') {
+      return `🙏 नमस्कार ${user.name || 'शेतकरी मित्र'}! मी तुमचा **Google Gemini AI Krishi Officer** आहे.\n\nमी तुमच्या **${location}** शेतीशी (मुख्य पीक: **${crop}**) जोडलेला आहे. पीक रोग, फवारणी औषधे, खते किंवा बाजारभावाबाबत विचारा!`;
+    }
+    return `Namaste ${user.name || 'Farmer'}! 🙏 I am your **Google Gemini AI Krishi Officer & Certified Agronomist**.\n\nI am synchronized with your farm in **${location}** (Primary Crop: **${crop}**). How can I assist with your crops, disease diagnostics, certified spray dosages, or APMC Mandi strategies today?`;
+  }, [language, location, crop, user.name]);
+
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      message: `Namaste ${user.name || 'Farmer'}! 🙏 I am your **Google Gemini AI Krishi Officer & Certified Agronomist**.\n\nI am synchronized with your farm in **${location}** (Primary Crop: **${crop}**). How can I assist with your crops, disease diagnostics, certified spray dosages, or APMC Mandi strategies today?`,
+      message: getInitialGreeting(),
       timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
-  const [input, setInput]               = useState('');
-  const [isLoading, setIsLoading]       = useState(false);
-  const [isListening, setIsListening]   = useState(false);
+  const [input, setInput]                 = useState('');
+  const [isLoading, setIsLoading]         = useState(false);
+  const [isListening, setIsListening]     = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [copiedIdx, setCopiedIdx]       = useState(null);
+  const [imagePreview, setImagePreview]   = useState(null);
+  const [copiedIdx, setCopiedIdx]         = useState(null);
+  const [lastFailedPrompt, setLastFailedPrompt] = useState(null);
 
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
   const fileInputRef   = useRef(null);
+
+  // Update initial greeting when language changes if no other conversation
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].type === 'bot') {
+        return [{
+          type: 'bot',
+          message: getInitialGreeting(),
+          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+        }];
+      }
+      return prev;
+    });
+  }, [language, getInitialGreeting]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -53,7 +100,7 @@ const AIKrishiOfficer = () => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = false;
       recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'hi-IN';
+      recognitionRef.current.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
 
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
@@ -64,11 +111,11 @@ const AIKrishiOfficer = () => {
       recognitionRef.current.onerror = () => setIsListening(false);
       recognitionRef.current.onend   = () => setIsListening(false);
     }
-  }, []);
+  }, [language]);
 
   const handleVoiceToggle = () => {
     if (!recognitionRef.current) {
-      alert('Speech recognition is not supported in this browser. Please use Google Chrome.');
+      alert(language === 'hi' ? 'इस ब्राउज़र में स्पीच रिकॉग्निशन समर्थित नहीं है। कृपया Google Chrome का उपयोग करें।' : 'Speech recognition is not supported in this browser. Please use Google Chrome.');
       return;
     }
 
@@ -76,6 +123,7 @@ const AIKrishiOfficer = () => {
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      recognitionRef.current.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
       recognitionRef.current.start();
       setIsListening(true);
     }
@@ -111,6 +159,9 @@ const AIKrishiOfficer = () => {
     const currentImg = selectedImage;
     handleClearImage();
     setIsLoading(true);
+    setLastFailedPrompt(null);
+
+    const langName = language === 'hi' ? 'Hindi' : language === 'mr' ? 'Marathi' : 'English';
 
     try {
       let replyText = '';
@@ -119,12 +170,14 @@ const AIKrishiOfficer = () => {
         // Image vision analysis route
         const formData = new FormData();
         formData.append('image', currentImg);
+        formData.append('language', langName);
+        
         const res = await API.post('/analyze-image', formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
 
         const data = res.data;
-        replyText = `🌱 **Detected Crop:** ${data.crop}\n\n🔍 **Diagnosis:** ${data.disease} (${data.confidence || 94}% confidence)\n\n✨ **Google AI Agronomist Clinical Review:**\n${data.aiReview || data.treatment}\n\n🧪 **Recommended Pesticide & Dosage:**\n${data.pesticides?.map(p => `• **${p.name}** (${p.type}): ${p.dosage}`).join('\n') || 'Mancozeb 75% WP @ 2g/L water'}\n\n📈 **Live APMC Mandi Rate:** ₹${data.currentPrice || 2450} / quintal (${data.priceTrend || '+2.8% ▲'})`;
+        replyText = `🌱 **Detected Crop:** ${data.crop}\n\n🔍 **Diagnosis:** ${data.disease} (${data.confidence || 94}% confidence)\n\n✨ **AI Agronomist Review:**\n${data.aiReview || data.treatment}\n\n🧪 **Recommended Pesticide & Dosage:**\n${data.pesticides?.map(p => `• **${p.name}** (${p.type}): ${p.dosage}`).join('\n') || 'Mancozeb 75% WP @ 2g/L water'}\n\n📈 **Live APMC Mandi Rate:** ₹${data.currentPrice || 2450} / quintal (${data.priceTrend || '+2.8% ▲'})`;
       } else {
         // AI Agronomist Chat text route
         const res = await API.post('/chat', {
@@ -132,10 +185,15 @@ const AIKrishiOfficer = () => {
           farmerContext: {
             name: user.name,
             location: location,
-            crop: crop
+            crop: crop,
+            language: langName
           }
         });
-        replyText = res.data?.reply || res.data?.message || `Based on agricultural guidelines for ${crop} in ${location}, ensure timely weed management and maintain balanced NPK nutrition (120:60:40 kg/ha). Apply protective fungicide spray early in the morning for maximum efficacy.`;
+        
+        replyText = res.data?.reply || res.data?.message;
+        if (!replyText) {
+          throw new Error('Empty response from AI server');
+        }
       }
 
       setMessages(prev => [...prev, {
@@ -144,9 +202,19 @@ const AIKrishiOfficer = () => {
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       }]);
     } catch (err) {
+      console.warn('AI Krishi Officer error:', err.message);
+      setLastFailedPrompt(textToSend);
+      
+      const errorMsg = language === 'hi'
+        ? 'AI Krishi Officer अस्थायी रूप से अनुपलब्ध है। कृपया पुनः प्रयास करें।'
+        : language === 'mr'
+        ? 'AI Krishi Officer तात्पुरता अनुपलब्ध आहे. कृपया पुन्हा प्रयत्न करा.'
+        : 'AI Krishi Officer is temporarily unavailable. Please try again.';
+
       setMessages(prev => [...prev, {
         type: 'bot',
-        message: `For **${crop}** in **${location}**, ensure adequate soil moisture and apply certified Trichoderma viride @ 5g/kg for seed treatment, or Mancozeb 75% WP @ 2g/L for foliar blight prevention.`,
+        isError: true,
+        message: errorMsg,
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       }]);
     } finally {
@@ -163,62 +231,74 @@ const AIKrishiOfficer = () => {
   const handleSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
-      const clean = text.replace(/[*#_`]/g, '');
+      const clean = text.replace(/[*#_`•]/g, '');
       const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN';
       utterance.rate = 0.95;
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  // Simple clean markdown parser for bold, bullet points, and newlines
+  // Markdown parser with clean paragraph and list separation
   const renderFormattedMessage = (content) => {
     if (!content) return null;
-    const lines = content.split('\n');
-    return lines.map((line, lineIdx) => {
-      // Parse bold **text**
-      const parts = line.split(/(\*\*.*?\*\*)/g);
-      const formattedLine = parts.map((part, partIdx) => {
-        if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={partIdx} style={{ color: '#0f172a', fontWeight: 800 }}>{part.slice(2, -2)}</strong>;
-        }
-        return part;
-      });
-
+    const paragraphs = content.split(/\n\n+/);
+    
+    return paragraphs.map((para, pIdx) => {
+      const lines = para.split('\n');
       return (
-        <React.Fragment key={lineIdx}>
-          {formattedLine}
-          {lineIdx < lines.length - 1 && <br />}
-        </React.Fragment>
+        <p key={pIdx} className="message-paragraph">
+          {lines.map((line, lineIdx) => {
+            const parts = line.split(/(\*\*.*?\*\*)/g);
+            const formattedLine = parts.map((part, partIdx) => {
+              if (part.startsWith('**') && part.endsWith('**')) {
+                return <strong key={partIdx} className="highlight-text">{part.slice(2, -2)}</strong>;
+              }
+              return part;
+            });
+
+            return (
+              <React.Fragment key={lineIdx}>
+                {formattedLine}
+                {lineIdx < lines.length - 1 && <br />}
+              </React.Fragment>
+            );
+          })}
+        </p>
       );
     });
   };
 
   return (
     <div className="ai-krishi-wrapper">
-      {/* ─── Header ─── */}
+      {/* ─── Header Card ─── */}
       <header className="ai-header">
         <div className="header-left">
           <div className="header-icon-wrap">
-            <GiSprout style={{ fontSize: '26px', color: '#4ade80' }} />
+            <GiSprout className="header-icon-svg" />
           </div>
           <div className="header-title-section">
-            <h1>AI Krishi Officer</h1>
-            <p>Google Gemini 2.0 Precision Agronomist • Realtime Crop & Soil Advisory</p>
-          </div>
-          <div className="header-badges">
-            <span className="badge-ai-live">
-              <span className="ai-pulse-dot" />
-              GEMINI 2.0 FLASH
-            </span>
+            <div className="header-title-row">
+              <h1>{t('aiKrishiOfficer', 'AI Krishi Officer')}</h1>
+              <span className="badge-ai-live">
+                <span className="ai-pulse-dot" />
+                GEMINI 2.0 FLASH
+              </span>
+            </div>
+            <p>{language === 'hi' ? 'Google Gemini AI कृषि विशेषज्ञ • सटीक फसल व मिट्टी परामर्श' : language === 'mr' ? 'Google Gemini AI कृषी सल्लागार • अचूक पीक व माती सल्ला' : 'Google Gemini 2.0 Precision Agronomist • Realtime Crop & Soil Advisory'}</p>
           </div>
         </div>
 
         <div className="header-right">
           <button
-            onClick={() => setMessages([messages[0]])}
+            onClick={() => setMessages([{
+              type: 'bot',
+              message: getInitialGreeting(),
+              timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+            }])}
             className="clear-chat-btn"
           >
-            <FaTrash style={{ color: '#ef4444', fontSize: '13px' }} /> Clear Chat
+            <FaTrash className="clear-icon" /> {language === 'hi' ? 'चैट साफ़ करें' : language === 'mr' ? 'चॅट साफ करा' : 'Clear Chat'}
           </button>
         </div>
       </header>
@@ -227,24 +307,15 @@ const AIKrishiOfficer = () => {
       <div className="ai-dashboard-grid">
         {/* Left: Chatbot Canvas */}
         <div className="chatbot-section">
-          {/* Quick Prompts Bar (No scrollbar) */}
+          {/* Quick Prompts Bar */}
           <div className="quick-prompts-bar">
-            {QUICK_PROMPTS.map((qp, i) => (
+            {quickPrompts.map((qp, i) => (
               <button
                 key={i}
                 className="quick-prompt-btn"
                 onClick={() => handleSend(qp.prompt)}
               >
-                <div style={{
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  background: qp.bg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px'
-                }}>
+                <div className="prompt-icon-pill" style={{ background: qp.bg }}>
                   <qp.icon style={{ color: qp.color }} />
                 </div>
                 <span>{qp.label}</span>
@@ -259,20 +330,20 @@ const AIKrishiOfficer = () => {
                 <motion.div
                   key={idx}
                   className={`chat-message-row ${msg.type}`}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.18 }}
+                  transition={{ duration: 0.16 }}
                 >
                   {msg.type === 'bot' && (
                     <div className="avatar-bot">
-                      <GiSprout style={{ fontSize: '20px', color: '#86efac' }} />
+                      <GiSprout style={{ fontSize: '18px', color: '#86efac' }} />
                     </div>
                   )}
 
-                  <div className={`message-bubble ${msg.type}`}>
+                  <div className={`message-bubble ${msg.type} ${msg.isError ? 'error-bubble' : ''}`}>
                     {msg.image && (
-                      <div style={{ marginBottom: '10px', borderRadius: '12px', overflow: 'hidden', maxWidth: '240px', border: '1.5px solid #cbd5e1' }}>
-                        <img src={msg.image} alt="Uploaded Specimen" style={{ width: '100%', display: 'block' }} />
+                      <div className="attached-image-wrapper">
+                        <img src={msg.image} alt="Uploaded Specimen" />
                       </div>
                     )}
 
@@ -280,24 +351,33 @@ const AIKrishiOfficer = () => {
                       {msg.type === 'bot' ? renderFormattedMessage(msg.message) : msg.message}
                     </div>
 
+                    {msg.isError && lastFailedPrompt && (
+                      <button
+                        onClick={() => handleSend(lastFailedPrompt)}
+                        className="retry-chat-btn"
+                      >
+                        <FaRedo /> {language === 'hi' ? 'पुनः प्रयास करें' : language === 'mr' ? 'पुन्हा प्रयत्न करा' : 'Retry'}
+                      </button>
+                    )}
+
                     <div className="message-footer">
                       <span className="msg-time">{msg.timestamp}</span>
 
-                      {msg.type === 'bot' && (
+                      {msg.type === 'bot' && !msg.isError && (
                         <div className="msg-actions">
                           <button
                             onClick={() => handleCopy(msg.message, idx)}
                             title="Copy response"
                             className="action-btn"
                           >
-                            {copiedIdx === idx ? <FaCheck style={{ color: '#22c55e', fontSize: '13px' }} /> : <FaCopy style={{ fontSize: '13px', color: '#64748b' }} />}
+                            {copiedIdx === idx ? <FaCheck style={{ color: '#22c55e', fontSize: '12px' }} /> : <FaCopy style={{ fontSize: '12px', color: '#64748b' }} />}
                           </button>
                           <button
                             onClick={() => handleSpeak(msg.message)}
                             title="Read aloud"
                             className="action-btn"
                           >
-                            <FaVolumeUp style={{ fontSize: '13px', color: '#64748b' }} />
+                            <FaVolumeUp style={{ fontSize: '12px', color: '#64748b' }} />
                           </button>
                         </div>
                       )}
@@ -310,14 +390,14 @@ const AIKrishiOfficer = () => {
             {isLoading && (
               <div className="chat-message-row bot">
                 <div className="avatar-bot">
-                  <GiSprout style={{ fontSize: '20px', color: '#86efac' }} />
+                  <GiSprout style={{ fontSize: '18px', color: '#86efac' }} />
                 </div>
                 <div className="message-bubble bot typing-bubble">
                   <div className="typing-dot" />
                   <div className="typing-dot" />
                   <div className="typing-dot" />
-                  <span style={{ fontSize: '0.85rem', color: '#15803d', fontWeight: 700, marginLeft: '8px' }}>
-                    Google Gemini AI Analyzing Crop Pathology…
+                  <span className="typing-label">
+                    {language === 'hi' ? 'AI Krishi Officer विश्लेषण कर रहा है…' : language === 'mr' ? 'AI Krishi Officer विश्लेषण करत आहे…' : 'AI Krishi Officer is analyzing…'}
                   </span>
                 </div>
               </div>
@@ -330,9 +410,9 @@ const AIKrishiOfficer = () => {
           {imagePreview && (
             <div className="image-preview-bar">
               <img src={imagePreview} alt="Leaf preview" />
-              <div style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#15803d' }}>📸 Leaf Photo Attached</span>
-                <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748b' }}>Will be scanned by Gemini 2.0 Vision</p>
+                <p style={{ margin: 0, fontSize: '0.74rem', color: '#64748b' }}>Will be analyzed with Gemini Vision</p>
               </div>
               <button onClick={handleClearImage} className="clear-img-btn"><FaTimes /></button>
             </div>
@@ -354,9 +434,8 @@ const AIKrishiOfficer = () => {
               className="chat-media-btn"
               onClick={() => fileInputRef.current?.click()}
               title="Attach leaf or pest image"
-              style={{ background: '#f0fdf4', borderColor: '#86efac' }}
             >
-              <FaCamera style={{ fontSize: '18px', color: '#15803d' }} />
+              <FaCamera style={{ fontSize: '17px', color: '#15803d' }} />
             </button>
 
             {/* Voice Input Button */}
@@ -364,16 +443,15 @@ const AIKrishiOfficer = () => {
               type="button"
               className={`chat-media-btn ${isListening ? 'listening' : ''}`}
               onClick={handleVoiceToggle}
-              title="Voice input (Hindi/English)"
-              style={{ background: isListening ? '#fee2e2' : '#f5f3ff', borderColor: isListening ? '#f87171' : '#c4b5fd' }}
+              title="Voice input"
             >
-              <FaMicrophone style={{ fontSize: '18px', color: isListening ? '#dc2626' : '#7c3aed' }} />
+              <FaMicrophone style={{ fontSize: '17px', color: isListening ? '#dc2626' : '#7c3aed' }} />
             </button>
 
             <input
               type="text"
               className="chat-text-input"
-              placeholder="Ask anything (e.g. 'How to treat fungal blight in Wheat?', or attach leaf photo)..."
+              placeholder={language === 'hi' ? "कोई भी कृषि प्रश्न पूछें (उदा. 'गेहूं में झुलसा रोग उपाय')..." : language === 'mr' ? "कृषी सल्ला विचारा (उदा. 'कांद्यावरील करपा उपाय')..." : "Ask anything (e.g. 'How to treat fungal blight in Wheat?')..."}
               value={input}
               onChange={e => setInput(e.target.value)}
               disabled={isLoading}
@@ -386,7 +464,7 @@ const AIKrishiOfficer = () => {
               disabled={isLoading || (!input.trim() && !selectedImage)}
               title="Send message"
             >
-              <FaPaperPlane style={{ fontSize: '16px', color: '#ffffff' }} />
+              <FaPaperPlane style={{ fontSize: '15px', color: '#ffffff' }} />
             </button>
           </form>
         </div>
@@ -396,56 +474,56 @@ const AIKrishiOfficer = () => {
           {/* Farmer Digital Profile Pill */}
           <div className="context-card">
             <div className="context-card-header">
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#15803d', fontSize: '16px' }}>
+              <div className="context-icon-wrap" style={{ background: '#dcfce7', color: '#15803d' }}>
                 <FaSeedling />
               </div>
-              <h4>Active Farm Context</h4>
+              <h4>{t('farmerProfile', 'Active Farm Context')}</h4>
             </div>
             <div className="context-meta-list">
               <div className="context-meta-row">
-                <span className="meta-k">Location</span>
+                <span className="meta-k">{t('selectDistrict', 'Location')}</span>
                 <span className="meta-v">📍 {location}</span>
               </div>
               <div className="context-meta-row">
-                <span className="meta-k">Primary Crop</span>
-                <span className="meta-v">🌾 {crop} (Vegetative)</span>
+                <span className="meta-k">{t('mainCrop', 'Primary Crop')}</span>
+                <span className="meta-v">🌾 {crop}</span>
               </div>
               <div className="context-meta-row">
-                <span className="meta-k">Soil Condition</span>
+                <span className="meta-k">{t('soilMoisture', 'Soil Status')}</span>
                 <span className="meta-v">🟤 Black Loam • pH 6.8</span>
               </div>
               <div className="context-meta-row">
-                <span className="meta-k">AI Verification</span>
-                <span className="meta-v" style={{ color: '#15803d', fontWeight: 800 }}>✓ Certified Model</span>
+                <span className="meta-k">AI Model</span>
+                <span className="meta-v" style={{ color: '#15803d', fontWeight: 800 }}>✓ Gemini 2.0 Flash</span>
               </div>
             </div>
           </div>
 
           {/* Realtime Weather Advisory Cardlet */}
-          <div className="context-card" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)', borderColor: '#86efac' }}>
+          <div className="context-card weather-advisory-card">
             <div className="context-card-header">
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#ccfbf1', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0f766e', fontSize: '16px' }}>
+              <div className="context-icon-wrap" style={{ background: '#ccfbf1', color: '#0f766e' }}>
                 <FaCloudSun />
               </div>
-              <h4 style={{ color: '#115e59' }}>Spray & Weather Window</h4>
+              <h4 style={{ color: '#115e59' }}>{t('weatherAdvisory', 'Spray & Weather Window')}</h4>
             </div>
-            <p style={{ margin: '6px 0', fontSize: '0.82rem', color: '#134e4a', lineHeight: 1.4 }}>
-              Current winds at <strong>12 km/h</strong> with <strong>10% rain chance</strong>. Perfect foliar pesticide and bio-fertilizer spraying window today.
+            <p style={{ margin: '6px 0', fontSize: '0.82rem', color: '#134e4a', lineHeight: 1.45 }}>
+              Current winds at <strong>12 km/h</strong> with <strong>10% rain probability</strong>. Safe foliar pesticide and bio-fertilizer spraying window today.
             </p>
           </div>
 
           {/* Quick Diagnostics Guidance */}
           <div className="context-card">
             <div className="context-card-header">
-              <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2563eb', fontSize: '16px' }}>
+              <div className="context-icon-wrap" style={{ background: '#dbeafe', color: '#2563eb' }}>
                 <FaShieldAlt />
               </div>
-              <h4>AI Diagnostics Protocol</h4>
+              <h4>AI Diagnostics Tips</h4>
             </div>
-            <ul style={{ margin: '8px 0 0 0', paddingLeft: '18px', fontSize: '0.78rem', color: '#475569', lineHeight: 1.5 }}>
-              <li>Snap close-up photos of leaves with clear natural sunlight.</li>
+            <ul className="guidance-list">
+              <li>Snap clear close-up photos of leaves with natural lighting.</li>
               <li>Ask for certified chemical dosages per acre or litre.</li>
-              <li>Ask for Mandi selling windows before harvesting.</li>
+              <li>Ask for Mandi price trajectory before harvesting.</li>
             </ul>
           </div>
         </div>

@@ -81,29 +81,15 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
       {/* Right side: Quick Lang + Voice + Notifications + Profile */}
       <div className="header-right">
         {/* Compact Header Language Selector */}
-        <div style={{ position: 'relative' }}>
+        <div className="header-lang-wrapper" style={{ position: 'relative' }}>
           <button
             className="header-lang-btn"
             onClick={() => setLangDropdownOpen(o => !o)}
             title="Switch Language"
             aria-label="Switch Language"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              padding: '6px 9px',
-              borderRadius: '10px',
-              background: '#f0fdf4',
-              border: '1.5px solid #86efac',
-              color: '#15803d',
-              fontSize: '12px',
-              fontWeight: 800,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
           >
             <FaGlobe style={{ fontSize: '13px' }} />
-            <span className="d-none d-md-inline">{currentLangObj.native || currentLangObj.name}</span>
+            <span className="header-lang-text">{currentLangObj.native || currentLangObj.name}</span>
           </button>
 
           {langDropdownOpen && (
@@ -113,6 +99,7 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
                 onClick={() => setLangDropdownOpen(false)} 
               />
               <div
+                className="header-lang-dropdown"
                 style={{
                   position: 'absolute',
                   top: 'calc(100% + 6px)',
@@ -163,7 +150,7 @@ const DashboardHeader = ({ toggleSidebar, sidebarOpen }) => {
 
         {/* Quick Voice Assistant shortcut (Desktop only) */}
         <button
-          className="header-quick-action-btn d-none d-lg-inline-flex"
+          className="header-quick-action-btn header-voice-btn"
           onClick={() => navigate('/farmer/voice')}
           title="Open Voice Assistant"
           aria-label="Voice Assistant"

@@ -15,11 +15,13 @@ import {
   Filler
 } from 'chart.js';
 import weatherService from '../../services/weatherService';
+import { useLanguage } from '../../context/LanguageContext';
 import './WeatherDashboard.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 const WeatherDashboard = () => {
+  const { t, language } = useLanguage();
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [hourly, setHourly] = useState(null);
@@ -31,22 +33,24 @@ const WeatherDashboard = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const location = user.location || 'Pune';
 
-  const getCurrentDateTime = () => {
+  const getCurrentDateTime = useCallback(() => {
     const now = new Date();
+    const localeStr = language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN';
     return {
-      date: now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-      time: now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+      date: now.toLocaleDateString(localeStr, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+      time: now.toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })
     };
-  };
+  }, [language]);
 
   const [currentDateTime, setCurrentDateTime] = useState(getCurrentDateTime());
 
   useEffect(() => {
+    setCurrentDateTime(getCurrentDateTime());
     const timer = setInterval(() => {
       setCurrentDateTime(getCurrentDateTime());
     }, 60000);
     return () => clearInterval(timer);
-  }, []);
+  }, [getCurrentDateTime]);
 
   const fetchWeatherData = useCallback(async () => {
     try {
@@ -234,45 +238,58 @@ const WeatherDashboard = () => {
   // Chart Data Configurations
   const tempTrendData = {
     labels: forecast.map(f => f.day),
-    datasets: [{
-      label: 'Temperature (°C)',
-      data: forecast.map(f => f.temp),
-      borderColor: '#2E7D32',
-      backgroundColor: 'rgba(46, 125, 50, 0.08)',
-      borderWidth: 3,
-      tension: 0.4,
-      fill: true,
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      pointBackgroundColor: '#2E7D32',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2
-    }]
+    datasets: [
+      {
+        label: `${t('temperature', 'Max Temp')} (°C)`,
+        data: forecast.map(f => f.tempMax || f.temp),
+        borderColor: '#16a34a',
+        backgroundColor: 'rgba(22, 163, 74, 0.08)',
+        borderWidth: 2.5,
+        tension: 0.35,
+        fill: true,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: '#16a34a',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      },
+      {
+        label: `${t('temperature', 'Min Temp')} (°C)`,
+        data: forecast.map(f => f.tempMin || Math.max(15, (f.temp || 25) - 5)),
+        borderColor: '#0284c7',
+        backgroundColor: 'transparent',
+        borderWidth: 2,
+        borderDash: [4, 4],
+        tension: 0.35,
+        pointRadius: 3,
+        pointBackgroundColor: '#0284c7'
+      }
+    ]
   };
 
   const rainForecastData = {
     labels: forecast.map(f => f.day),
     datasets: [{
-      label: 'Rain Probability (%)',
-      data: forecast.map(f => f.rain),
-      backgroundColor: forecast.map(f => f.rain > 70 ? '#1E88E5' : f.rain > 40 ? '#42A5F5' : '#90CAF9'),
-      borderRadius: 8,
-      barThickness: 32
+      label: `${t('precipitation', 'Rain Probability')} (%)`,
+      data: forecast.map(f => f.rain !== undefined ? f.rain : 0),
+      backgroundColor: forecast.map(f => (f.rain || 0) > 70 ? '#0284c7' : (f.rain || 0) > 40 ? '#38bdf8' : '#bae6fd'),
+      borderRadius: 6,
+      maxBarThickness: 36
     }]
   };
 
   const hourlyTempData = {
-    labels: hourly.slice(0, 24).map(h => h.time),
+    labels: hourly.slice(0, 12).map(h => h.time),
     datasets: [{
-      label: 'Temperature (°C)',
-      data: hourly.slice(0, 24).map(h => h.temp),
-      borderColor: '#FFB300',
-      backgroundColor: 'rgba(255, 179, 0, 0.1)',
-      borderWidth: 3,
-      tension: 0.4,
+      label: `${t('temperature', 'Temperature')} (°C)`,
+      data: hourly.slice(0, 12).map(h => h.temp),
+      borderColor: '#d97706',
+      backgroundColor: 'rgba(217, 119, 6, 0.1)',
+      borderWidth: 2.5,
+      tension: 0.35,
       fill: true,
       pointRadius: 3,
-      pointBackgroundColor: '#FFB300'
+      pointBackgroundColor: '#d97706'
     }]
   };
 
@@ -280,52 +297,71 @@ const WeatherDashboard = () => {
     labels: forecast.map(f => f.day),
     datasets: [
       {
-        label: 'Humidity (%)',
+        label: `${t('humidity', 'Humidity')} (%)`,
         data: forecast.map(f => f.humidity),
-        backgroundColor: '#1E88E5',
-        borderRadius: 6,
-        barThickness: 20
+        backgroundColor: '#3b82f6',
+        borderRadius: 5,
+        maxBarThickness: 18
       },
       {
-        label: 'Wind Speed (km/h)',
+        label: `${t('wind', 'Wind Speed')} (km/h)`,
         data: forecast.map(f => f.wind),
-        backgroundColor: '#4CAF50',
-        borderRadius: 6,
-        barThickness: 20
+        backgroundColor: '#22c55e',
+        borderRadius: 5,
+        maxBarThickness: 18
       }
     ]
   };
-
-  const uvTrendData = weather ? {
-    labels: forecast.map(f => f.day),
-    datasets: [{
-      label: 'UV Index',
-      data: forecast.map(() => weather.uvIndex || 5),
-      borderColor: '#E53935',
-      backgroundColor: 'rgba(229, 57, 53, 0.1)',
-      borderWidth: 2,
-      tension: 0.3,
-      fill: true,
-      pointBackgroundColor: '#E53935'
-    }]
-  } : null;
 
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: 'top', labels: { font: { size: 11, weight: '600' }, usePointStyle: true } },
-      tooltip: { backgroundColor: '#1B2E1B', padding: 10, cornerRadius: 8 }
+      legend: {
+        position: 'top',
+        labels: {
+          font: { size: 11, weight: '600', family: 'system-ui, -apple-system, sans-serif' },
+          usePointStyle: true,
+          boxWidth: 8,
+          padding: 10
+        }
+      },
+      tooltip: {
+        backgroundColor: '#0f172a',
+        padding: 10,
+        cornerRadius: 8,
+        titleFont: { size: 12, weight: '700' },
+        bodyFont: { size: 12 }
+      }
     },
     scales: {
-      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 } } },
-      x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } }
+      y: {
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 10.5 }, maxTicksLimit: 6 }
+      },
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: { size: 10.5, weight: '600' },
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 7
+        }
+      }
     }
   };
 
   const rainChartOptions = {
     ...chartOptions,
-    scales: { ...chartOptions.scales, y: { ...chartOptions.scales.y, max: 100, ticks: { callback: v => v + '%' } } }
+    scales: {
+      ...chartOptions.scales,
+      y: {
+        ...chartOptions.scales.y,
+        max: 100,
+        min: 0,
+        ticks: { callback: v => v + '%', font: { size: 10.5 }, maxTicksLimit: 6 }
+      }
+    }
   };
 
   return (
@@ -337,29 +373,29 @@ const WeatherDashboard = () => {
             {weather.temperature > 35 ? '🔥' : weather.rainProbability > 50 ? '🌧️' : weather.temperature > 30 ? '☀️' : '🌤️'}
           </div>
           <div className="header-title">
-            <h1>Weather Intelligence</h1>
-            <p>AI-Powered AgriTech Insights</p>
+            <h1>{t('weatherIntelPlatform', 'Weather Intelligence')}</h1>
+            <p>{t('precisionAgroMeteorology', 'AI-Powered Precision Agro-Meteorology Insights')}</p>
           </div>
           <div className="badges">
-            <span className="live-badge">🔴 LIVE DATA</span>
+            <span className="live-badge">🔴 {t('live', 'LIVE DATA')}</span>
             <span className="location-badge">📍 {weather.location}</span>
           </div>
         </div>
         <div className="header-right">
           <div className="datetime">
             <div className="current-date">{currentDateTime.date}</div>
-            <div className="current-time">{currentDateTime.time}</div>
+            <div className="current-time">
+              {t('updated', 'Updated')}: {lastUpdated ? lastUpdated.toLocaleTimeString(language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' }) : t('justNow', 'Just now')}
+            </div>
           </div>
-          <div className="last-updated">
-            <span>🔄</span>
-            <span>Updated: {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Just now'}</span>
-          </div>
-          <button onClick={fetchWeatherData} className="refresh-btn-premium" disabled={isSyncing}>
-            {isSyncing ? '⟳ Syncing...' : '⟳ Refresh'}
-          </button>
-          <div className="sync-status">
-            <span className="sync-dot"></span>
-            <span>Auto-sync</span>
+          <div className="header-actions-row">
+            <button onClick={fetchWeatherData} className="refresh-btn-premium" disabled={isSyncing}>
+              {isSyncing ? `⟳ ${t('loading', 'Syncing...')}` : `⟳ ${t('refresh', 'Refresh')}`}
+            </button>
+            <div className="sync-status">
+              <span className="sync-dot"></span>
+              <span>{t('autoSync', 'Auto-sync')}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -372,27 +408,27 @@ const WeatherDashboard = () => {
             <div className="temp-section">
               <div className="current-temp-premium">{weather.temperature}°C</div>
               <div className="condition-text">{weather.description}</div>
-              <div className="feels-like">Feels like {weather.feelsLike}°C</div>
+              <div className="feels-like">{t('feelsLike', 'Feels like')} {weather.feelsLike}°C</div>
             </div>
             <div className="weather-icon-large">
-              {weather.temperature > 35 ? '🔥☀️' : weather.rainProbability > 50 ? '🌧️💧' : '🌾🌱'}
+              {weather.temperature > 35 ? '🔥☀️' : weather.rainProbability > 50 ? '🌧️💧' : weather.temperature > 25 ? '🌤️🌿' : '🌥️🌱'}
             </div>
           </div>
 
           {/* Premium Stats Grid */}
           <div className="stats-grid-premium">
-            <div className="stat-card"><div className="stat-icon">🌡️</div><div className="stat-label">Temp</div><div className="stat-value">{weather.temperature}°C</div></div>
-            <div className="stat-card"><div className="stat-icon">💧</div><div className="stat-label">Humidity</div><div className="stat-value">{weather.humidity}%</div></div>
-            <div className="stat-card"><div className="stat-icon">💨</div><div className="stat-label">Wind</div><div className="stat-value">{weather.windSpeed} km/h</div></div>
-            <div className="stat-card"><div className="stat-icon">🌧️</div><div className="stat-label">Rain</div><div className="stat-value">{weather.rainProbability}%</div></div>
-            <div className="stat-card"><div className="stat-icon">☀️</div><div className="stat-label">UV Index</div><div className="stat-value">{weather.uvIndex}</div></div>
-            <div className="stat-card"><div className="stat-icon">🏭</div><div className="stat-label">AQI</div><div className="stat-value">{weather.airQuality || 'Moderate'}</div></div>
-            <div className="stat-card"><div className="stat-icon">🌅</div><div className="stat-label">Sunrise</div><div className="stat-value">{weather.sunrise || '6:12 AM'}</div></div>
-            <div className="stat-card"><div className="stat-icon">🌇</div><div className="stat-label">Sunset</div><div className="stat-value">{weather.sunset || '6:45 PM'}</div></div>
-            <div className="stat-card"><div className="stat-icon">👁️</div><div className="stat-label">Visibility</div><div className="stat-value">{weather.visibility || '10'} km</div></div>
-            <div className="stat-card"><div className="stat-icon">📊</div><div className="stat-label">Pressure</div><div className="stat-value">{weather.pressure || '1013'} hPa</div></div>
-            <div className="stat-card"><div className="stat-icon">🌱</div><div className="stat-label">Soil Moisture</div><div className="stat-value">{weather.soilMoistureSuggestion || '65'}%</div></div>
-            <div className="stat-card"><div className="stat-icon">⚠️</div><div className="stat-label">Crop Stress</div><div className="stat-value">{weather.temperature > 35 ? 'High' : weather.temperature > 32 ? 'Moderate' : 'Low'}</div></div>
+            <div className="stat-card"><div className="stat-icon">🌡️</div><div className="stat-label">{t('temperature', 'Temp')}</div><div className="stat-value">{weather.temperature}°C</div></div>
+            <div className="stat-card"><div className="stat-icon">💧</div><div className="stat-label">{t('humidity', 'Humidity')}</div><div className="stat-value">{weather.humidity}%</div></div>
+            <div className="stat-card"><div className="stat-icon">💨</div><div className="stat-label">{t('wind', 'Wind')}</div><div className="stat-value">{weather.windSpeed} km/h</div></div>
+            <div className="stat-card"><div className="stat-icon">🌧️</div><div className="stat-label">{t('precipitation', 'Rain')}</div><div className="stat-value">{weather.rainProbability}%</div></div>
+            <div className="stat-card"><div className="stat-icon">☀️</div><div className="stat-label">{t('uvIndex', 'UV Index')}</div><div className="stat-value">{weather.uvIndex}</div></div>
+            <div className="stat-card"><div className="stat-icon">🏭</div><div className="stat-label">{t('airQuality', 'AQI')}</div><div className="stat-value">{weather.airQuality || 'Optimal (42 AQI)'}</div></div>
+            <div className="stat-card"><div className="stat-icon">🌅</div><div className="stat-label">{t('sunrise', 'Sunrise')}</div><div className="stat-value">{weather.sunrise || '06:12 AM'}</div></div>
+            <div className="stat-card"><div className="stat-icon">🌇</div><div className="stat-label">{t('sunset', 'Sunset')}</div><div className="stat-value">{weather.sunset || '06:45 PM'}</div></div>
+            <div className="stat-card"><div className="stat-icon">👁️</div><div className="stat-label">{t('visibility', 'Visibility')}</div><div className="stat-value">{weather.visibility || '10'} km</div></div>
+            <div className="stat-card"><div className="stat-icon">📊</div><div className="stat-label">{t('pressure', 'Pressure')}</div><div className="stat-value">{weather.pressure || '1013'} hPa</div></div>
+            <div className="stat-card"><div className="stat-icon">🌱</div><div className="stat-label">{t('soilMoisture', 'Soil Moisture')}</div><div className="stat-value">{weather.soilMoistureSuggestion || '65'}%</div></div>
+            <div className="stat-card"><div className="stat-icon">⚠️</div><div className="stat-label">{t('healthStatus', 'Crop Stress')}</div><div className="stat-value">{weather.temperature > 35 ? t('critical', 'High') : weather.temperature > 32 ? t('needsCare', 'Moderate') : t('healthy', 'Low')}</div></div>
           </div>
 
           {/* Alerts Section */}
@@ -411,8 +447,8 @@ const WeatherDashboard = () => {
         {/* Right: Smart Recommendations */}
         <div className="recommendations-card-premium">
           <div className="section-title-premium">
-            🤖 AI-Powered Smart Recommendations
-            <span className="ai-badge">LIVE</span>
+            🤖 {t('aiAdvisor', 'AI-Powered Smart Recommendations')}
+            <span className="ai-badge">{t('live', 'LIVE')}</span>
           </div>
           <div className="rec-list">
             {recommendations.map((rec, idx) => (
@@ -431,56 +467,34 @@ const WeatherDashboard = () => {
       {/* Charts Grid */}
       <div className="charts-grid-premium">
         <div className="chart-card-premium">
-          <div className="chart-title-premium">📈 7-Day Temperature Trend</div>
+          <div className="chart-title-premium">📈 {t('sevenDayOutlook', '7-Day Temperature Trend')}</div>
           <div className="chart-container-premium">
             <Line data={tempTrendData} options={chartOptions} />
           </div>
         </div>
         <div className="chart-card-premium">
-          <div className="chart-title-premium">🌧️ Rain Probability Forecast</div>
+          <div className="chart-title-premium">🌧️ {t('precipitation', 'Rain Probability Forecast')}</div>
           <div className="chart-container-premium">
             <Bar data={rainForecastData} options={rainChartOptions} />
           </div>
         </div>
         <div className="chart-card-premium">
-          <div className="chart-title-premium">⏱️ Hourly Temperature</div>
+          <div className="chart-title-premium">⏱️ {t('hourlyRadarTag', 'Hourly Temperature')}</div>
           <div className="chart-container-premium">
             <Line data={hourlyTempData} options={chartOptions} />
           </div>
         </div>
         <div className="chart-card-premium">
-          <div className="chart-title-premium">💨 Humidity vs Wind Speed</div>
+          <div className="chart-title-premium">💨 {t('humidity', 'Humidity')} vs {t('wind', 'Wind Speed')}</div>
           <div className="chart-container-premium">
             <Bar data={humidityWindData} options={chartOptions} />
-          </div>
-        </div>
-        {uvTrendData && (
-          <div className="chart-card-premium">
-            <div className="chart-title-premium">☀️ UV Index Trend</div>
-            <div className="chart-container-premium">
-              <Line data={uvTrendData} options={chartOptions} />
-            </div>
-          </div>
-        )}
-        <div className="chart-card-premium">
-          <div className="chart-title-premium">🌾 Weekly Farming Condition Score</div>
-          <div className="chart-container-premium">
-            <Bar data={{
-              labels: forecast.map(f => f.day),
-              datasets: [{
-                label: 'Farming Conditions (%)',
-                data: forecast.map(f => Math.min(100, Math.max(0, 100 - Math.abs(25 - f.temp) * 2 - (f.rain > 50 ? 30 : 0) - (f.wind > 15 ? 20 : 0)))),
-                backgroundColor: '#4CAF50',
-                borderRadius: 8
-              }]
-            }} options={{ ...chartOptions, scales: { ...chartOptions.scales, y: { max: 100, ticks: { callback: v => v + '%' } } } }} />
           </div>
         </div>
       </div>
 
       {/* 24-Hour Forecast Summary */}
       <div className="forecast-24h">
-        <div className="chart-title-premium">⏰ Next 24 Hours Forecast</div>
+        <div className="chart-title-premium">⏰ {t('today', 'Next 24 Hours Forecast')}</div>
         <div className="hourly-scroll">
           {hourlySummary.map((hour, idx) => (
             <div key={idx} className="hour-card">

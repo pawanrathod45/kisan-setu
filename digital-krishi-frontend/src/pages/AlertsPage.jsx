@@ -7,7 +7,8 @@ import {
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
-import '../styles/Dashboard.css';
+import { useLanguage } from '../context/LanguageContext';
+import './AlertsPage.css';
 
 const DEFAULT_ALERTS = [
   {
@@ -68,7 +69,7 @@ const DEFAULT_ALERTS = [
     date: new Date(Date.now() - 86400000 * 2).toISOString(),
     read: true,
     crop: 'Wheat',
-    recommendedAction: 'Monitor recovery after 7 days.'
+    recommendedAction: 'Inspect crop again after 10 days for sporulation.'
   }
 ];
 
@@ -84,7 +85,32 @@ const TYPE_CONFIG = {
   market:  { icon: <FaChartLine />, label: 'Market Trend', color: '#15803d', bg: '#dcfce7' },
 };
 
+// Safe date formatter to prevent "Invalid Date"
+const formatAlertDate = (dateVal) => {
+  if (!dateVal) return 'Date unavailable';
+  try {
+    const d = new Date(dateVal);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    // Attempt parsing DD/MM/YYYY or DD-MM-YYYY
+    if (typeof dateVal === 'string') {
+      const parts = dateVal.split(/[-/]/);
+      if (parts.length === 3) {
+        const parsed = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+        if (!isNaN(parsed.getTime())) {
+          return parsed.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+      }
+    }
+    return 'Date unavailable';
+  } catch (e) {
+    return 'Date unavailable';
+  }
+};
+
 const AlertsPage = () => {
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [alerts, setAlerts]             = useState(DEFAULT_ALERTS);
   const [loading, setLoading]           = useState(false);
@@ -132,135 +158,117 @@ const AlertsPage = () => {
     if (selectedType !== 'all' && alert.type !== selectedType) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      return alert.title.toLowerCase().includes(q) || alert.description.toLowerCase().includes(q) || (alert.crop && alert.crop.toLowerCase().includes(q));
+      return alert.title?.toLowerCase().includes(q) ||
+             alert.description?.toLowerCase().includes(q) ||
+             (alert.crop && alert.crop.toLowerCase().includes(q));
     }
     return true;
   });
 
   return (
-    <div style={{ padding: '24px 20px', maxWidth: '1440px', margin: '0 auto', background: '#f4f8f4', minHeight: '100vh', color: '#0f172a' }}>
+    <div className="alerts-page-container">
       
       {/* ─── Forest Hero Banner ─── */}
       <motion.div
         initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          background: 'linear-gradient(135deg, #072712 0%, #0d421f 40%, #155e2d 100%)',
-          borderRadius: '20px',
-          padding: '24px 28px',
-          marginBottom: '24px',
-          color: '#ffffff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: '0 10px 30px rgba(13, 66, 31, 0.25)',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          flexWrap: 'wrap',
-          gap: '18px'
-        }}
+        className="alerts-hero-banner"
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
-          <div style={{
-            width: '54px', height: '54px', borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '26px', color: '#fef08a', border: '1.5px solid rgba(255, 255, 255, 0.25)'
-          }}>
+        <div className="alerts-hero-left">
+          <div className="alerts-hero-icon">
             <FaBell />
           </div>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 800, margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
-              Smart Agricultural Alerts & Hazard Radar
+          <div className="alerts-hero-titles">
+            <h1>
+              {t('alertsAdvisoriesTitle', 'Smart Agricultural Alerts & Hazard Radar')}
             </h1>
-            <p style={{ fontSize: '13.5px', color: 'rgba(255, 255, 255, 0.85)', margin: 0, fontWeight: 500 }}>
-              Live real-time monitoring of severe weather warnings, pest/disease outbreaks, soil moisture deficits, and APMC Mandi price spikes.
+            <p>
+              {t('dashboardSubtitle', 'Live real-time monitoring of severe weather warnings, pest/disease outbreaks, soil moisture deficits, and APMC Mandi price spikes.')}
             </p>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            background: criticalCount > 0 ? 'rgba(239, 68, 68, 0.28)' : 'rgba(34, 197, 94, 0.22)',
-            color: criticalCount > 0 ? '#fca5a5' : '#86efac',
-            border: `1px solid ${criticalCount > 0 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(34, 197, 94, 0.45)'}`,
-            padding: '6px 14px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 800,
-            display: 'flex', alignItems: 'center', gap: '6px'
-          }}>
-            <span style={{
-              width: '8px', height: '8px', borderRadius: '50%',
-              background: criticalCount > 0 ? '#ef4444' : '#4ade80',
-              boxShadow: `0 0 8px ${criticalCount > 0 ? '#ef4444' : '#4ade80'}`
-            }} />
-            {criticalCount > 0 ? `${criticalCount} CRITICAL THREATS` : 'ALL FIELDS CLEAR'}
+          <div
+            className="alerts-status-badge"
+            style={{
+              background: criticalCount > 0 ? 'rgba(239, 68, 68, 0.28)' : 'rgba(34, 197, 94, 0.22)',
+              color: criticalCount > 0 ? '#fca5a5' : '#86efac',
+              border: `1px solid ${criticalCount > 0 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(34, 197, 94, 0.45)'}`,
+            }}
+          >
+            <span
+              className="alerts-pulse-dot"
+              style={{
+                background: criticalCount > 0 ? '#ef4444' : '#4ade80',
+                boxShadow: `0 0 8px ${criticalCount > 0 ? '#ef4444' : '#4ade80'}`
+              }}
+            />
+            {criticalCount > 0 ? `${criticalCount} ${t('criticalAlerts', 'CRITICAL THREATS')}` : t('allPendingTasksDone', 'ALL FIELDS CLEAR')}
           </div>
         </div>
       </motion.div>
 
       {/* ─── Metric Summary Counters ─── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '16px', padding: '18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#fee2e2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+      <div className="alerts-metrics-grid">
+        <div className="alert-metric-card">
+          <div className="alert-metric-icon" style={{ background: '#fee2e2', color: '#dc2626' }}>
             <FaExclamationTriangle />
           </div>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#991b1b', textTransform: 'uppercase' }}>Critical Urgency</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{criticalCount}</div>
+            <div className="alert-metric-title" style={{ color: '#991b1b' }}>{t('criticalAlerts', 'Critical Urgency')}</div>
+            <div className="alert-metric-val">{criticalCount}</div>
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '16px', padding: '18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+        <div className="alert-metric-card">
+          <div className="alert-metric-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>
             <FaCloudRain />
           </div>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#075985', textTransform: 'uppercase' }}>Weather Risks</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{alerts.filter(a => a.type === 'weather' && !a.read).length}</div>
+            <div className="alert-metric-title" style={{ color: '#075985' }}>{t('weatherAlerts', 'Weather Risks')}</div>
+            <div className="alert-metric-val">{alerts.filter(a => a.type === 'weather' && !a.read).length}</div>
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '16px', padding: '18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#fef3c7', color: '#d97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+        <div className="alert-metric-card">
+          <div className="alert-metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
             <FaBug />
           </div>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#92400e', textTransform: 'uppercase' }}>Pest Outbreaks</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{alerts.filter(a => a.type === 'pest' && !a.read).length}</div>
+            <div className="alert-metric-title" style={{ color: '#92400e' }}>{t('pestAlerts', 'Pest Outbreaks')}</div>
+            <div className="alert-metric-val">{alerts.filter(a => a.type === 'pest' && !a.read).length}</div>
           </div>
         </div>
 
-        <div style={{ background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '16px', padding: '18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 2px 8px rgba(15, 23, 42, 0.03)' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#dcfce7', color: '#15803d', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+        <div className="alert-metric-card">
+          <div className="alert-metric-icon" style={{ background: '#dcfce7', color: '#15803d' }}>
             <FaChartLine />
           </div>
           <div>
-            <div style={{ fontSize: '11px', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>Market Spikes</div>
-            <div style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>{alerts.filter(a => a.type === 'market' && !a.read).length}</div>
+            <div className="alert-metric-title" style={{ color: '#166534' }}>{t('marketAlerts', 'Market Spikes')}</div>
+            <div className="alert-metric-val">{alerts.filter(a => a.type === 'market' && !a.read).length}</div>
           </div>
         </div>
       </div>
 
       {/* ─── Interactive Filter & Search Bar ─── */}
-      <div style={{
-        background: '#ffffff', border: '1.5px solid #e2ece3', borderRadius: '16px',
-        padding: '14px 18px', marginBottom: '22px', display: 'flex',
-        justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px'
-      }}>
+      <div className="alerts-filter-bar">
         {/* Status Tabs */}
-        <div style={{ display: 'flex', gap: '6px' }}>
+        <div className="alerts-tabs-group">
           {[
-            { id: 'all', label: `All (${alerts.length})` },
-            { id: 'unread', label: `Active (${activeCount})` },
-            { id: 'resolved', label: `Resolved (${resolvedCount})` }
+            { id: 'all', label: `${t('all', 'All')} (${alerts.length})` },
+            { id: 'unread', label: `${t('active', 'Active')} (${activeCount})` },
+            { id: 'resolved', label: `${t('completed', 'Resolved')} (${resolvedCount})` }
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              className="alert-tab-btn"
               style={{
-                background: activeTab === tab.id ? '#15803d' : '#f8fafc',
+                background: activeTab === tab.id ? '#155e2d' : '#f8fafc',
                 color: activeTab === tab.id ? '#ffffff' : '#475569',
-                border: `1.5px solid ${activeTab === tab.id ? '#15803d' : '#e2e8f0'}`,
-                padding: '7px 14px', borderRadius: '10px', fontWeight: 700, fontSize: '12.5px',
-                cursor: 'pointer', transition: 'all 0.2s ease'
+                border: `1.5px solid ${activeTab === tab.id ? '#155e2d' : '#e2e8f0'}`,
               }}
             >
               {tab.label}
@@ -269,22 +277,21 @@ const AlertsPage = () => {
         </div>
 
         {/* Category Filter Chips */}
-        <div style={{ display: 'flex', gap: '6px', overflowX: 'auto' }}>
+        <div className="alerts-chips-group">
           {[
-            { id: 'all', label: 'All Types' },
-            { id: 'weather', label: '🌧️ Weather' },
-            { id: 'pest', label: '🐛 Pests' },
-            { id: 'market', label: '📈 Mandi Rates' },
+            { id: 'all', label: t('all', 'All Types') },
+            { id: 'weather', label: `🌧️ ${t('weatherAdvisory', 'Weather')}` },
+            { id: 'pest', label: `🐛 ${t('pestAlerts', 'Pests')}` },
+            { id: 'market', label: `📈 ${t('liveRates', 'Mandi Rates')}` },
           ].map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedType(cat.id)}
+              className="alert-chip-btn"
               style={{
                 background: selectedType === cat.id ? '#f0fdf4' : '#ffffff',
-                color: selectedType === cat.id ? '#15803d' : '#64748b',
+                color: selectedType === cat.id ? '#155e2d' : '#64748b',
                 border: `1.5px solid ${selectedType === cat.id ? '#86efac' : '#e2e8f0'}`,
-                padding: '6px 12px', borderRadius: '10px', fontWeight: 700, fontSize: '12px',
-                cursor: 'pointer'
               }}
             >
               {cat.label}
@@ -293,38 +300,40 @@ const AlertsPage = () => {
         </div>
 
         {/* Search Input */}
-        <div style={{ position: 'relative', minWidth: '220px' }}>
-          <FaSearch style={{ position: 'absolute', left: '12px', top: '11px', color: '#94a3b8', fontSize: '13px' }} />
+        <div className="alerts-search-box">
+          <FaSearch className="alerts-search-icon" />
           <input
             type="text"
-            placeholder="Search crop or keyword…"
+            placeholder={language === 'hi' ? "फसल या चेतावनी खोजें…" : language === 'mr' ? "पीक किंवा अलर्ट शोधा…" : "Search crop or alert keyword…"}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%', padding: '8px 12px 8px 34px', borderRadius: '10px',
-              border: '1.5px solid #cbd5e1', fontSize: '13px', outline: 'none', background: '#f8fafc'
-            }}
+            className="alerts-search-input"
           />
         </div>
       </div>
 
-      {/* ─── Alerts Cards Feed ─── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* ─── Responsive CSS Grid for Alerts Cards (2 columns desktop/tablet, 1 col mobile) ─── */}
+      <div className="alerts-cards-grid">
         <AnimatePresence>
           {filteredAlerts.length === 0 ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              style={{ background: '#ffffff', border: '1.5px dashed #cbd5e1', borderRadius: '18px', padding: '48px 24px', textAlign: 'center' }}
+              className="alerts-empty-state"
             >
               <FaCheckCircle style={{ fontSize: '42px', color: '#22c55e', marginBottom: '12px' }} />
-              <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: 800 }}>No alerts matching your criteria</h3>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '13.5px' }}>All agricultural safety parameters in your region are operating under normal conditions.</p>
+              <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: 800 }}>
+                {language === 'hi' ? 'कोई चेतावनी नहीं मिली' : language === 'mr' ? 'कोणताही इशारा उपलब्ध नाही' : 'No alerts matching your criteria'}
+              </h3>
+              <p style={{ margin: 0, color: '#64748b', fontSize: '13.5px' }}>
+                {language === 'hi' ? 'आपके क्षेत्र में सभी कृषि सुरक्षा पैरामीटर सामान्य हैं।' : language === 'mr' ? 'आपल्या परिसरातील सर्व कृषी मापदंड सुरक्षित आहेत.' : 'All agricultural safety parameters in your region are operating under normal conditions.'}
+              </p>
             </motion.div>
           ) : (
             filteredAlerts.map(alert => {
               const sev = SEVERITY_CONFIG[alert.severity] || SEVERITY_CONFIG.medium;
               const typ = TYPE_CONFIG[alert.type] || TYPE_CONFIG.weather;
+              const dateText = formatAlertDate(alert.date || alert.createdAt || alert.timestamp);
 
               return (
                 <motion.div
@@ -332,81 +341,71 @@ const AlertsPage = () => {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.98 }}
+                  className="alert-item-card"
                   style={{
-                    background: '#ffffff',
                     border: `1.5px solid ${alert.read ? '#e2ece3' : sev.border}`,
                     borderLeft: `5px solid ${sev.color}`,
-                    borderRadius: '18px',
-                    padding: '20px 22px',
                     boxShadow: alert.read ? 'none' : '0 4px 16px rgba(15, 23, 42, 0.05)',
-                    opacity: alert.read ? 0.75 : 1,
-                    transition: 'all 0.2s ease'
+                    opacity: alert.read ? 0.78 : 1,
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        background: typ.bg, color: typ.color, fontSize: '12px', fontWeight: 800,
-                        padding: '4px 10px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px'
-                      }}>
-                        {typ.icon} {typ.label}
-                      </span>
-
-                      {alert.crop && (
-                        <span style={{ background: '#f1f5f9', color: '#334155', fontSize: '12px', fontWeight: 700, padding: '4px 10px', borderRadius: '8px' }}>
-                          🌱 {alert.crop}
+                  <div>
+                    <div className="alert-item-header">
+                      <div className="alert-item-badges">
+                        <span
+                          className="alert-type-badge"
+                          style={{ background: typ.bg, color: typ.color }}
+                        >
+                          {typ.icon} {typ.label}
                         </span>
-                      )}
 
-                      <span style={{ background: sev.bg, color: sev.color, fontSize: '11px', fontWeight: 800, padding: '3px 8px', borderRadius: '6px' }}>
-                        {sev.label}
-                      </span>
+                        {alert.crop && (
+                          <span className="alert-crop-badge">
+                            🌱 {alert.crop}
+                          </span>
+                        )}
+
+                        <span
+                          className="alert-severity-badge"
+                          style={{ background: sev.bg, color: sev.color }}
+                        >
+                          {sev.label}
+                        </span>
+                      </div>
+
+                      <div className="alert-date-label">
+                        {dateText}
+                      </div>
                     </div>
 
-                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 500 }}>
-                      {new Date(alert.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </div>
+                    <h3 className="alert-card-title">
+                      {alert.title}
+                    </h3>
+
+                    <p className="alert-card-desc">
+                      {alert.description}
+                    </p>
+
+                    {alert.recommendedAction && (
+                      <div className="alert-action-protocol-box">
+                        <span style={{ fontWeight: 800, color: '#15803d', flexShrink: 0 }}>⚡ Action:</span>
+                        <span>{alert.recommendedAction}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <h3 style={{ margin: '0 0 8px 0', fontSize: '16.5px', fontWeight: 800, color: '#0f172a' }}>
-                    {alert.title}
-                  </h3>
-
-                  <p style={{ margin: '0 0 14px 0', fontSize: '13.5px', color: '#475569', lineHeight: 1.55 }}>
-                    {alert.description}
-                  </p>
-
-                  {alert.recommendedAction && (
-                    <div style={{
-                      background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px',
-                      padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: '#1e293b',
-                      display: 'flex', alignItems: 'center', gap: '8px'
-                    }}>
-                      <span style={{ fontWeight: 800, color: '#15803d' }}>⚡ Action Protocol:</span>
-                      <span>{alert.recommendedAction}</span>
-                    </div>
-                  )}
-
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="alert-card-footer">
+                    <div className="alert-footer-actions-left">
                       <button
                         onClick={() => navigate('/farmer/tasks')}
-                        style={{
-                          background: '#f0fdf4', border: '1.5px solid #86efac', color: '#15803d',
-                          padding: '7px 14px', borderRadius: '10px', fontSize: '12.5px', fontWeight: 700,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-                        }}
+                        className="alert-action-btn-planner"
                       >
                         <FaCalendarPlus /> Add to Planner
                       </button>
 
                       <button
                         onClick={() => navigate('/farmer/ai-assistant')}
-                        style={{
-                          background: '#faf5ff', border: '1.5px solid #d8b4fe', color: '#7e22ce',
-                          padding: '7px 14px', borderRadius: '10px', fontSize: '12.5px', fontWeight: 700,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px'
-                        }}
+                        className="alert-action-btn-ai"
                       >
                         <FaComments /> Ask AI Krishi Officer
                       </button>
@@ -415,13 +414,7 @@ const AlertsPage = () => {
                     <button
                       onClick={() => handleToggleResolve(alert._id, alert.read)}
                       disabled={resolvingId === alert._id}
-                      style={{
-                        background: alert.read ? '#f1f5f9' : '#15803d',
-                        color: alert.read ? '#475569' : '#ffffff',
-                        border: 'none', padding: '8px 16px', borderRadius: '10px',
-                        fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
-                        display: 'flex', alignItems: 'center', gap: '6px'
-                      }}
+                      className={`alert-resolve-btn ${alert.read ? 'resolved-btn' : 'active-btn'}`}
                     >
                       {alert.read ? <><FaUndo /> Mark as Active</> : <><FaCheck /> Mark as Resolved</>}
                     </button>

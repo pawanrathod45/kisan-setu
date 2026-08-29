@@ -3,20 +3,22 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { FaHome, FaSeedling, FaCalendarCheck, FaChartLine, FaRobot } from 'react-icons/fa';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
-
-const BOTTOM_NAV = [
-  { path: '/farmer/dashboard',    icon: FaHome,          label: 'Home' },
-  { path: '/farmer/crops',        icon: FaSeedling,      label: 'Crops' },
-  { path: '/farmer/tasks',        icon: FaCalendarCheck, label: 'Tasks' },
-  { path: '/farmer/market',       icon: FaChartLine,     label: 'Market' },
-  { path: '/farmer/ai-assistant', icon: FaRobot,         label: 'AI' },
-];
+import { useLanguage } from '../../context/LanguageContext';
 
 const DashboardLayout = () => {
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 1025 : true
   );
   const location = useLocation();
+
+  const bottomNavItems = [
+    { path: '/farmer/dashboard',    icon: FaHome,          label: t('navHome', 'Home') },
+    { path: '/farmer/crops',        icon: FaSeedling,      label: t('navCrops', 'Crops') },
+    { path: '/farmer/tasks',        icon: FaCalendarCheck, label: t('navTasks', 'Tasks') },
+    { path: '/farmer/market',       icon: FaChartLine,     label: t('navMarket', 'Market') },
+    { path: '/farmer/ai-assistant', icon: FaRobot,         label: t('navAi', 'AI') },
+  ];
 
   // Listen for window resize to intelligently adjust sidebar state
   useEffect(() => {
@@ -80,7 +82,7 @@ const DashboardLayout = () => {
 
       {/* Mobile bottom navigation bar */}
       <nav className="ks-mobile-nav" aria-label="Mobile Navigation">
-        {BOTTOM_NAV.map(item => {
+        {bottomNavItems.map(item => {
           const isActive = location.pathname === item.path ||
             location.pathname.startsWith(item.path + '/');
           return (

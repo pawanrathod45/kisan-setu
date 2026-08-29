@@ -9,6 +9,7 @@ import {
 import API from '../services/api';
 import weatherService from '../services/weatherService';
 import ConfirmModal from '../components/common/ConfirmModal';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/Dashboard.css';
 
 const CATEGORY_CONFIG = {
@@ -20,17 +21,10 @@ const CATEGORY_CONFIG = {
   other:      { label: 'General Task',   color: 'gray',   emoji: '📝' },
 };
 
-const TABS = [
-  { key: 'all',      label: 'All Tasks' },
-  { key: 'sowing',   label: '🌱 Sowing & Planting' },
-  { key: 'today',    label: 'Today' },
-  { key: 'upcoming', label: 'Upcoming' },
-  { key: 'done',     label: 'Completed' },
-];
-
 const todayStr = () => new Date().toISOString().split('T')[0];
 
 const TasksPage = () => {
+  const { t, language } = useLanguage();
   const [tasks, setTasks]                 = useState([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState(null);
@@ -185,22 +179,39 @@ const TasksPage = () => {
     }
   };
 
+  const tabs = [
+    { key: 'all',      label: t('all', 'All Tasks') },
+    { key: 'sowing',   label: `🌱 ${t('sowingTab', 'Sowing & Planting')}` },
+    { key: 'today',    label: t('today', 'Today') },
+    { key: 'upcoming', label: t('upcoming', 'Upcoming') },
+    { key: 'done',     label: t('completed', 'Completed') },
+  ];
+
+  const categoryLabels = {
+    sowing:     { label: t('sowingTab', 'Sowing & Seeds'), color: 'green',  emoji: '🌱' },
+    irrigation: { label: t('irrigationTab', 'Irrigation'), color: 'blue',   emoji: '💧' },
+    fertilizer: { label: t('fertilizerTab', 'Fertilizer'), color: 'green',  emoji: '🌿' },
+    pesticide:  { label: t('pesticideTab', 'Pesticide Spray'), color: 'amber',  emoji: '🐛' },
+    harvest:    { label: t('harvestTab', 'Harvesting'), color: 'amber',  emoji: '🌾' },
+    other:      { label: t('tasksSowing', 'General Task'), color: 'gray',   emoji: '📝' },
+  };
+
   /* ── Filter ── */
   const today = todayStr();
-  const filtered = tasks.filter(t => {
-    if (activeTab === 'sowing')   return t.category === 'sowing';
-    if (activeTab === 'today')    return t.date === today && t.status !== 'completed';
-    if (activeTab === 'upcoming') return t.date > today  && t.status !== 'completed';
-    if (activeTab === 'done')     return t.status === 'completed';
+  const filtered = tasks.filter(taskItem => {
+    if (activeTab === 'sowing')   return taskItem.category === 'sowing';
+    if (activeTab === 'today')    return taskItem.date === today && taskItem.status !== 'completed';
+    if (activeTab === 'upcoming') return taskItem.date > today  && taskItem.status !== 'completed';
+    if (activeTab === 'done')     return taskItem.status === 'completed';
     return true;
   });
 
   const counts = {
     all:      tasks.length,
-    sowing:   tasks.filter(t => t.category === 'sowing').length,
-    today:    tasks.filter(t => t.date === today && t.status !== 'completed').length,
-    upcoming: tasks.filter(t => t.date > today  && t.status !== 'completed').length,
-    done:     tasks.filter(t => t.status === 'completed').length,
+    sowing:   tasks.filter(taskItem => taskItem.category === 'sowing').length,
+    today:    tasks.filter(taskItem => taskItem.date === today && taskItem.status !== 'completed').length,
+    upcoming: tasks.filter(taskItem => taskItem.date > today  && taskItem.status !== 'completed').length,
+    done:     tasks.filter(taskItem => taskItem.status === 'completed').length,
   };
 
   // Weather Sowing Feasibility Calculation
@@ -217,10 +228,10 @@ const TasksPage = () => {
           </div>
           <div>
             <h1 className="ks-page-title" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', margin: 0 }}>
-              Tasks & Sowing Planner
+              {t('fieldOperationsPlanner', 'Tasks & Sowing Planner')}
             </h1>
             <p className="ks-page-subtitle" style={{ fontSize: '0.88rem', color: 'var(--text-light)', margin: '4px 0 0 0' }}>
-              Synchronized with live farm weather in {location} • {counts.today} task{counts.today !== 1 ? 's' : ''} scheduled today
+              {t('synchronizedWeather', 'Synchronized with live farm weather in {location} • {count} tasks today', { location, count: counts.today })}
             </p>
           </div>
         </div>
@@ -244,11 +255,11 @@ const TasksPage = () => {
               boxShadow: '0 4px 12px rgba(15, 118, 110, 0.25)'
             }}
           >
-            <FaMagic /> {generatingAI ? 'Generating Smart Schedule…' : '⚡ AI Weather-Smart Sowing Tasks'}
+            <FaMagic /> {generatingAI ? t('loading', 'Generating Smart Schedule…') : `⚡ ${t('aiSuggestTasks', 'AI Weather-Smart Sowing Tasks')}`}
           </button>
 
           <button className="ks-btn ks-btn--primary" onClick={handleAdd} style={{ padding: '10px 18px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FaPlus /> Add Task
+            <FaPlus /> {t('addTaskBtn', 'Add Task')}
           </button>
         </div>
       </div>
@@ -293,9 +304,9 @@ const TasksPage = () => {
               </span>
             </div>
             <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.8)', marginTop: '4px' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaTint /> Humidity: {weather?.humidity || 56}%</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaWind /> Wind: {weather?.windSpeed || 12} km/h</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>🌧 Rain Risk: {weather?.rainProbability || 10}%</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaTint /> {t('humidity', 'Humidity')}: {weather?.humidity || 56}%</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><FaWind /> {t('wind', 'Wind')}: {weather?.windSpeed || 12} km/h</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>🌧 {t('precipitation', 'Rain Risk')}: {weather?.rainProbability || 10}%</span>
             </div>
           </div>
         </div>
@@ -310,10 +321,10 @@ const TasksPage = () => {
             backdropFilter: 'blur(6px)'
           }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.75)', textTransform: 'uppercase' }}>
-              🌱 SOWING WINDOW
+              🌱 {t('sowingTab', 'SOWING WINDOW')}
             </div>
             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: isSowingOptimal ? '#86efac' : '#fca5a5', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-              {isSowingOptimal ? <><FaCheckCircle /> Highly Optimal</> : <><FaExclamationTriangle /> High Heat Risk</>}
+              {isSowingOptimal ? <><FaCheckCircle /> {t('optimalSpray', 'Highly Optimal')}</> : <><FaExclamationTriangle /> {t('riskySpray', 'High Heat Risk')}</>}
             </div>
           </div>
 
@@ -325,10 +336,10 @@ const TasksPage = () => {
             backdropFilter: 'blur(6px)'
           }}>
             <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.75)', textTransform: 'uppercase' }}>
-              🧪 PESTICIDE SPRAY WINDOW
+              🧪 {t('pesticideTab', 'PESTICIDE SPRAY WINDOW')}
             </div>
             <div style={{ fontSize: '0.95rem', fontWeight: 800, color: isSpraySafe ? '#7dd3fc' : '#fde68a', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-              {isSpraySafe ? <><FaCheckCircle /> Safe (Calm Wind)</> : <><FaExclamationTriangle /> High Drift Risk</>}
+              {isSpraySafe ? <><FaCheckCircle /> {t('idealSprayWindow', 'Safe (Calm Wind)')}</> : <><FaExclamationTriangle /> {t('windDriftAlert', 'High Drift Risk')}</>}
             </div>
           </div>
         </div>
@@ -336,7 +347,7 @@ const TasksPage = () => {
 
       {/* Tab Bar */}
       <div className="ks-tab-bar" style={{ marginBottom: '20px', display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-        {TABS.map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.key}
             className={`ks-tab ${activeTab === tab.key ? 'active' : ''}`}
@@ -363,25 +374,25 @@ const TasksPage = () => {
       ) : filtered.length === 0 ? (
         <div className="ks-empty" style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '24px', border: '2px dashed var(--border)' }}>
           <FaCheckCircle style={{ fontSize: '48px', color: '#15803d', marginBottom: '12px' }} />
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>All Clear! No Pending Tasks</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>{t('allPendingTasksDone', 'All Clear! No Pending Tasks')}</h3>
           <p style={{ color: 'var(--text-light)', maxWidth: '420px', margin: '6px auto 20px' }}>
-            Click above to add manual tasks or generate AI weather-driven sowing operations.
+            {t('noTasksFilter', 'Click above to add manual tasks or generate AI weather-driven sowing operations.')}
           </p>
           <button className="ks-btn ks-btn--primary" onClick={handleAdd}>
-            <FaPlus className="me-2" /> Add Sowing Task
+            <FaPlus className="me-2" /> {t('addTaskBtn', 'Add Task')}
           </button>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <AnimatePresence>
-            {filtered.map((task, i) => {
-              const cat = CATEGORY_CONFIG[task.category] || CATEGORY_CONFIG.other;
-              const isOverdue = task.date < today && task.status !== 'completed';
-              const isDone    = task.status === 'completed';
+            {filtered.map((taskItem, i) => {
+              const cat = categoryLabels[taskItem.category] || categoryLabels.other;
+              const isOverdue = taskItem.date < today && taskItem.status !== 'completed';
+              const isDone    = taskItem.status === 'completed';
 
               return (
                 <motion.div
-                  key={task._id}
+                  key={taskItem._id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -403,7 +414,7 @@ const TasksPage = () => {
                   {/* Left: Checkbox + Content */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
                     <button
-                      onClick={() => !isDone && handleComplete(task._id)}
+                      onClick={() => !isDone && handleComplete(taskItem._id)}
                       disabled={isDone}
                       style={{
                         width: '28px',
@@ -432,7 +443,7 @@ const TasksPage = () => {
                           color: isDone ? '#94a3b8' : 'var(--text)',
                           textDecoration: isDone ? 'line-through' : 'none'
                         }}>
-                          {task.title}
+                          {taskItem.title}
                         </h4>
                         <span style={{
                           background: '#f1f5f9',
@@ -452,38 +463,36 @@ const TasksPage = () => {
                         )}
                       </div>
 
-                      {task.description && (
+                      {taskItem.description && (
                         <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: isDone ? '#94a3b8' : 'var(--text-mid)', lineHeight: 1.4 }}>
-                          {task.description}
+                          {taskItem.description}
                         </p>
                       )}
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', fontSize: '0.75rem', color: 'var(--text-light)' }}>
-                        <FaClock style={{ fontSize: '11px' }} />
-                        <span>Scheduled: {new Date(task.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <div style={{ display: 'flex', gap: '12px', fontSize: '0.75rem', color: '#64748b', marginTop: '6px', alignItems: 'center' }}>
+                        <span>📅 {new Date(taskItem.date).toLocaleDateString(language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' })}</span>
+                        {taskItem.weatherCondition && <span>⛅ {taskItem.weatherCondition}</span>}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Delete action */}
-                  <button
-                    onClick={() => handleDelete(task._id)}
-                    style={{
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#94a3b8',
-                      cursor: 'pointer',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      transition: 'color 0.2s ease'
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.color = '#ef4444'}
-                    onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}
-                    title="Delete task"
-                  >
-                    <FaTrash />
-                  </button>
+                  {/* Right: Actions */}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => setDeleteTaskId(taskItem._id)}
+                      style={{
+                        background: '#fee2e2',
+                        border: '1px solid #fca5a5',
+                        color: '#dc2626',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        fontSize: '0.75rem',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </motion.div>
               );
             })}
@@ -494,10 +503,10 @@ const TasksPage = () => {
       {/* Delete Task Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteTaskId}
-        title="Delete Scheduled Task?"
-        message="Are you sure you want to remove this task from your farming calendar and daily planner?"
-        confirmText="Yes, Delete Task"
-        cancelText="Cancel"
+        title={t('delete', 'Delete Task?')}
+        message="Are you sure you want to remove this scheduled operation?"
+        confirmText={t('delete', 'Delete')}
+        cancelText={t('cancel', 'Cancel')}
         type="danger"
         onConfirm={confirmDeleteTask}
         onCancel={() => setDeleteTaskId(null)}
@@ -523,7 +532,7 @@ const TasksPage = () => {
             >
               <div className="ks-modal-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                 <h2 className="ks-modal-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
-                  🌱 Schedule Sowing or Farm Operation
+                  🌱 {t('fieldOperationsPlanner', 'Schedule Sowing or Farm Operation')}
                 </h2>
                 <button className="ks-modal-close" onClick={() => setShowModal(false)}><FaTimes /></button>
               </div>
@@ -531,7 +540,7 @@ const TasksPage = () => {
               <form onSubmit={handleSubmit}>
                 <div className="ks-modal-body" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Task Title *</label>
+                    <label className="ks-form-label">{t('taskTitle', 'Task Title')} *</label>
                     <input
                       className="ks-input"
                       type="text"
@@ -543,23 +552,23 @@ const TasksPage = () => {
                   </div>
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Operation Category</label>
+                    <label className="ks-form-label">{t('taskCategory', 'Operation Category')}</label>
                     <select
                       className="ks-input"
                       value={newTask.category}
                       onChange={e => setNewTask({ ...newTask, category: e.target.value })}
                     >
-                      <option value="sowing">🌱 Sowing & Seed Treatment</option>
-                      <option value="irrigation">💧 Irrigation & Moisture Management</option>
-                      <option value="fertilizer">🌿 Basal / Top Dressing Fertilizer</option>
-                      <option value="pesticide">🐛 Pesticide / Fungicide Spray</option>
-                      <option value="harvest">🌾 Harvesting & Threshing</option>
-                      <option value="other">📝 Other Farm Operation</option>
+                      <option value="sowing">🌱 {t('sowingTab', 'Sowing & Seed Treatment')}</option>
+                      <option value="irrigation">💧 {t('irrigationTab', 'Irrigation & Moisture Management')}</option>
+                      <option value="fertilizer">🌿 {t('fertilizerTab', 'Basal / Top Dressing Fertilizer')}</option>
+                      <option value="pesticide">🐛 {t('pesticideTab', 'Pesticide / Fungicide Spray')}</option>
+                      <option value="harvest">🌾 {t('harvestTab', 'Harvesting & Threshing')}</option>
+                      <option value="other">📝 {t('tasksSowing', 'Other Farm Operation')}</option>
                     </select>
                   </div>
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Scheduled Date *</label>
+                    <label className="ks-form-label">{t('scheduledDate', 'Scheduled Date')} *</label>
                     <input
                       className="ks-input"
                       type="date"
@@ -570,7 +579,7 @@ const TasksPage = () => {
                   </div>
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Detailed Notes / Prescription</label>
+                    <label className="ks-form-label">{t('notes', 'Detailed Notes / Prescription')}</label>
                     <textarea
                       className="ks-input"
                       rows={3}
@@ -582,9 +591,9 @@ const TasksPage = () => {
                 </div>
 
                 <div className="ks-modal-footer" style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="button" className="ks-btn ks-btn--ghost" onClick={() => setShowModal(false)}>Cancel</button>
+                  <button type="button" className="ks-btn ks-btn--ghost" onClick={() => setShowModal(false)}>{t('cancel', 'Cancel')}</button>
                   <button type="submit" className="ks-btn ks-btn--primary" disabled={saving}>
-                    {saving ? 'Scheduling…' : 'Schedule Task'}
+                    {saving ? t('loading', 'Scheduling…') : t('submit', 'Schedule Task')}
                   </button>
                 </div>
               </form>

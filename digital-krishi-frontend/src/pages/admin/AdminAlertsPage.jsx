@@ -14,6 +14,42 @@ import {
 } from "react-icons/fa";
 import adminService from "../../services/adminService";
 import ConfirmModal from "../../components/common/ConfirmModal";
+import CustomSelect from "../../components/common/CustomSelect";
+
+const TYPE_OPTIONS = [
+  { value: "all", label: "All Alert Types" },
+  { value: "weather", label: "Weather Warnings" },
+  { value: "pest", label: "Pest & Disease Advisories" },
+  { value: "market", label: "Market & Mandi Price Alerts" },
+  { value: "task", label: "Farm Tasks" },
+  { value: "general", label: "General Broadcasts" }
+];
+
+const SEVERITY_OPTIONS = [
+  { value: "all", label: "All Severities" },
+  { value: "low", label: "Low Severity" },
+  { value: "medium", label: "Medium Severity" },
+  { value: "high", label: "High / Urgent" }
+];
+
+const MODAL_CATEGORY_OPTIONS = [
+  { value: "general", label: "General Broadcast" },
+  { value: "weather", label: "Weather Warning" },
+  { value: "pest", label: "Pest & Disease Advisory" },
+  { value: "market", label: "Market & Mandi Notice" }
+];
+
+const MODAL_SEVERITY_OPTIONS = [
+  { value: "low", label: "Low (Information)" },
+  { value: "medium", label: "Medium (Advisory)" },
+  { value: "high", label: "High (Urgent Emergency)" }
+];
+
+const TARGET_ROLE_OPTIONS = [
+  { value: "farmer", label: "All Registered Farmers Only" },
+  { value: "officer", label: "Krishi Officers Only" },
+  { value: "all", label: "All Users (Farmers & Officers)" }
+];
 
 const SEVERITY_COLORS = {
   low: { bg: "#dcfce7", text: "#15803d", border: "#86efac" },
@@ -139,42 +175,28 @@ const AdminAlertsPage = () => {
         </button>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter & Search Bar */}
       <div className="admin-controls-card">
-        <div className="admin-filters-group" style={{ marginLeft: 0 }}>
-          <div className="admin-filter-item">
-            <FaFilter className="admin-filter-icon" />
-            <select
-              value={typeFilter}
-              onChange={(e) => {
-                setTypeFilter(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Alert Types</option>
-              <option value="weather">Weather Warnings</option>
-              <option value="pest">Pest & Disease Advisories</option>
-              <option value="market">Market & Mandi Price Alerts</option>
-              <option value="task">Farm Tasks</option>
-              <option value="general">General Broadcasts</option>
-            </select>
-          </div>
+        <div className="admin-filters-group" style={{ width: "100%", margin: 0 }}>
+          <CustomSelect
+            options={TYPE_OPTIONS}
+            value={typeFilter}
+            onChange={(val) => {
+              setTypeFilter(val);
+              setPage(1);
+            }}
+            icon={FaFilter}
+          />
 
-          <div className="admin-filter-item">
-            <FaBell className="admin-filter-icon" />
-            <select
-              value={severityFilter}
-              onChange={(e) => {
-                setSeverityFilter(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Severities</option>
-              <option value="low">Low Severity</option>
-              <option value="medium">Medium Severity</option>
-              <option value="high">High / Urgent</option>
-            </select>
-          </div>
+          <CustomSelect
+            options={SEVERITY_OPTIONS}
+            value={severityFilter}
+            onChange={(val) => {
+              setSeverityFilter(val);
+              setPage(1);
+            }}
+            icon={FaBell}
+          />
 
           <button className="admin-reset-btn" onClick={fetchAlerts} title="Refresh alerts">
             <FaRedoAlt />
@@ -310,7 +332,7 @@ const AdminAlertsPage = () => {
       {/* ── Broadcast Creation Modal ── */}
       {showBroadcastModal && (
         <div className="admin-modal-backdrop" onClick={() => setShowBroadcastModal(false)}>
-          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "540px" }}>
+          <div className="admin-modal-card" onClick={(e) => e.stopPropagation()} style={{ maxWidth: "520px", maxHeight: "min(580px, 88vh)" }}>
             <div className="admin-modal-header">
               <div className="admin-modal-title-group">
                 <div className="admin-avatar-lg" style={{ background: "#fee2e2", color: "#dc2626" }}>
@@ -326,61 +348,53 @@ const AdminAlertsPage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleBroadcast} className="admin-modal-body ks-scroll">
-              {broadcastSuccess && (
-                <div className="admin-success-box">
-                  <FaCheck /> {broadcastSuccess}
-                </div>
-              )}
-
-              <div className="admin-form-group">
-                <label>Alert Message *</label>
-                <textarea
-                  rows={4}
-                  required
-                  placeholder="e.g. Weather Warning: Heavy rains expected in Maharashtra districts over next 48 hours. Ensure field drainage."
-                  value={broadcastForm.message}
-                  onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
-                />
-              </div>
-
-              <div className="admin-form-row">
-                <div className="admin-form-group">
-                  <label>Category</label>
-                  <select
-                    value={broadcastForm.type}
-                    onChange={(e) => setBroadcastForm({ ...broadcastForm, type: e.target.value })}
-                  >
-                    <option value="general">General Broadcast</option>
-                    <option value="weather">Weather Alert</option>
-                    <option value="pest">Pest / Disease Warning</option>
-                    <option value="market">Market & Pricing Notice</option>
-                  </select>
-                </div>
+            <form onSubmit={handleBroadcast} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0, overflow: "hidden" }}>
+              <div className="admin-modal-body ks-scroll" style={{ overflowY: "auto", flex: 1, padding: "16px 20px" }}>
+                {broadcastSuccess && (
+                  <div className="admin-success-box">
+                    <FaCheck /> {broadcastSuccess}
+                  </div>
+                )}
 
                 <div className="admin-form-group">
-                  <label>Severity Level</label>
-                  <select
-                    value={broadcastForm.severity}
-                    onChange={(e) => setBroadcastForm({ ...broadcastForm, severity: e.target.value })}
-                  >
-                    <option value="low">Low (Information)</option>
-                    <option value="medium">Medium (Advisory)</option>
-                    <option value="high">High (Urgent Emergency)</option>
-                  </select>
+                  <label>Alert Message *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    placeholder="e.g. Weather Warning: Heavy rains expected in Maharashtra districts over next 48 hours. Ensure field drainage."
+                    value={broadcastForm.message}
+                    onChange={(e) => setBroadcastForm({ ...broadcastForm, message: e.target.value })}
+                  />
                 </div>
-              </div>
 
-              <div className="admin-form-group">
-                <label>Recipient Target</label>
-                <select
-                  value={broadcastForm.targetRole}
-                  onChange={(e) => setBroadcastForm({ ...broadcastForm, targetRole: e.target.value })}
-                >
-                  <option value="farmer">All Registered Farmers Only</option>
-                  <option value="officer">Krishi Officers Only</option>
-                  <option value="all">All Users (Farmers & Officers)</option>
-                </select>
+                <div className="admin-form-row">
+                  <div className="admin-form-group">
+                    <label>Category</label>
+                    <CustomSelect
+                      options={MODAL_CATEGORY_OPTIONS}
+                      value={broadcastForm.type}
+                      onChange={(val) => setBroadcastForm({ ...broadcastForm, type: val })}
+                    />
+                  </div>
+
+                  <div className="admin-form-group">
+                    <label>Severity Level</label>
+                    <CustomSelect
+                      options={MODAL_SEVERITY_OPTIONS}
+                      value={broadcastForm.severity}
+                      onChange={(val) => setBroadcastForm({ ...broadcastForm, severity: val })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-group">
+                  <label>Recipient Target</label>
+                  <CustomSelect
+                    options={TARGET_ROLE_OPTIONS}
+                    value={broadcastForm.targetRole}
+                    onChange={(val) => setBroadcastForm({ ...broadcastForm, targetRole: val })}
+                  />
+                </div>
               </div>
 
               <div className="admin-modal-actions">

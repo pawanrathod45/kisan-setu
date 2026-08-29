@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { GiWheat } from "react-icons/gi";
 import adminService from "../../services/adminService";
+import CustomSelect from "../../components/common/CustomSelect";
 
 const HEALTH_COLORS = {
   Healthy: { bg: "#dcfce7", text: "#15803d", border: "#86efac" },
@@ -20,6 +21,14 @@ const HEALTH_COLORS = {
   Infected: { bg: "#ffedd5", text: "#c2410c", border: "#fdba74" },
   Critical: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" }
 };
+
+const HEALTH_OPTIONS = [
+  { value: "all", label: "All Health Statuses" },
+  { value: "Healthy", label: "Healthy" },
+  { value: "Mild Infection", label: "Mild Infection" },
+  { value: "Infected", label: "Infected" },
+  { value: "Critical", label: "Critical" }
+];
 
 const AdminCropsPage = () => {
   const [crops, setCrops] = useState([]);
@@ -90,22 +99,15 @@ const AdminCropsPage = () => {
         </div>
 
         <div className="admin-filters-group">
-          <div className="admin-filter-item">
-            <FaHeartbeat className="admin-filter-icon" />
-            <select
-              value={healthStatus}
-              onChange={(e) => {
-                setHealthStatus(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Health Statuses</option>
-              <option value="Healthy">Healthy</option>
-              <option value="Mild Infection">Mild Infection</option>
-              <option value="Infected">Infected</option>
-              <option value="Critical">Critical</option>
-            </select>
-          </div>
+          <CustomSelect
+            options={HEALTH_OPTIONS}
+            value={healthStatus}
+            onChange={(val) => {
+              setHealthStatus(val);
+              setPage(1);
+            }}
+            icon={FaHeartbeat}
+          />
 
           <button className="admin-reset-btn" onClick={fetchCrops} title="Refresh crops">
             <FaRedoAlt />

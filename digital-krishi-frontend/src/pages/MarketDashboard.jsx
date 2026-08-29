@@ -19,6 +19,7 @@ import {
   FaCheckCircle, FaExclamationTriangle, FaTruck, FaMoneyBillWave
 } from 'react-icons/fa';
 import marketService from '../services/marketService';
+import { useLanguage } from '../context/LanguageContext';
 import './MarketDashboard.css';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -39,24 +40,26 @@ const MAHARASHTRA_DISTRICTS = ['Pune', 'Nashik', 'Mumbai', 'Nagpur', 'Aurangabad
 const DEFAULT_MARKETS = ['Pune APMC', 'Nashik APMC', 'Lasalgaon APMC', 'Mumbai APMC', 'Nagpur APMC', 'Solapur APMC'];
 
 const MarketDashboard = () => {
-  const [selectedCrop, setSelectedCrop]       = useState('Onion');
-  const [selectedState, setSelectedState]     = useState('Maharashtra');
+  const { t, language } = useLanguage();
+  const [selectedCrop, setSelectedCrop]         = useState('Onion');
+  const [selectedState, setSelectedState]       = useState('Maharashtra');
   const [selectedDistrict, setSelectedDistrict] = useState('Pune');
-  const [selectedMarket, setSelectedMarket]   = useState('Pune APMC');
-  const [dateRange, setDateRange]             = useState('weekly');
+  const [selectedMarket, setSelectedMarket]     = useState('Pune APMC');
+  const [dateRange, setDateRange]               = useState('weekly');
 
-  const [marketData, setMarketData]           = useState(null);
-  const [priceHistory, setPriceHistory]       = useState([]);
-  const [arrivalsData, setArrivalsData]       = useState([]);
-  const [multiMarketData, setMultiMarketData] = useState([]);
-  const [loading, setLoading]                 = useState(true);
-  const [error, setError]                     = useState(null);
-  const [lastUpdated, setLastUpdated]         = useState(null);
-  const [isRefreshing, setIsRefreshing]       = useState(false);
+  const [marketData, setMarketData]             = useState(null);
+  const [priceHistory, setPriceHistory]         = useState([]);
+  const [arrivalsData, setArrivalsData]         = useState([]);
+  const [multiMarketData, setMultiMarketData]   = useState([]);
+  const [cropSummaryData, setCropSummaryData]   = useState([]);
+  const [loading, setLoading]                   = useState(true);
+  const [error, setError]                       = useState(null);
+  const [lastUpdated, setLastUpdated]           = useState(null);
+  const [isRefreshing, setIsRefreshing]         = useState(false);
 
-  const [availableStates, setAvailableStates]     = useState([]);
+  const [availableStates, setAvailableStates]       = useState([]);
   const [availableDistricts, setAvailableDistricts] = useState([]);
-  const [availableMarkets, setAvailableMarkets]   = useState([]);
+  const [availableMarkets, setAvailableMarkets]     = useState([]);
 
   // AI Mandi Assistant Chat State
   const [chatMessages, setChatMessages] = useState([
@@ -66,7 +69,7 @@ const MarketDashboard = () => {
       timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     }
   ]);
-  const [chatInput, setChatInput]     = useState('');
+  const [chatInput, setChatInput]       = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
 
   useEffect(() => {
@@ -91,7 +94,7 @@ const MarketDashboard = () => {
 
       const days = dateRange === 'today' ? 1 : dateRange === 'weekly' ? 7 : 30;
 
-      const [currentData, historical, arrivals, multiMarket] = await Promise.all([
+      const [currentData, historical, arrivals, multiMarket, summary] = await Promise.all([
         marketService.getCurrentMarketPrice({
           commodity: selectedCrop,
           state: selectedState,
@@ -108,56 +111,50 @@ const MarketDashboard = () => {
           commodity: selectedCrop,
           state: selectedState,
           district: selectedDistrict,
-          days: 30
+          days
         }).catch(() => []),
         marketService.getMultiMarketPrices({
           commodity: selectedCrop,
           state: selectedState,
-          markets: DEFAULT_MARKETS.slice(0, 5)
-        }).catch(() => [])
+          district: selectedDistrict,
+          markets: DEFAULT_MARKETS
+        }).catch(() => []),
+        marketService.getSummary().catch(() => null)
       ]);
 
-      setMarketData(currentData || {
-        modalPrice: 2450,
-        minPrice: 2180,
-        maxPrice: 2750,
-        commodity: selectedCrop,
-        market: selectedMarket,
-        state: selectedState,
-        district: selectedDistrict
-      });
+      if (currentData) {
+        setMarketData(currentData);
+      } else {
+        setMarketData({
+          modalPrice: 2450,
+          minPrice: 2180,
+          maxPrice: 2750,
+          commodity: selectedCrop,
+          market: selectedMarket,
+          state: selectedState,
+          district: selectedDistrict
+        });
+      }
 
-      setPriceHistory(historical?.length > 0 ? historical : [
-        { date: 'Mon', price: 2350 },
-        { date: 'Tue', price: 2380 },
-        { date: 'Wed', price: 2410 },
-        { date: 'Thu', price: 2390 },
-        { date: 'Fri', price: 2430 },
-        { date: 'Sat', price: 2450 },
-        { date: 'Sun', price: 2480 },
-      ]);
-
-      setArrivalsData(arrivals?.length > 0 ? arrivals : [
-        { date: 'Mon', quantity: 1200 },
-        { date: 'Tue', quantity: 1450 },
-        { date: 'Wed', quantity: 1320 },
-        { date: 'Thu', quantity: 1100 },
-        { date: 'Fri', quantity: 1580 },
-        { date: 'Sat', quantity: 1420 },
-        { date: 'Sun', quantity: 980 },
-      ]);
-
-      setMultiMarketData(multiMarket?.length > 0 ? multiMarket : [
-        { name: 'Pune APMC', price: 2450, distance: '12 km', diff: 'Base Market' },
-        { name: 'Lasalgaon APMC', price: 2620, distance: '140 km', diff: '+₹170 / qtl' },
-        { name: 'Nashik APMC', price: 2540, distance: '110 km', diff: '+₹90 / qtl' },
-        { name: 'Mumbai APMC', price: 2780, distance: '150 km', diff: '+₹330 / qtl' },
-        { name: 'Solapur APMC', price: 2390, distance: '210 km', diff: '-₹60 / qtl' },
-      ]);
+      setPriceHistory(Array.isArray(historical) ? historical : []);
+      setArrivalsData(Array.isArray(arrivals) ? arrivals : []);
+      setMultiMarketData(Array.isArray(multiMarket) ? multiMarket : []);
+      
+      if (summary?.topCrops && summary.topCrops.length > 0) {
+        setCropSummaryData(summary.topCrops);
+      } else {
+        setCropSummaryData(TOP_CROPS.map(c => ({
+          name: c.name,
+          emoji: c.emoji,
+          price: c.defaultPrice,
+          trend: c.trend
+        })));
+      }
 
       setLastUpdated(new Date());
     } catch (err) {
-      setError(err.message);
+      console.error('Market data fetch error:', err);
+      setError(err.message || 'Failed to fetch real market data');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -192,13 +189,13 @@ const MarketDashboard = () => {
 
       setChatMessages(prev => [...prev, {
         type: 'bot',
-        message: response.reply || `Based on current arrivals in ${selectedMarket}, ${selectedCrop} is holding steady at ₹${marketData?.modalPrice || 2450}/qtl. Expected bullish move of +3-5% over the next 5-7 days.`,
+        message: response.reply || `Based on current arrivals in ${selectedMarket}, ${selectedCrop} is holding steady at ₹${marketData?.modalPrice || 2450}/qtl. Expected favorable trade conditions over the next 5-7 days.`,
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       }]);
     } catch (err) {
       setChatMessages(prev => [...prev, {
         type: 'bot',
-        message: `Currently, ${selectedCrop} modal rate in ${selectedMarket} is ₹${marketData?.modalPrice || 2450}/qtl. Selling over the next 48 hours is recommended to capture active wholesale demand.`,
+        message: `Currently, ${selectedCrop} modal rate in ${selectedMarket} is ₹${marketData?.modalPrice || 2450}/qtl. Selling during morning auction hours is recommended.`,
         timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
       }]);
     } finally {
@@ -206,11 +203,20 @@ const MarketDashboard = () => {
     }
   };
 
-  const chartOptions = {
+  // Base responsive chart options
+  const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
+      legend: {
+        position: 'top',
+        labels: {
+          font: { size: 11, weight: '600', family: 'system-ui, -apple-system, sans-serif' },
+          usePointStyle: true,
+          boxWidth: 8,
+          padding: 8
+        }
+      },
       tooltip: {
         backgroundColor: '#0f172a',
         titleFont: { size: 12, weight: '700' },
@@ -220,10 +226,123 @@ const MarketDashboard = () => {
       }
     },
     scales: {
-      y: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11, weight: '600' } } },
-      x: { grid: { display: false }, ticks: { font: { size: 11, weight: '700' } } }
+      y: {
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 10.5 }, maxTicksLimit: 6 }
+      },
+      x: {
+        grid: { display: false },
+        ticks: {
+          font: { size: 10.5, weight: '600' },
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: 7
+        }
+      }
     }
   };
+
+  // 1. Chart 1: Mandi-wise current price comparison
+  const mandiComparisonChartData = useMemo(() => {
+    const labels = multiMarketData.map(m => m.name?.replace(' APMC', '') || m.name);
+    const data = multiMarketData.map(m => m.price || m.modalPrice || 2450);
+    const backgroundColors = multiMarketData.map(m => {
+      if (m.name === selectedMarket) return '#15803d'; // Selected APMC
+      return m.price >= 2500 ? '#0284c7' : '#38bdf8';
+    });
+
+    return {
+      labels,
+      datasets: [{
+        label: `${selectedCrop} ${t('liveRates', 'Modal Rate')} (₹/Qtl)`,
+        data,
+        backgroundColor: backgroundColors,
+        borderRadius: 6,
+        maxBarThickness: 38
+      }]
+    };
+  }, [multiMarketData, selectedCrop, selectedMarket, t]);
+
+  // 2. Chart 2: Crop-wise / Commodity price comparison
+  const cropComparisonChartData = useMemo(() => {
+    const crops = cropSummaryData.length > 0 ? cropSummaryData : TOP_CROPS;
+    const labels = crops.map(c => c.name);
+    const data = crops.map(c => typeof c.price === 'number' ? c.price : parseInt(String(c.price).replace(/[^0-9]/g, '')) || c.defaultPrice || 2400);
+    const backgroundColors = crops.map(c => c.name.toLowerCase() === selectedCrop.toLowerCase() ? '#15803d' : '#94a3b8');
+
+    return {
+      labels,
+      datasets: [{
+        label: `${t('liveRates', 'Modal Price')} (₹/Qtl)`,
+        data,
+        backgroundColor: backgroundColors,
+        borderRadius: 6,
+        maxBarThickness: 32
+      }]
+    };
+  }, [cropSummaryData, selectedCrop, t]);
+
+  // 3. Chart 3: Price Trajectory & Arrival Volume Analysis over time
+  const priceArrivalsTrendData = useMemo(() => {
+    const validHistory = priceHistory.filter(p => p && p.date && p.date !== 'Invalid Date');
+    const labels = validHistory.map(p => p.date);
+    const prices = validHistory.map(p => p.price || p.modalPrice || 0);
+    const arrivals = validHistory.map(p => p.arrivals || p.quantity || 120);
+
+    return {
+      labels,
+      datasets: [
+        {
+          type: 'line',
+          label: `${selectedCrop} ${t('temperature', 'Price')} (₹/Qtl)`,
+          data: prices,
+          borderColor: '#15803d',
+          backgroundColor: 'rgba(21, 128, 61, 0.08)',
+          borderWidth: 2.5,
+          tension: 0.35,
+          fill: true,
+          yAxisID: 'y',
+          pointRadius: 4,
+          pointBackgroundColor: '#15803d'
+        },
+        {
+          type: 'bar',
+          label: `${t('arrivalsVolume', 'Arrivals')} (Qtl)`,
+          data: arrivals,
+          backgroundColor: 'rgba(2, 132, 199, 0.3)',
+          borderColor: '#0284c7',
+          borderWidth: 1,
+          borderRadius: 4,
+          maxBarThickness: 24,
+          yAxisID: 'y1'
+        }
+      ]
+    };
+  }, [priceHistory, selectedCrop, t]);
+
+  const dualAxisOptions = useMemo(() => ({
+    ...baseChartOptions,
+    scales: {
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        grid: { color: 'rgba(0,0,0,0.05)' },
+        ticks: { font: { size: 10.5 }, maxTicksLimit: 6, callback: v => `₹${v}` }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        grid: { drawOnChartArea: false },
+        ticks: { font: { size: 10.5 }, maxTicksLimit: 6 }
+      },
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 10.5, weight: '600' }, maxRotation: 0, autoSkip: true, maxTicksLimit: 7 }
+      }
+    }
+  }), [baseChartOptions]);
 
   return (
     <div className="dashboard-wrapper">
@@ -231,114 +350,71 @@ const MarketDashboard = () => {
       <header className="dashboard-header">
         <div className="header-left">
           <div className="header-title-section">
-            <h1>Market Intelligence & Mandi Rates</h1>
-            <p>Live AGMARKNET APMC Trading Data • Real-time Selling Strategies</p>
+            <h1>{t('apmcMarketIntel', 'Market Intelligence & Mandi Rates')}</h1>
+            <p>{t('marketIntelTag', 'Live AGMARKNET APMC Trading Data • Real-time Selling Strategies')}</p>
           </div>
           <div className="header-badges">
             <span className="badge-live">
               <span className="live-dot" />
-              LIVE APMC FEED
+              {t('liveRates', 'LIVE APMC FEED')}
             </span>
             <span className="badge-sync">
               <span className="sync-icon">⟳</span>
-              {isRefreshing ? 'Syncing...' : 'Realtime'}
+              {isRefreshing ? t('loading', 'Syncing...') : t('live', 'Realtime')}
             </span>
           </div>
         </div>
 
-        <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--m-muted)', textTransform: 'uppercase' }}>Last Sync</span>
-            <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--m-text)' }}>
-              {lastUpdated ? lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+        <div className="header-right">
+          <div className="last-sync-info">
+            <span className="last-sync-label">{t('updated', 'Last Sync')}</span>
+            <div className="last-sync-time">
+              {lastUpdated ? lastUpdated.toLocaleTimeString(language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN', { hour: '2-digit', minute: '2-digit' }) : t('justNow', 'Just now')}
             </div>
           </div>
           <button
             onClick={fetchMarketData}
             disabled={isRefreshing}
-            style={{
-              background: 'linear-gradient(135deg, #15803d, #16a34a)',
-              color: '#ffffff',
-              border: 'none',
-              padding: '9px 16px',
-              borderRadius: '12px',
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
-            }}
+            className="header-refresh-btn"
           >
-            <FaSyncAlt className={isRefreshing ? 'sync-spin' : ''} /> Refresh
+            <FaSyncAlt className={isRefreshing ? 'sync-spin' : ''} /> {t('refresh', 'Refresh')}
           </button>
         </div>
       </header>
 
       {/* ─── Commodity Quick Selection Bar ─── */}
-      <div style={{
-        display: 'flex',
-        gap: '10px',
-        overflowX: 'auto',
-        paddingBottom: '8px',
-        marginBottom: '20px'
-      }}>
+      <div className="crops-scroll-container">
         {TOP_CROPS.map(c => {
           const isSelected = selectedCrop.toLowerCase() === c.name.toLowerCase();
           return (
             <button
               key={c.name}
               onClick={() => setSelectedCrop(c.name)}
-              style={{
-                background: isSelected ? '#155e2d' : '#ffffff',
-                color: isSelected ? '#ffffff' : '#0f172a',
-                border: `1.5px solid ${isSelected ? '#155e2d' : 'var(--m-border)'}`,
-                padding: '10px 16px',
-                borderRadius: '14px',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                flexShrink: 0,
-                boxShadow: isSelected ? '0 4px 14px rgba(21, 94, 45, 0.25)' : '0 2px 6px rgba(0,0,0,0.03)',
-                transition: 'all 0.2s ease'
-              }}
+              className={`crop-chip-btn ${isSelected ? 'selected' : ''}`}
             >
-              <span style={{ fontSize: '1.2rem' }}>{c.emoji}</span>
-              <span>{c.name}</span>
-              <span style={{
-                background: isSelected ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
-                color: isSelected ? '#ffffff' : '#15803d',
-                padding: '2px 6px',
-                borderRadius: '6px',
-                fontSize: '0.72rem',
-                fontWeight: 800
-              }}>
-                {c.trend}
-              </span>
+              <span className="crop-chip-emoji">{c.emoji}</span>
+              <span className="crop-chip-name">{c.name}</span>
+              <span className="crop-chip-trend">{c.trend}</span>
             </button>
           );
         })}
       </div>
 
       {/* ─── Filter Bar ─── */}
-      <div className="filters-card" style={{ marginBottom: '22px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1 }}>
+      <div className="filters-card">
+        <div className="filters-wrapper-row">
+          <div className="filter-dropdowns-group">
             <div className="filter-item">
-              <label><FaMapMarkerAlt /> State</label>
+              <label><FaMapMarkerAlt /> {t('selectState', 'State')}</label>
               <select value={selectedState} onChange={e => setSelectedState(e.target.value)}>
-                {(availableStates.length > 0 ? availableStates : ['Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Punjab']).map(s => (
+                {(availableStates.length > 0 ? availableStates : ['Maharashtra', 'Gujarat', 'Madhya Pradesh', 'Punjab', 'Karnataka', 'Rajasthan']).map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
               </select>
             </div>
 
             <div className="filter-item">
-              <label><FaStore /> District</label>
+              <label><FaStore /> {t('selectDistrict', 'District')}</label>
               <select value={selectedDistrict} onChange={e => setSelectedDistrict(e.target.value)}>
                 {(availableDistricts.length > 0 ? availableDistricts : MAHARASHTRA_DISTRICTS).slice(0, 15).map(d => (
                   <option key={d} value={d}>{d}</option>
@@ -347,7 +423,7 @@ const MarketDashboard = () => {
             </div>
 
             <div className="filter-item">
-              <label><FaStore /> Mandi APMC</label>
+              <label><FaStore /> {t('selectMarket', 'Mandi APMC')}</label>
               <select value={selectedMarket} onChange={e => setSelectedMarket(e.target.value)}>
                 {(availableMarkets.length > 0 ? availableMarkets : DEFAULT_MARKETS).slice(0, 15).map(m => (
                   <option key={m} value={m}>{m}</option>
@@ -356,14 +432,14 @@ const MarketDashboard = () => {
             </div>
           </div>
 
-          <div className="date-filter" style={{ margin: 0 }}>
+          <div className="date-filter">
             {['today', 'weekly', 'monthly'].map(range => (
               <button
                 key={range}
                 className={dateRange === range ? 'active' : ''}
                 onClick={() => setDateRange(range)}
               >
-                {range === 'today' ? 'Today' : range === 'weekly' ? '7-Day View' : '30-Day Trend'}
+                {range === 'today' ? t('today', 'Today') : range === 'weekly' ? '7-Day View' : '30-Day Trend'}
               </button>
             ))}
           </div>
@@ -371,13 +447,13 @@ const MarketDashboard = () => {
       </div>
 
       {/* ─── Market Hero Banner ─── */}
-      <div className="market-hero-card" style={{ marginBottom: '24px' }}>
+      <div className="market-hero-card">
         <div className="hero-header">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="hero-crop-row">
               <h2 className="hero-crop">{selectedCrop}</h2>
               <span className="trend-badge rising">
-                <FaArrowUp /> +3.2% (₹120 / qtl this week)
+                <FaArrowUp /> +3.2% (₹120 / qtl)
               </span>
             </div>
             <p className="hero-location">
@@ -385,11 +461,11 @@ const MarketDashboard = () => {
             </p>
           </div>
 
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', fontWeight: 700 }}>
-              MARKET ADVISORY
+          <div className="hero-advisory-box">
+            <span className="hero-advisory-label">
+              {t('advisory', 'MARKET ADVISORY')}
             </span>
-            <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#86efac', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end', marginTop: '2px' }}>
+            <div className="hero-advisory-action">
               <FaLightbulb /> HOLD & SELL NEXT WEEK
             </div>
           </div>
@@ -398,26 +474,26 @@ const MarketDashboard = () => {
         {/* 4 Price Metric Cards */}
         <div className="hero-price-grid">
           <div className="price-box main-price">
-            <span className="price-label">Modal (Current) Rate</span>
+            <span className="price-label">{t('liveRates', 'Modal (Current) Rate')}</span>
             <span className="price-value">₹{marketData?.modalPrice || 2450}</span>
-            <span className="price-unit">per Quintal (100 kg)</span>
+            <span className="price-unit">{t('perQuintal', 'per Quintal (100 kg)')}</span>
           </div>
 
           <div className="price-box">
-            <span className="price-label">Minimum (Support) Rate</span>
+            <span className="price-label">{t('lowPrice', 'Minimum Rate')}</span>
             <span className="price-value">₹{marketData?.minPrice || 2180}</span>
-            <span className="price-unit">₹/Quintal</span>
+            <span className="price-unit">₹/{t('perQuintal', 'Quintal')}</span>
           </div>
 
           <div className="price-box">
-            <span className="price-label">Maximum (Peak) Rate</span>
+            <span className="price-label">{t('highPrice', 'Maximum (Peak) Rate')}</span>
             <span className="price-value" style={{ color: '#86efac' }}>₹{marketData?.maxPrice || 2750}</span>
-            <span className="price-unit">₹/Quintal</span>
+            <span className="price-unit">₹/{t('perQuintal', 'Quintal')}</span>
           </div>
 
           <div className="price-box">
-            <span className="price-label">Daily Market Arrivals</span>
-            <span className="price-value" style={{ color: '#fde047' }}>1,420</span>
+            <span className="price-label">{t('arrivalsVolume', 'Daily Market Arrivals')}</span>
+            <span className="price-value" style={{ color: '#fde047' }}>{marketData?.arrivalQuantity ? Number(marketData.arrivalQuantity).toLocaleString() : '1,420'}</span>
             <span className="price-unit">Quintals Traded Today</span>
           </div>
         </div>
@@ -425,7 +501,7 @@ const MarketDashboard = () => {
         <div className="hero-footer">
           <span className="market-status">
             <span className="status-dot active" />
-            Trading Session Active (08:00 AM – 04:30 PM)
+            {t('tradingSessionActive', 'Trading Session Active (08:00 AM – 04:30 PM)')}
           </span>
           <span className="data-source">
             Verified Govt AGMARKNET & e-NAM Mandi Gateway
@@ -433,53 +509,75 @@ const MarketDashboard = () => {
         </div>
       </div>
 
-      {/* ─── Main Grid: Charts & Multi-Mandi Arbitrage ─── */}
-      <div className="dashboard-grid">
-        {/* Left Section: Price History & Arbitrage */}
-        <div className="left-section">
-          {/* Price History Chart */}
-          <div className="chart-card">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 className="chart-title" style={{ margin: 0 }}>
-                📈 {selectedCrop} Price Trajectory (₹/Quintal)
-              </h3>
-              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#15803d', background: '#dcfce7', padding: '3px 8px', borderRadius: '8px' }}>
-                7-Day Moving Avg
-              </span>
-            </div>
-            <div className="chart-container">
-              <Line
-                data={{
-                  labels: priceHistory.map(d => d.date),
-                  datasets: [{
-                    label: `${selectedCrop} Price`,
-                    data: priceHistory.map(d => d.price),
-                    borderColor: '#15803d',
-                    backgroundColor: 'rgba(21, 128, 61, 0.08)',
-                    borderWidth: 3,
-                    tension: 0.35,
-                    fill: true,
-                    pointBackgroundColor: '#15803d',
-                    pointRadius: 4
-                  }]
-                }}
-                options={chartOptions}
-              />
-            </div>
+      {/* ─── 3 Real Mandi Charts Grid ─── */}
+      <div className="mandi-charts-section">
+        {/* Chart 1: Mandi-wise Current Price Comparison */}
+        <div className="chart-card">
+          <div className="chart-card-header">
+            <h3 className="chart-title">
+              🏪 Mandi-wise Price Comparison ({selectedCrop})
+            </h3>
+            <span className="chart-sub-tag">Regional APMC Spread</span>
           </div>
+          <div className="chart-container">
+            {multiMarketData.length > 0 ? (
+              <Bar data={mandiComparisonChartData} options={baseChartOptions} />
+            ) : (
+              <div className="chart-empty-state">No APMC market data available.</div>
+            )}
+          </div>
+        </div>
 
-          {/* Multi-Mandi Price Comparison Table */}
+        {/* Chart 2: Crop-wise Price Benchmark */}
+        <div className="chart-card">
+          <div className="chart-card-header">
+            <h3 className="chart-title">
+              🌾 Commodity Benchmark Rates ({selectedDistrict})
+            </h3>
+            <span className="chart-sub-tag">Key Crops (₹/Qtl)</span>
+          </div>
+          <div className="chart-container">
+            {cropSummaryData.length > 0 ? (
+              <Bar data={cropComparisonChartData} options={baseChartOptions} />
+            ) : (
+              <div className="chart-empty-state">No crop benchmark data available.</div>
+            )}
+          </div>
+        </div>
+
+        {/* Chart 3: Price Trajectory & Market Arrivals Trend */}
+        <div className="chart-card chart-card-full-width">
+          <div className="chart-card-header">
+            <h3 className="chart-title">
+              📈 {selectedCrop} Price Trajectory & Arrivals Volume Trend
+            </h3>
+            <span className="chart-sub-tag">Dual-Axis Trend Analysis</span>
+          </div>
+          <div className="chart-container">
+            {priceHistory.length > 0 ? (
+              <Line data={priceArrivalsTrendData} options={dualAxisOptions} />
+            ) : (
+              <div className="chart-empty-state">No historical price trend available.</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Main Grid: Arbitrage Table & AI Copilot ─── */}
+      <div className="dashboard-grid">
+        {/* Left: Nearby APMC Comparison Table */}
+        <div className="left-section">
           <div className="chart-card">
             <h3 className="chart-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FaTruck style={{ color: '#15803d' }} /> Nearby APMC Mandi Price Comparison (Arbitrage Opportunities)
+              <FaTruck style={{ color: '#15803d' }} /> {t('compareApmc', 'Nearby APMC Mandi Price Comparison')}
             </h3>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                 <thead>
                   <tr style={{ borderBottom: '2px solid var(--m-border)', textAlign: 'left', color: 'var(--m-muted)' }}>
-                    <th style={{ padding: '10px 8px' }}>Mandi APMC</th>
+                    <th style={{ padding: '10px 8px' }}>{t('selectMarket', 'Mandi APMC')}</th>
                     <th style={{ padding: '10px 8px' }}>Distance</th>
-                    <th style={{ padding: '10px 8px' }}>Modal Price</th>
+                    <th style={{ padding: '10px 8px' }}>{t('liveRates', 'Modal Price')}</th>
                     <th style={{ padding: '10px 8px' }}>Net Profit Margin</th>
                   </tr>
                 </thead>
@@ -488,7 +586,7 @@ const MarketDashboard = () => {
                     <tr key={idx} style={{ borderBottom: '1px solid var(--m-border)' }}>
                       <td style={{ padding: '12px 8px', fontWeight: 700, color: 'var(--m-text)' }}>{m.name}</td>
                       <td style={{ padding: '12px 8px', color: 'var(--m-muted)' }}>{m.distance || `${20 + idx * 35} km`}</td>
-                      <td style={{ padding: '12px 8px', fontWeight: 800, color: '#0f172a' }}>₹{m.price}/qtl</td>
+                      <td style={{ padding: '12px 8px', fontWeight: 800, color: '#0f172a' }}>₹{m.price || m.modalPrice}/qtl</td>
                       <td style={{ padding: '12px 8px' }}>
                         <span style={{
                           background: m.price >= 2500 ? '#dcfce7' : '#f1f5f9',
@@ -509,12 +607,12 @@ const MarketDashboard = () => {
           </div>
         </div>
 
-        {/* Right Section: AI Mandi Strategist Copilot */}
+        {/* Right: AI Mandi Strategist Copilot */}
         <div className="right-section">
           {/* Smart Strategic Recommendations */}
           <div className="recommendations-card">
             <h3 className="recommendations-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FaLightbulb style={{ color: '#16a34a' }} /> AI Agronomist Mandi Prescriptions
+              <FaLightbulb style={{ color: '#16a34a' }} /> {t('aiMarketAdvisor', 'AI Mandi Advisor')}
             </h3>
             <div className="recommendations-grid">
               <div className="rec-card">
@@ -529,7 +627,7 @@ const MarketDashboard = () => {
                 <div className="rec-icon">🚛</div>
                 <div>
                   <div className="rec-title">Arbitrage Opportunity: Mumbai APMC</div>
-                  <p className="rec-desc">Mumbai APMC is paying ₹2,780/qtl (+₹330 higher). Transport cost is ~₹110/qtl for net +₹220/qtl gain.</p>
+                  <p className="rec-desc">Mumbai APMC is paying higher by +₹320/qtl. Transport cost is ~₹110/qtl for net +₹210/qtl gain.</p>
                 </div>
               </div>
 
@@ -550,8 +648,8 @@ const MarketDashboard = () => {
                 <FaRobot />
               </div>
               <div>
-                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>AI Mandi Strategist</h4>
-                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>● Online & Analyzing Trades</span>
+                <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800 }}>{t('aiMarketAdvisor', 'AI Mandi Strategist')}</h4>
+                <span style={{ fontSize: '0.72rem', color: '#16a34a', fontWeight: 700 }}>● {t('active', 'Online & Analyzing Trades')}</span>
               </div>
             </div>
 
@@ -566,7 +664,7 @@ const MarketDashboard = () => {
               ))}
               {isChatLoading && (
                 <div className="chat-msg bot" style={{ fontStyle: 'italic', opacity: 0.8 }}>
-                  AI Mandi Strategist is calculating best market prices…
+                  {t('loading', 'AI Mandi Strategist is calculating best market prices…')}
                 </div>
               )}
             </div>
@@ -574,7 +672,7 @@ const MarketDashboard = () => {
             <form onSubmit={handleSendMessage} className="chat-input-row">
               <input
                 type="text"
-                placeholder="Ask e.g., 'Should I sell my onion now?'"
+                placeholder={t('askMarketQuestion', "Ask e.g., 'Should I sell my onion now?'")}
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
               />

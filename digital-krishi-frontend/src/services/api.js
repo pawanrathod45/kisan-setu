@@ -2,15 +2,26 @@ import axios from "axios";
 
 // Helper to reliably compute the API base URL for dev and production
 const getBaseURL = () => {
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+     window.location.hostname === "127.0.0.1" ||
+     window.location.hostname === "::1");
+
   const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL;
+
+  // In local development, always connect to local backend (port 5000) unless explicitly given a local URL
+  if (isLocalhost) {
+    if (envUrl && (envUrl.includes("localhost") || envUrl.includes("127.0.0.1"))) {
+      const clean = envUrl.trim().replace(/\/+$/, "");
+      return clean.endsWith("/api") ? clean : `${clean}/api`;
+    }
+    return "http://localhost:5000/api";
+  }
+
   if (envUrl && envUrl.trim()) {
     const clean = envUrl.trim().replace(/\/+$/, "");
     return clean.endsWith("/api") ? clean : `${clean}/api`;
-  }
-  
-  // In browser, if running locally use localhost, otherwise connect to live production backend on Render
-  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
-    return "http://localhost:5000/api";
   }
 
   return "https://kisan-setu-veld.onrender.com/api";
@@ -18,6 +29,7 @@ const getBaseURL = () => {
 
 const API = axios.create({
   baseURL: getBaseURL(),
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },

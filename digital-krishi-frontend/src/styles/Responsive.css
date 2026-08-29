@@ -137,33 +137,54 @@ input, select, textarea, button {
     box-sizing: border-box !important;
   }
 
-  /* Sidebar Drawer on Mobile & Tablet */
-  .sidebar {
+  /* Sidebar Drawer on Mobile & Tablet (<=1024px) */
+  .sidebar,
+  .admin-sidebar {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
-    width: min(320px, 86vw) !important;
+    bottom: 0 !important;
+    width: min(82vw, 320px) !important;
+    max-width: 320px !important;
     height: 100vh !important;
+    height: 100dvh !important;
     transform: translateX(-100%) !important;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 99999 !important;
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.35) !important;
+    margin: 0 !important;
+    visibility: visible !important;
+    background: rgba(255, 255, 255, 0.98) !important;
   }
 
-  .sidebar.open {
+  .sidebar.open,
+  .admin-sidebar.open {
     transform: translateX(0) !important;
   }
 
-  .sidebar-close-btn {
+  .sidebar-close-btn,
+  .admin-sidebar-close-btn {
     display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
   }
 
-  .sidebar-overlay {
+  .sidebar-overlay,
+  .admin-sidebar-overlay {
     position: fixed !important;
     inset: 0 !important;
-    background: rgba(15, 23, 42, 0.72) !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
     z-index: 99998 !important;
     display: block !important;
   }
@@ -171,43 +192,48 @@ input, select, textarea, button {
   /* Header Bar */
   .dashboard-top-header {
     height: 60px !important;
-    padding: 0 12px !important;
+    padding: 0 14px !important;
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
     flex-wrap: nowrap !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .header-left {
+  .dashboard-top-header .header-left {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
     flex-wrap: nowrap !important;
     min-width: 0 !important;
-    flex: 1 !important;
+    flex: 1 1 auto !important;
   }
 
-  .header-page-title-box {
+  .dashboard-top-header .header-page-title-box {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
     min-width: 0 !important;
   }
 
-  .header-right {
+  .dashboard-top-header .header-right {
     display: flex !important;
     align-items: center !important;
+    justify-content: flex-end !important;
     gap: 8px !important;
     flex-wrap: nowrap !important;
     flex-shrink: 0 !important;
+    width: auto !important;
+    margin-left: auto !important;
   }
 
-  .hamburger-btn {
+  .dashboard-top-header .hamburger-btn {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 36px !important;
-    height: 36px !important;
+    width: 38px !important;
+    height: 38px !important;
     border-radius: 10px !important;
     flex-shrink: 0 !important;
   }
@@ -231,23 +257,177 @@ input, select, textarea, button {
 
   /* Welcome Hero Card */
   .hero-welcome-card {
-    padding: 22px 18px !important;
-    flex-direction: column !important;
-    gap: 16px !important;
+    padding: 20px 18px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .hero-welcome-card .hero-content {
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: 16px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .hero-left {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .hero-greeting {
+    font-size: 20px !important;
+    line-height: 1.3 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+
+  .hero-subtitle {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    max-width: 100% !important;
+    margin-bottom: 10px !important;
+  }
+
+  .hero-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .meta-item {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    max-width: 100% !important;
+    padding: 5px 10px !important;
+    font-size: 12px !important;
   }
 
   .hero-right {
     width: 100% !important;
+    min-width: 0 !important;
   }
 
   .premium-weather {
     width: 100% !important;
     max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: left !important;
+  }
+
+  .weather-header-pill {
+    align-self: flex-start !important;
+    margin-bottom: 0 !important;
+  }
+
+  .weather-main-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .weather-icon-float {
+    font-size: 26px !important;
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .weather-temp {
+    font-size: 22px !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    color: #ffffff !important;
+  }
+
+  .weather-condition {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-transform: capitalize !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.3 !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .weather-extra {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+
+  .weather-stat-chip {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 6px 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .weather-stat-val {
+    white-space: nowrap !important;
+    font-weight: 800 !important;
+  }
+
+  .hero-quick-actions-bar {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+  }
+
+  .hero-quick-actions-label {
+    width: 100% !important;
+    margin-bottom: 2px !important;
+  }
+
+  .hero-quick-action-btn {
+    flex: 1 1 calc(50% - 8px) !important;
+    min-width: 140px !important;
+    justify-content: center !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    text-align: center !important;
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+    margin-left: 0 !important;
   }
 
   /* 2-Column Section Grids Collapse on Tablet/Mobile */
@@ -255,10 +435,25 @@ input, select, textarea, button {
   .analytics-main-grid,
   .ai-dashboard-grid,
   .dd-grid-layout,
-  .dashboard-grid {
+  .dashboard-grid,
+  .dashboard-two-col-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 18px !important;
+    gap: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-card-interactive {
+    height: auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
   }
 
   .calendar-matrix-card {
@@ -293,10 +488,229 @@ input, select, textarea, button {
    ============================================================ */
 @media (max-width: 768px) {
   
-  /* Typography Scale */
-  h1 { font-size: 20px !important; }
-  h2 { font-size: 18px !important; }
-  h3 { font-size: 16px !important; }
+  /* Typography & Text Flow */
+  body, html {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  * {
+    box-sizing: border-box !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, p, span, div, strong, label, button, a {
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+  }
+
+  h1 { font-size: 19px !important; line-height: 1.3 !important; }
+  h2 { font-size: 17px !important; line-height: 1.3 !important; }
+  h3 { font-size: 15.5px !important; line-height: 1.35 !important; }
+
+  /* Dashboard Cards General */
+  .dashboard-card-interactive {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .dashboard-card-header-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .dashboard-card-title {
+    font-size: 16px !important;
+    flex-wrap: wrap !important;
+    line-height: 1.3 !important;
+  }
+
+  .dashboard-badge-pill {
+    white-space: normal !important;
+  }
+
+  .dashboard-card-footer {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    text-align: left !important;
+  }
+
+  .dashboard-card-footer button,
+  .dashboard-card-footer a {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Hourly Radar Track (Card 1) */
+  .hourly-radar-track {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 8px !important;
+    padding-bottom: 6px !important;
+    width: 100% !important;
+    scrollbar-width: none !important;
+  }
+
+  .hourly-radar-track::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .hourly-slot-btn {
+    flex: 0 0 76px !important;
+    min-width: 76px !important;
+    padding: 8px 4px !important;
+  }
+
+  /* Hero Welcome Card Mobile */
+  .hero-welcome-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .hero-greeting {
+    font-size: 19px !important;
+  }
+
+  .hero-meta-row {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    width: 100% !important;
+  }
+
+  .meta-item {
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+    max-width: 100% !important;
+    padding: 4px 8px !important;
+    font-size: 11.5px !important;
+  }
+
+  /* Mobile Weather Box */
+  .premium-weather {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: left !important;
+    margin-top: 6px !important;
+  }
+
+  .weather-header-pill {
+    align-self: flex-start !important;
+    margin-bottom: 0 !important;
+  }
+
+  .weather-main-row {
+    display: grid !important;
+    grid-template-columns: auto auto minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .weather-icon-float {
+    font-size: 26px !important;
+    margin-bottom: 0 !important;
+    line-height: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .weather-temp {
+    font-size: 22px !important;
+    font-weight: 850 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    color: #ffffff !important;
+  }
+
+  .weather-condition {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-transform: capitalize !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    line-height: 1.3 !important;
+    min-width: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .weather-extra {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+  }
+
+  .weather-stat-chip {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    padding: 6px 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .weather-stat-val {
+    white-space: nowrap !important;
+    font-weight: 800 !important;
+  }
+
+  .hero-quick-actions-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .hero-quick-action-btn {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+    font-size: 12.5px !important;
+    padding: 10px 14px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    margin-left: 0 !important;
+  }
 
   /* Dashboard Header */
   .header-search-wrap {
@@ -304,14 +718,17 @@ input, select, textarea, button {
   }
 
   .header-page-name {
-    font-size: 15px !important;
+    font-size: 14.5px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 140px !important;
+    max-width: 100% !important;
   }
 
-  .header-page-badge {
+  .header-page-badge,
+  .header-page-icon-pill,
+  .header-quick-action-btn,
+  .header-voice-btn {
     display: none !important;
   }
 
@@ -320,14 +737,25 @@ input, select, textarea, button {
   }
 
   .header-bell-btn {
-    width: 36px !important;
-    height: 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
   }
 
   .profile-trigger {
-    padding: 3px 6px !important;
-    gap: 4px !important;
-    height: 36px !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    height: 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+  }
+
+  .profile-trigger-avatar-wrap,
+  .profile-trigger-avatar {
+    width: 34px !important;
+    height: 34px !important;
   }
 
   .profile-trigger-name,
@@ -753,6 +1181,20 @@ input, select, textarea, button {
   .metric-cards-grid {
     grid-template-columns: 1fr !important;
     gap: 8px !important;
+  }
+
+  .weather-temp {
+    font-size: 19px !important;
+  }
+
+  .weather-condition {
+    font-size: 11.5px !important;
+  }
+
+  .weather-stat-chip {
+    font-size: 10.5px !important;
+    padding: 5px 4px !important;
+    gap: 3px !important;
   }
 }
 

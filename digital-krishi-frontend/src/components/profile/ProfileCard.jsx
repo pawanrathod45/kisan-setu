@@ -6,9 +6,11 @@ import {
   FaTractor, FaUserCheck
 } from 'react-icons/fa';
 import { GiPlantRoots, GiWheat, GiFarmer } from 'react-icons/gi';
+import { useLanguage } from '../../context/LanguageContext';
 import './profile.css';
 
 const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
+  const { t, language } = useLanguage();
   if (!user) return null;
 
   const fields = [
@@ -25,8 +27,12 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
   const completion = Math.round((filledFields / fields.length) * 100);
 
   const getRoleDisplay = (role) => {
-    const roles = { farmer: '🌾 Verified Kisan Member', officer: '🏛 Krishi Officer', agent: '🤝 Agri Agent' };
-    return roles[role] || '🌾 Verified Kisan Member';
+    const roles = {
+      farmer: `🌾 ${t('kisanMitra', 'Verified Kisan Member')}`,
+      officer: `🏛 ${t('krishiOfficer', 'Krishi Officer')}`,
+      agent: '🤝 Agri Agent'
+    };
+    return roles[role] || `🌾 ${t('kisanMitra', 'Verified Kisan Member')}`;
   };
 
   const getInitials = (name) => {
@@ -54,7 +60,7 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
                 {getInitials(user.name)}
               </div>
             )}
-            <button className="profile-avatar-edit-badge" onClick={onEdit} title="Change Profile Photo" aria-label="Change photo">
+            <button className="profile-avatar-edit-badge" onClick={onEdit} title={t('edit', 'Change Profile Photo')} aria-label="Change photo">
               <FaCamera />
             </button>
           </div>
@@ -63,7 +69,7 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <div className="profile-identity-name">
               <span>{user.name || 'Farmer User'}</span>
               <span className="profile-verified-badge">
-                <FaCheckCircle style={{ fontSize: '11px' }} /> Verified
+                <FaCheckCircle style={{ fontSize: '11px' }} /> {t('healthy', 'Verified')}
               </span>
             </div>
 
@@ -80,7 +86,7 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
 
               <span className="profile-meta-pill-item">
                 <FaSeedling />
-                {user.crop ? `${user.crop.charAt(0).toUpperCase() + user.crop.slice(1)}` : 'Multi-Crop'}
+                {user.crop ? `${user.crop.charAt(0).toUpperCase() + user.crop.slice(1)}` : t('all', 'Multi-Crop')}
               </span>
             </div>
           </div>
@@ -88,10 +94,10 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
 
         <div className="profile-hero-actions">
           <button className="profile-btn-edit" onClick={onEdit}>
-            <FaUserEdit /> Edit Farm Details
+            <FaUserEdit /> {t('edit', 'Edit Farm Details')}
           </button>
           <button className="profile-btn-logout" onClick={onLogout}>
-            <FaSignOutAlt /> Logout
+            <FaSignOutAlt /> {t('logout', 'Logout')}
           </button>
         </div>
       </div>
@@ -100,8 +106,8 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
       <div className="profile-completion-card">
         <div className="completion-header">
           <div>
-            <h3 className="completion-title">🌾 Farm Dossier Registration Health</h3>
-            <p className="completion-subtitle">A completed farm profile enables hyper-local AI disease scans and tailored Mandi arbitrage</p>
+            <h3 className="completion-title">🌾 {t('farmerDossier', 'Farm Dossier Registration Health')}</h3>
+            <p className="completion-subtitle">{t('dashboardSubtitle', 'A completed farm profile enables hyper-local AI disease scans and tailored Mandi arbitrage')}</p>
           </div>
           <div className="completion-percentage">{completion}%</div>
         </div>
@@ -118,7 +124,7 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <FaMapMarkerAlt />
           </div>
           <div className="detail-content">
-            <div className="detail-label">FARM LOCATION & DISTRICT</div>
+            <div className="detail-label">{t('location', 'FARM LOCATION & DISTRICT')}</div>
             <div className="detail-value">{user.location || 'Haveli, Pune'}</div>
           </div>
         </div>
@@ -128,8 +134,8 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <FaSeedling />
           </div>
           <div className="detail-content">
-            <div className="detail-label">PRIMARY CROP</div>
-            <div className="detail-value">{user.crop ? `${user.crop.charAt(0).toUpperCase() + user.crop.slice(1)} (Certified)` : 'Rice (Basmati)'}</div>
+            <div className="detail-label">{t('cropName', 'PRIMARY CROP')}</div>
+            <div className="detail-value">{user.crop ? `${user.crop.charAt(0).toUpperCase() + user.crop.slice(1)}` : 'Rice (Basmati)'}</div>
           </div>
         </div>
 
@@ -138,8 +144,8 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <FaLayerGroup />
           </div>
           <div className="detail-content">
-            <div className="detail-label">LAND HOLDING</div>
-            <div className="detail-value">{user.landArea ? `${user.landArea} Acres` : '4.5 Acres (Canal & Drip)'}</div>
+            <div className="detail-label">{t('landArea', 'LAND HOLDING')}</div>
+            <div className="detail-value">{user.landArea ? `${user.landArea} ${t('acres', 'Acres')}` : `4.5 ${t('acres', 'Acres')}`}</div>
           </div>
         </div>
 
@@ -148,8 +154,8 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <GiPlantRoots />
           </div>
           <div className="detail-content">
-            <div className="detail-label">FARMING METHOD</div>
-            <div className="detail-value">{user.farmingType ? user.farmingType.charAt(0).toUpperCase() + user.farmingType.slice(1) : 'Sustainable Commercial'}</div>
+            <div className="detail-label">{t('farmingType', 'FARMING METHOD')}</div>
+            <div className="detail-value">{user.farmingType ? user.farmingType.charAt(0).toUpperCase() + user.farmingType.slice(1) : t('farmingType', 'Sustainable Commercial')}</div>
           </div>
         </div>
 
@@ -158,9 +164,9 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <FaGlobe />
           </div>
           <div className="detail-content">
-            <div className="detail-label">PREFERRED DIALECT</div>
+            <div className="detail-label">{t('language', 'PREFERRED DIALECT')}</div>
             <div className="detail-value">
-              {user.language === 'hi' ? 'हिन्दी (Hindi)' : user.language === 'mr' ? 'मराठी (Marathi)' : 'English (India)'}
+              {language === 'hi' || user.language === 'hi' ? 'हिन्दी (Hindi)' : language === 'mr' || user.language === 'mr' ? 'मराठी (Marathi)' : 'English (India)'}
             </div>
           </div>
         </div>
@@ -170,8 +176,8 @@ const ProfileCard = ({ user, tip, weather, market, onEdit, onLogout }) => {
             <FaShieldAlt />
           </div>
           <div className="detail-content">
-            <div className="detail-label">SOIL HEALTH CARD</div>
-            <div className="detail-value">Grade-A Loamy Soil (Verified)</div>
+            <div className="detail-label">{t('soilHealthIndex', 'SOIL HEALTH CARD')}</div>
+            <div className="detail-value">{t('healthy', 'Grade-A Loamy Soil (Verified)')}</div>
           </div>
         </div>
 

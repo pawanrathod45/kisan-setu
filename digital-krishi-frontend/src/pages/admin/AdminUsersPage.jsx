@@ -20,6 +20,27 @@ import {
 import adminService from "../../services/adminService";
 import ConfirmModal from "../../components/common/ConfirmModal";
 
+import CustomSelect from "../../components/common/CustomSelect";
+
+const ROLE_OPTIONS = [
+  { value: "all", label: "All Roles" },
+  { value: "farmer", label: "Farmers" },
+  { value: "officer", label: "Krishi Officers" },
+  { value: "admin", label: "Super Admins" }
+];
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All Statuses" },
+  { value: "active", label: "Active Only" },
+  { value: "suspended", label: "Suspended Only" }
+];
+
+const VERIFIED_OPTIONS = [
+  { value: "all", label: "All Verification" },
+  { value: "true", label: "Verified Email" },
+  { value: "false", label: "Pending Verification" }
+];
+
 const AdminUsersPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState([]);
@@ -177,53 +198,37 @@ const AdminUsersPage = () => {
 
         <div className="admin-filters-group">
           {/* Role Filter */}
-          <div className="admin-filter-item">
-            <FaUserShield className="admin-filter-icon" />
-            <select
-              value={role}
-              onChange={(e) => {
-                setRole(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Roles</option>
-              <option value="farmer">Farmers</option>
-              <option value="officer">Krishi Officers</option>
-              <option value="admin">Super Admins</option>
-            </select>
-          </div>
+          <CustomSelect
+            options={ROLE_OPTIONS}
+            value={role}
+            onChange={(val) => {
+              setRole(val);
+              setPage(1);
+            }}
+            icon={FaUserShield}
+          />
 
           {/* Status Filter */}
-          <div className="admin-filter-item">
-            <FaFilter className="admin-filter-icon" />
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active Only</option>
-              <option value="suspended">Suspended Only</option>
-            </select>
-          </div>
+          <CustomSelect
+            options={STATUS_OPTIONS}
+            value={status}
+            onChange={(val) => {
+              setStatus(val);
+              setPage(1);
+            }}
+            icon={FaFilter}
+          />
 
           {/* Email Verification Filter */}
-          <div className="admin-filter-item">
-            <FaCheckCircle className="admin-filter-icon" />
-            <select
-              value={verified}
-              onChange={(e) => {
-                setVerified(e.target.value);
-                setPage(1);
-              }}
-            >
-              <option value="all">All Verification</option>
-              <option value="true">Verified Email</option>
-              <option value="false">Pending Verification</option>
-            </select>
-          </div>
+          <CustomSelect
+            options={VERIFIED_OPTIONS}
+            value={verified}
+            onChange={(val) => {
+              setVerified(val);
+              setPage(1);
+            }}
+            icon={FaCheckCircle}
+          />
 
           <button className="admin-reset-btn" onClick={fetchUsers} title="Refresh directory">
             <FaRedoAlt />

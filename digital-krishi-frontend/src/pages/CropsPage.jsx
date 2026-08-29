@@ -7,19 +7,20 @@ import {
 } from 'react-icons/fa';
 import { GiWheat } from 'react-icons/gi';
 import API from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/Dashboard.css';
 
 import ConfirmModal from '../components/common/ConfirmModal';
 
 /* Growth stage helper */
-const getStage = (sowingDate) => {
-  if (!sowingDate) return { label: 'Active', color: 'green' };
+const getStage = (sowingDate, t) => {
+  if (!sowingDate) return { label: t?.('active', 'Active') || 'Active', color: 'green' };
   const daysOld = Math.floor((Date.now() - new Date(sowingDate)) / 86400000);
-  if (daysOld < 0)   return { label: 'Planned',    color: 'blue' };
-  if (daysOld < 30)  return { label: 'Germination',color: 'green' };
-  if (daysOld < 80)  return { label: 'Growing',    color: 'green' };
-  if (daysOld < 120) return { label: 'Maturing',   color: 'amber' };
-  return               { label: 'Harvest Ready',   color: 'amber' };
+  if (daysOld < 0)   return { label: t?.('planned', 'Planned') || 'Planned', color: 'blue' };
+  if (daysOld < 30)  return { label: t?.('germination', 'Germination') || 'Germination', color: 'green' };
+  if (daysOld < 80)  return { label: t?.('growing', 'Growing / Vegetative') || 'Growing', color: 'green' };
+  if (daysOld < 120) return { label: t?.('maturing', 'Maturing / Flowering') || 'Maturing', color: 'amber' };
+  return               { label: t?.('harvestReady', 'Harvest Ready') || 'Harvest Ready', color: 'amber' };
 };
 
 const EMPTY_CROP = {
@@ -36,6 +37,7 @@ const EMPTY_CROP = {
 };
 
 const CropsPage = () => {
+  const { t, language } = useLanguage();
   const [crops, setCrops]                 = useState([]);
   const [loading, setLoading]             = useState(true);
   const [error, setError]                 = useState(null);
@@ -226,16 +228,16 @@ const CropsPage = () => {
           </div>
           <div>
             <h1 className="ks-page-title" style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text)', margin: 0 }}>
-              My Crops & Live Market
+              {t('cropsLiveMarket', 'My Crops & Live Market')}
             </h1>
             <p className="ks-page-subtitle" style={{ fontSize: '0.88rem', color: 'var(--text-light)', margin: '4px 0 0 0' }}>
-              {loading ? 'Syncing farm portfolio…' : `Managing ${crops.length} active crop${crops.length !== 1 ? 's' : ''} with live APMC rates & pesticide logs`}
+              {loading ? t('syncingPortfolio', 'Syncing farm portfolio…') : t('managingPlots', { count: crops.length })}
             </p>
           </div>
         </div>
 
         <button className="ks-btn ks-btn--primary" onClick={openAdd} style={{ padding: '10px 18px', borderRadius: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FaPlus /> Add New Crop
+          <FaPlus /> {t('addNewCrop', 'Add New Crop')}
         </button>
       </div>
 
@@ -269,18 +271,18 @@ const CropsPage = () => {
             {crops.length === 0 && (
               <div className="ks-empty" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '24px', border: '2px dashed var(--border)' }}>
                 <GiWheat style={{ fontSize: '48px', color: '#15803d', marginBottom: '12px' }} />
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>No Crops In Your Portfolio Yet</h3>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text)' }}>{t('noCropsPortfolio', 'No Crops In Your Portfolio Yet')}</h3>
                 <p style={{ color: 'var(--text-light)', maxWidth: '420px', margin: '6px auto 20px' }}>
-                  Add your first crop or upload a plant photo to auto-detect market prices and disease protection schedules.
+                  {t('addFirstCropDesc', 'Add your first crop or upload a plant photo to auto-detect market prices and disease protection schedules.')}
                 </p>
                 <button className="ks-btn ks-btn--primary" onClick={openAdd}>
-                  <FaPlus className="me-2" /> Add First Crop
+                  <FaPlus className="me-2" /> {t('addNewCrop', 'Add First Crop')}
                 </button>
               </div>
             )}
 
             {crops.map((crop, i) => {
-              const stage = getStage(crop.sowingDate);
+              const stage = getStage(crop.sowingDate, t);
               const isHealthy = crop.healthStatus === 'Healthy' || !crop.diseaseDetected || crop.diseaseDetected === 'Healthy Plant';
 
               return (
@@ -346,7 +348,7 @@ const CropsPage = () => {
                         boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
                       }}
                     >
-                      <FaCamera /> Scan Leaf
+                      <FaCamera /> {t('diagnoseLeaf', 'Scan Leaf')}
                     </button>
                   </div>
 
@@ -377,7 +379,7 @@ const CropsPage = () => {
                         gap: '4px'
                       }}>
                         {isHealthy ? <FaCheckCircle /> : <FaExclamationTriangle />}
-                        {crop.diseaseDetected ? crop.diseaseDetected.slice(0, 16) : (isHealthy ? 'Healthy' : 'Needs Care')}
+                        {crop.diseaseDetected ? crop.diseaseDetected.slice(0, 16) : (isHealthy ? t('healthy', 'Healthy') : t('needsCare', 'Needs Care'))}
                       </span>
                     </div>
 
@@ -395,10 +397,10 @@ const CropsPage = () => {
                       }}>
                         <div>
                           <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#15803d', textTransform: 'uppercase' }}>
-                            MANDI RATE
+                            {t('liveRates', 'MANDI RATE')}
                           </div>
                           <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>
-                            ₹{crop.currentPrice || 2450} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>/qtl</span>
+                            ₹{crop.currentPrice || 2450} <span style={{ fontSize: '0.68rem', color: '#64748b' }}>{t('perQuintal', '/qtl')}</span>
                           </div>
                         </div>
                         <span style={{ background: '#22c55e', color: '#ffffff', fontSize: '0.65rem', fontWeight: 800, padding: '2px 5px', borderRadius: '6px' }}>
@@ -417,10 +419,10 @@ const CropsPage = () => {
                         justifyContent: 'center'
                       }}>
                         <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
-                          SOWN ON
+                          {t('sowingDate', 'SOWN ON')}
                         </div>
                         <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#334155' }}>
-                          {crop.sowingDate ? new Date(crop.sowingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'Nov 2025'}
+                          {crop.sowingDate ? new Date(crop.sowingDate).toLocaleDateString(language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short' }) : 'Nov 2025'}
                         </div>
                       </div>
                     </div>
@@ -464,7 +466,7 @@ const CropsPage = () => {
                           gap: '5px'
                         }}
                       >
-                        <FaFlask /> Sprays
+                        <FaFlask /> {t('logPesticide', 'Sprays')}
                       </button>
 
                       <button
@@ -482,6 +484,7 @@ const CropsPage = () => {
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}
+                        title={t('editPlot', 'Edit Plot')}
                       >
                         <FaEdit />
                       </button>
@@ -501,6 +504,7 @@ const CropsPage = () => {
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}
+                        title={t('deleteCrop', 'Delete Plot')}
                       >
                         <FaTrash />
                       </button>
@@ -517,10 +521,10 @@ const CropsPage = () => {
       {/* Delete Crop Confirmation Modal */}
       <ConfirmModal
         isOpen={!!deleteCropId}
-        title="Delete Crop From Portfolio?"
+        title={t('deleteCrop', 'Delete Crop From Portfolio?')}
         message="Are you sure you want to delete this crop? This will also remove associated spray records and price tracking."
-        confirmText="Yes, Delete Crop"
-        cancelText="Cancel"
+        confirmText={t('delete', 'Yes, Delete Crop')}
+        cancelText={t('cancel', 'Cancel')}
         type="danger"
         onConfirm={confirmDelete}
         onCancel={() => setDeleteCropId(null)}
@@ -546,7 +550,7 @@ const CropsPage = () => {
             >
               <div className="ks-modal-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                 <h2 className="ks-modal-title" style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>
-                  {editMode ? '✏️ Edit Crop Details' : '🌱 Add New Crop to Portfolio'}
+                  {editMode ? `✏️ ${t('editPlot', 'Edit Crop Details')}` : `🌱 ${t('addNewCrop', 'Add New Crop to Portfolio')}`}
                 </h2>
                 <button className="ks-modal-close" onClick={closeModal}><FaTimes /></button>
               </div>
@@ -563,10 +567,10 @@ const CropsPage = () => {
                       textAlign: 'center'
                     }}>
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#15803d', marginBottom: '6px' }}>
-                        📸 Quick AI Auto-Fill via Leaf/Crop Photo
+                        📸 {t('diagnoseLeaf', 'Quick AI Auto-Fill via Leaf/Crop Photo')}
                       </div>
                       <p style={{ fontSize: '0.78rem', color: '#64748b', margin: '0 0 10px 0' }}>
-                        Upload a photo to automatically identify crop, fetch live Mandi prices & pesticide prescriptions!
+                        {t('uploadPhotoPrompt', 'Upload a photo to automatically identify crop, fetch live Mandi prices & pesticide prescriptions!')}
                       </p>
                       <button
                         type="button"
@@ -585,7 +589,7 @@ const CropsPage = () => {
                           gap: '6px'
                         }}
                       >
-                        <FaUpload /> Select Crop Photo
+                        <FaUpload /> {t('cropImage', 'Select Crop Photo')}
                       </button>
                       <input
                         type="file"
@@ -598,7 +602,7 @@ const CropsPage = () => {
                   )}
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Crop Name *</label>
+                    <label className="ks-form-label">{t('cropName', 'Crop Name')} *</label>
                     <input
                       className="ks-input"
                       type="text"
@@ -610,7 +614,7 @@ const CropsPage = () => {
                   </div>
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Variety / Hybrid</label>
+                    <label className="ks-form-label">{t('variety', 'Variety / Hybrid')}</label>
                     <input
                       className="ks-input"
                       type="text"
@@ -622,7 +626,7 @@ const CropsPage = () => {
 
                   <div className="ks-grid--2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                     <div className="ks-input-group">
-                      <label className="ks-form-label">Area (acres) *</label>
+                      <label className="ks-form-label">{t('plotArea', 'Area (acres)')} *</label>
                       <input
                         className="ks-input"
                         type="number"
@@ -635,7 +639,7 @@ const CropsPage = () => {
                       />
                     </div>
                     <div className="ks-input-group">
-                      <label className="ks-form-label">Sowing Date *</label>
+                      <label className="ks-form-label">{t('sowingDate', 'Sowing Date')} *</label>
                       <input
                         className="ks-input"
                         type="date"
@@ -649,18 +653,18 @@ const CropsPage = () => {
                   {/* Market Price & Status Overview */}
                   <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#475569' }}>
-                      Current Live APMC Rate:
+                      {t('liveRates', 'Current Live APMC Rate')}:
                     </span>
                     <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#15803d' }}>
-                      ₹{current.currentPrice || 2450} / quintal
+                      ₹{current.currentPrice || 2450} {t('perQuintal', '/ quintal')}
                     </span>
                   </div>
                 </div>
 
                 <div className="ks-modal-footer" style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="button" className="ks-btn ks-btn--ghost" onClick={closeModal}>Cancel</button>
+                  <button type="button" className="ks-btn ks-btn--ghost" onClick={closeModal}>{t('cancel', 'Cancel')}</button>
                   <button type="submit" className="ks-btn ks-btn--primary" disabled={saving}>
-                    {saving ? <><FaSpinner className="fa-spin me-1" /> Saving…</> : editMode ? 'Update Crop' : 'Add to My Crops'}
+                    {saving ? <><FaSpinner className="fa-spin me-1" /> {t('loading', 'Saving…')}</> : editMode ? t('savePlot', 'Update Crop') : t('savePlot', 'Add to My Crops')}
                   </button>
                 </div>
               </form>
@@ -689,7 +693,7 @@ const CropsPage = () => {
             >
               <div className="ks-modal-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
                 <h2 className="ks-modal-title" style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
-                  🧪 Record Pesticide Spray: {pesticideModalCrop.name}
+                  🧪 {t('logPesticide', 'Record Pesticide Spray')}: {pesticideModalCrop.name}
                 </h2>
                 <button className="ks-modal-close" onClick={() => setPesticideModalCrop(null)}><FaTimes /></button>
               </div>
@@ -721,7 +725,7 @@ const CropsPage = () => {
                   </div>
 
                   <div className="ks-input-group">
-                    <label className="ks-form-label">Treatment Category</label>
+                    <label className="ks-form-label">{t('taskCategory', 'Treatment Category')}</label>
                     <select
                       className="ks-input"
                       value={newPesticide.type}
@@ -736,9 +740,9 @@ const CropsPage = () => {
                 </div>
 
                 <div className="ks-modal-footer" style={{ padding: '16px 24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <button type="button" className="ks-btn ks-btn--ghost" onClick={() => setPesticideModalCrop(null)}>Cancel</button>
+                  <button type="button" className="ks-btn ks-btn--ghost" onClick={() => setPesticideModalCrop(null)}>{t('cancel', 'Cancel')}</button>
                   <button type="submit" className="ks-btn ks-btn--primary" disabled={savingPesticide}>
-                    {savingPesticide ? 'Saving Spray Log…' : 'Record Spray Application'}
+                    {savingPesticide ? t('loading', 'Saving Spray Log…') : t('save', 'Record Spray Application')}
                   </button>
                 </div>
               </form>

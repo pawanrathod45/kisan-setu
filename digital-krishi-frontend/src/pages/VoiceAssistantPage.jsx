@@ -6,6 +6,7 @@ import {
 } from 'react-icons/fa';
 import { GiSprout } from 'react-icons/gi';
 import API from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/VoiceAssistant.css';
 
 /* ── Language configs ── */
@@ -15,29 +16,56 @@ const LANG_OPTIONS = [
   { code: 'en-IN', label: 'English', name: 'English' },
 ];
 
-const QUICK_PROMPTS = [
+const QUICK_PROMPTS_EN = [
+  { icon: '🌾', text: 'What is the best treatment for Yellow Rust in Wheat?' },
+  { icon: '💧', text: 'When should I do the first irrigation for Cotton?' },
+  { icon: '💰', text: 'What are today Mandi prices for Tomato and Onion?' },
+  { icon: '🌱', text: 'Correct dosage of Urea for Paddy crop per acre?' },
+  { icon: '🐛', text: 'Best organic pesticide spray for aphids and thrips?' },
+];
+
+const QUICK_PROMPTS_HI = [
   { icon: '🌾', text: 'गेहूं में पीला रतुआ का इलाज क्या है?' },
   { icon: '💧', text: 'कपास में पहली सिंचाई कब करें?' },
   { icon: '💰', text: 'आज टमाटर और प्याज का मंडी भाव क्या है?' },
   { icon: '🌱', text: 'धान की फसल में यूरिया की सही मात्रा?' },
-  { icon: '🐛', text: 'Best organic pesticide for aphids' },
+  { icon: '🐛', text: 'माहो व कीटों के लिए सबसे अच्छा जैविक कीटनाशक?' },
+];
+
+const QUICK_PROMPTS_MR = [
+  { icon: '🌾', text: 'गव्हावरील पिवळा तांबेरा रोगावर उपाय काय?' },
+  { icon: '💧', text: 'कापूस पिकाला पहिले पाणी कधी द्यावे?' },
+  { icon: '💰', text: 'आज टोमॅटो आणि कांद्याचे बाजारभाव काय आहेत?' },
+  { icon: '🌱', text: 'भात पिकासाठी युरिया खताची योग्य मात्रा किती?' },
+  { icon: '🐛', text: 'मावा व तुडतुडे नियंत्रणासाठी जैविक कीटकनाशक?' },
 ];
 
 const VoiceAssistantPage = () => {
+  const { language, setLanguage, t } = useLanguage();
   const [transcript, setTranscript]       = useState('');
   const [textInput, setTextInput]         = useState('');
   const [history, setHistory]             = useState([
     {
       role: 'bot',
-      text: 'नमस्ते किसान भाई! मैं आपका डिजिटल कृषि वॉइस ऑफिसर हूँ। माइक बटन दबाकर या लिखकर अपनी फसल, मौसम या मंडी से जुड़ा सवाल पूछें।'
+      text: language === 'hi'
+        ? 'नमस्ते किसान भाई! मैं आपका डिजिटल कृषि वॉइस ऑफिसर हूँ। माइक बटन दबाकर या लिखकर अपनी फसल, मौसम या मंडी से जुड़ा सवाल पूछें।'
+        : language === 'mr'
+        ? 'नमस्कार शेतकरी मित्र! मी तुमचा डिजिटल कृषी व्हॉइस ऑफिसर आहे. माइक बटण दाबून किंवा टाईप करून पीक, हवामान किंवा बाजारभावाबाबत विचारा.'
+        : 'Welcome Farmer! I am your Digital Krishi Voice Officer. Tap the microphone button or type below to ask any questions about your crops, weather spray radar, or Mandi rates.'
     }
   ]);
   const [listening, setListening]         = useState(false);
   const [loading, setLoading]             = useState(false);
   const [speaking, setSpeaking]           = useState(false);
-  const [langCode, setLangCode]           = useState('hi-IN');
+  const [langCode, setLangCode]           = useState(language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN');
   const [supported, setSupported]         = useState(true);
   const [error, setError]                 = useState(null);
+
+  const quickPrompts = language === 'hi' ? QUICK_PROMPTS_HI : language === 'mr' ? QUICK_PROMPTS_MR : QUICK_PROMPTS_EN;
+
+  useEffect(() => {
+    setLangCode(language === 'hi' ? 'hi-IN' : language === 'mr' ? 'mr-IN' : 'en-IN');
+  }, [language]);
 
   const recognitionRef = useRef(null);
   const bottomRef      = useRef(null);
@@ -219,8 +247,8 @@ const VoiceAssistantPage = () => {
             <FaMicrophone />
           </div>
           <div className="va-hero-titles">
-            <h1>AI Krishi Voice Assistant</h1>
-            <p>Hands-free natural language voice dialogue powered by Google Gemini 2.5 Flash AI.</p>
+            <h1>{t('voiceAssistant', 'Voice Assistant')}</h1>
+            <p>{language === 'hi' ? 'Google Gemini 2.5 AI द्वारा संचालित प्राकृतिक आवाज संवाद।' : language === 'mr' ? 'Google Gemini 2.5 AI द्वारे समर्थित नैसर्गिक आवाज संवाद.' : 'Hands-free natural language voice dialogue powered by Google Gemini 2.5 Flash AI.'}</p>
           </div>
         </div>
 
@@ -232,6 +260,7 @@ const VoiceAssistantPage = () => {
               className={`va-lang-btn ${langCode === l.code ? 'active' : ''}`}
               onClick={() => {
                 setLangCode(l.code);
+                setLanguage(l.code.split('-')[0]);
                 stopSpeaking();
               }}
             >
@@ -248,7 +277,7 @@ const VoiceAssistantPage = () => {
         <div className="va-chat-card">
           {/* Quick Prompts Bar */}
           <div className="va-quick-prompts-bar">
-            {QUICK_PROMPTS.map((p, idx) => (
+            {quickPrompts.map((p, idx) => (
               <button
                 key={idx}
                 className="va-prompt-chip"

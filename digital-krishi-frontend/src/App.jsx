@@ -7,8 +7,9 @@ import Register from './pages/Register';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import Dashboard from './pages/Dashboard';
 
-// Layout
+// Layout & Common
 import DashboardLayout from './components/common/DashboardLayout';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 // Feature Pages
 import WeatherPage from './pages/WeatherPage';
@@ -45,73 +46,75 @@ import './styles/Responsive.css';
 
 function App() {
   return (
-    <LanguageProvider>
-      <BrowserRouter>
-        <Routes>
+    <ErrorBoundary title="Kisan Setu Application">
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
 
-          {/* Default Redirect */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+            {/* Default Redirect */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
 
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-          {/* Backward compatibility */}
-          <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
+            {/* Backward compatibility */}
+            <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
 
-          {/* 🔥 PROTECTED FARMER ROUTES */}
-          <Route
-            path="/farmer"
-            element={
-              <ProtectedRoute>
-                <RoleProtectedRoute role="farmer">
-                  <DashboardLayout />
-                </RoleProtectedRoute>
-              </ProtectedRoute>
-            }
-          >
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="crops" element={<CropsPage />} />
-            <Route path="tasks" element={<TasksPage />} />
-            <Route path="weather" element={<WeatherPage />} />
-            <Route path="market" element={<MarketPage />} />
-            <Route path="ai-assistant" element={<AIAssistantPage />} />
-            <Route path="disease-detection" element={<DiseaseDetectionPage />} />
-            <Route path="alerts" element={<AlertsPage />} />
-            <Route path="calendar" element={<CropCalendarPage />} />
-            <Route path="analytics" element={<AnalyticsPage />} />
-            <Route path="voice" element={<VoiceAssistantPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+            {/* 🔥 PROTECTED FARMER ROUTES */}
+            <Route
+              path="/farmer"
+              element={
+                <ProtectedRoute>
+                  <RoleProtectedRoute role="farmer">
+                    <DashboardLayout />
+                  </RoleProtectedRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="crops" element={<CropsPage />} />
+              <Route path="tasks" element={<TasksPage />} />
+              <Route path="weather" element={<WeatherPage />} />
+              <Route path="market" element={<MarketPage />} />
+              <Route path="ai-assistant" element={<AIAssistantPage />} />
+              <Route path="disease-detection" element={<DiseaseDetectionPage />} />
+              <Route path="alerts" element={<AlertsPage />} />
+              <Route path="calendar" element={<CropCalendarPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="voice" element={<VoiceAssistantPage />} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
 
-          {/* 🛡️ PROTECTED ADMIN CONSOLE ROUTES */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <RoleProtectedRoute role="admin">
-                  <AdminLayout />
-                </RoleProtectedRoute>
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboardPage />} />
-            <Route path="users" element={<AdminUsersPage />} />
-            <Route path="crops" element={<AdminCropsPage />} />
-            <Route path="alerts" element={<AdminAlertsPage />} />
-            <Route path="reports" element={<AdminReportsPage />} />
-            <Route path="system" element={<AdminSystemPage />} />
-          </Route>
+            {/* 🛡️ PROTECTED ADMIN CONSOLE ROUTES */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <RoleProtectedRoute role="admin">
+                    <AdminLayout />
+                  </RoleProtectedRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="users" element={<AdminUsersPage />} />
+              <Route path="crops" element={<AdminCropsPage />} />
+              <Route path="alerts" element={<AdminAlertsPage />} />
+              <Route path="reports" element={<AdminReportsPage />} />
+              <Route path="system" element={<AdminSystemPage />} />
+            </Route>
 
-          {/* ❌ Unauthorized fallback */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* ❌ Unauthorized fallback */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
 
-        </Routes>
-      </BrowserRouter>
-    </LanguageProvider>
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }
 
