@@ -20,7 +20,6 @@ const createTransporter = () => {
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
   const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "465", 10);
-  const emailService = (process.env.EMAIL_SERVICE || "gmail").trim().toLowerCase();
 
   if (!emailUser || !emailPass) {
     return null;
@@ -67,65 +66,65 @@ const createTransporter = () => {
 };
 
 /**
- * Diagnostic helper to verify SMTP credentials on startup (without logging secrets)
+ * Diagnostic helper to verify Resend and SMTP credentials on startup
  */
 const verifyEmailConfig = async () => {
+  const resendKey = (process.env.RESEND_API_KEY || "").trim();
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
   const emailService = (process.env.EMAIL_SERVICE || "gmail").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
 
-  if (!emailUser || !emailPass) {
-    console.warn("⚠️ [EmailService] SMTP credentials not fully configured (EMAIL_USER or EMAIL_PASS missing).");
-    return { configured: false, reason: "Missing EMAIL_USER or EMAIL_PASS" };
+  const results = { configured: false, resend: false, smtp: false };
+
+  if (resendKey) {
+    results.resend = true;
+    results.configured = true;
+    console.log(`✅ [EmailService] Resend API configured (${resendKey.substring(0, 6)}***)`);
   }
 
-  try {
-    const transporter = createTransporter();
-    if (!transporter) {
-      console.warn("⚠️ [EmailService] Could not initialize email transporter.");
-      return { configured: false, reason: "Failed to initialize transporter" };
+  if (emailUser && emailPass) {
+    try {
+      const transporter = createTransporter();
+      if (transporter) {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error("SMTP verification timeout (10s)")), 10000);
+          transporter.verify((err, success) => {
+            clearTimeout(timer);
+            if (err) reject(err);
+            else resolve(success);
+          });
+        });
+        results.smtp = true;
+        results.configured = true;
+        console.log(`✅ [EmailService] SMTP connection verified successfully for ${maskEmail(emailUser)} (Service: ${emailService || emailHost || "gmail"})`);
+      }
+    } catch (err) {
+      console.warn("⚠️ [EmailService] SMTP verification warning:", err.message);
     }
-
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (10s)")), 10000);
-      transporter.verify((err, success) => {
-        clearTimeout(timer);
-        if (err) reject(err);
-        else resolve(success);
-      });
-    });
-
-    console.log(`✅ [EmailService] SMTP connection verified successfully for ${maskEmail(emailUser)} (Service: ${emailService || emailHost || "gmail"})`);
-    return { configured: true, user: maskEmail(emailUser) };
-  } catch (err) {
-    console.error("❌ [EmailService] SMTP verification failed on startup:", err.message);
-    return { configured: false, error: err.message };
   }
+
+  if (!results.configured) {
+    console.warn("⚠️ [EmailService] Neither RESEND_API_KEY nor EMAIL_USER/EMAIL_PASS are configured.");
+  }
+
+  return results;
 };
 
 /**
  * Send Official Account Verification OTP Email
+ * Uses Resend API with automatic fallback to SMTP for 100% deliverability
  * @param {string} email - Recipient email address
  * @param {string} otp - 6-digit numeric OTP code
  * @param {string} name - Farmer / User name
- * @returns {Promise<{success: boolean, messageId?: string, error?: string, durationMs?: number}>}
+ * @returns {Promise<{success: boolean, messageId?: string, error?: string, durationMs?: number, provider?: string}>}
  */
 const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
   const startTime = Date.now();
+  const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
+  const resendFrom = (process.env.RESEND_FROM || "Kisan Setu <onboarding@resend.dev>").trim();
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const fromAddress = (process.env.EMAIL_FROM || emailUser || "").trim();
-  const transporter = createTransporter();
-
-  if (!transporter || !emailUser) {
-    const errMsg = "Email transporter not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.";
-    console.error(`❌ [EmailService] Email dispatch aborted: ${errMsg}`);
-    return { success: false, error: errMsg, durationMs: Date.now() - startTime };
-  }
-
-  const formattedFrom = fromAddress.includes("<")
-    ? fromAddress
-    : `"🌾 Kisan Setu Official" <${emailUser}>`;
 
   const otpDigits = String(otp).trim().split("");
   const otpBoxesHtml = otpDigits
@@ -292,6 +291,56 @@ Portal: https://kisan-setu54.vercel.app/login
 ============================================================
   `.trim();
 
+  // Tier 1: Attempt Resend API Dispatch (High performance, direct inbox delivery)
+  if (resendApiKey) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 7000);
+
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: resendFrom,
+          to: [email],
+          subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
+          text: plainTextContent,
+          html: htmlContent,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timer);
+      const resData = await response.json();
+
+      if (response.ok && resData.id) {
+        const durationMs = Date.now() - startTime;
+        console.log(`✅ [EmailService] [Resend] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, id: ${resData.id})`);
+        return { success: true, messageId: resData.id, durationMs, provider: "resend" };
+      } else {
+        console.warn(`⚠️ [EmailService] [Resend] Dispatch failed (${response.status}: ${resData.message || JSON.stringify(resData)}). Falling back to SMTP...`);
+      }
+    } catch (resendError) {
+      console.warn(`⚠️ [EmailService] [Resend] API connection error: ${resendError.message}. Falling back to SMTP...`);
+    }
+  }
+
+  // Tier 2: Attempt SMTP Transporter Dispatch (Gmail / Custom SMTP fallback)
+  const transporter = createTransporter();
+
+  if (!transporter || !emailUser) {
+    const errMsg = "Email delivery failed: Neither Resend API nor valid SMTP credentials are functional.";
+    console.error(`❌ [EmailService] ${errMsg}`);
+    return { success: false, error: errMsg, durationMs: Date.now() - startTime };
+  }
+
+  const formattedFrom = fromAddress.includes("<")
+    ? fromAddress
+    : `"🌾 Kisan Setu Official" <${emailUser}>`;
+
   try {
     const sendMailPromise = transporter.sendMail({
       from: formattedFrom,
@@ -302,17 +351,17 @@ Portal: https://kisan-setu54.vercel.app/login
     });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email dispatch timed out after 10s")), 10000)
+      setTimeout(() => reject(new Error("SMTP email dispatch timed out after 10s")), 10000)
     );
 
     const info = await Promise.race([sendMailPromise, timeoutPromise]);
     const durationMs = Date.now() - startTime;
 
-    console.log(`✅ [EmailService] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, messageId: ${info.messageId})`);
-    return { success: true, messageId: info.messageId, durationMs };
+    console.log(`✅ [EmailService] [SMTP] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, messageId: ${info.messageId})`);
+    return { success: true, messageId: info.messageId, durationMs, provider: "smtp" };
   } catch (error) {
     const durationMs = Date.now() - startTime;
-    console.error(`❌ [EmailService] OTP email failed for ${maskEmail(email)} (duration: ${durationMs}ms): ${error.message}`);
+    console.error(`❌ [EmailService] [SMTP] OTP email failed for ${maskEmail(email)} (duration: ${durationMs}ms): ${error.message}`);
     return { success: false, error: error.message, durationMs };
   }
 };
@@ -322,3 +371,4 @@ module.exports = {
   sendVerificationOtpEmail,
   verifyEmailConfig,
 };
+

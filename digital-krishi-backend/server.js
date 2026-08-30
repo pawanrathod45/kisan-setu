@@ -126,6 +126,7 @@ app.use((err, req, res, next) => {
 const logEnvironmentConfig = () => {
   console.log("==================================================");
   console.log("⚙️  [Kisan Setu] Environment Configuration Check:");
+  console.log(`- RESEND_API_KEY: ${process.env.RESEND_API_KEY ? `configured (${process.env.RESEND_API_KEY.substring(0, 6)}***)` : "not configured"}`);
   console.log(`- EMAIL_SERVICE : ${process.env.EMAIL_SERVICE ? `configured (${process.env.EMAIL_SERVICE})` : "not configured (defaulting to gmail)"}`);
   console.log(`- EMAIL_USER    : ${process.env.EMAIL_USER ? `configured (${maskEmail(process.env.EMAIL_USER)})` : "not configured"}`);
   console.log(`- EMAIL_PASS    : ${process.env.EMAIL_PASS ? "configured (yes)" : "not configured"}`);
