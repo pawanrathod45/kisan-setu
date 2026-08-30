@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaTimes,
@@ -17,23 +17,86 @@ import {
   FaSeedling,
   FaMapMarkerAlt,
   FaWater,
-  FaUserCheck
+  FaUserCheck,
+  FaArrowLeft
 } from "react-icons/fa";
 import { useLanguage } from "../../context/LanguageContext";
 
 const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookmarked }) => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
+
+  // Prevent background body scrolling while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !scheme) return null;
 
   // Language-specific texts
-  const displayName = language === "mr" && scheme.nameMr ? scheme.nameMr : language === "hi" && scheme.nameHi ? scheme.nameHi : scheme.name;
+  const displayName =
+    language === "mr" && scheme.nameMr
+      ? scheme.nameMr
+      : language === "hi" && scheme.nameHi
+      ? scheme.nameHi
+      : scheme.name;
   const officialEnName = scheme.name;
-  const displayDesc = language === "mr" && scheme.descriptionMr ? scheme.descriptionMr : language === "hi" && scheme.descriptionHi ? scheme.descriptionHi : scheme.description;
-  const displayBenefit = language === "mr" && scheme.benefits?.benefitDescriptionMr ? scheme.benefits.benefitDescriptionMr : language === "hi" && scheme.benefits?.benefitDescriptionHi ? scheme.benefits.benefitDescriptionHi : scheme.benefits?.benefitDescription;
+  const displayDesc =
+    language === "mr" && scheme.descriptionMr
+      ? scheme.descriptionMr
+      : language === "hi" && scheme.descriptionHi
+      ? scheme.descriptionHi
+      : scheme.description;
+  const displayBenefit =
+    language === "mr" && scheme.benefits?.benefitDescriptionMr
+      ? scheme.benefits.benefitDescriptionMr
+      : language === "hi" && scheme.benefits?.benefitDescriptionHi
+      ? scheme.benefits.benefitDescriptionHi
+      : scheme.benefits?.benefitDescription;
 
   const evalData = scheme.evaluation;
-  const evalBadge = evalData ? (language === "mr" ? evalData.statusBadgeMr : language === "hi" ? evalData.statusBadgeHi : evalData.statusBadge) : null;
+  const evalStatus = evalData?.status || "partial";
+
+  const getEvaluationHeader = () => {
+    if (evalStatus === "eligible") {
+      return {
+        icon: <FaCheckCircle size={22} />,
+        title: language === "mr" ? "पात्र शेतकरी (Eligible)" : language === "hi" ? "पात्र किसान (Eligible)" : "Eligible for Scheme Benefits",
+        colorClass: "eval-eligible"
+      };
+    }
+    if (evalStatus === "ineligible") {
+      return {
+        icon: <FaTimesCircle size={22} />,
+        title: language === "mr" ? "सध्या अपात्र (Not Eligible)" : language === "hi" ? "वर्तमान में अपात्र (Not Eligible)" : "Not Currently Eligible",
+        colorClass: "eval-ineligible"
+      };
+    }
+    return {
+      icon: <FaExclamationTriangle size={22} />,
+      title: language === "mr" ? "शर्ती पडताळा (Verify Requirements)" : language === "hi" ? "शर्तें जांचें (Verify Requirements)" : "May Be Eligible – Verify Requirements",
+      colorClass: "eval-partial"
+    };
+  };
+
+  const evalHeaderInfo = getEvaluationHeader();
 
   const verifiedDateFormatted = scheme.lastVerifiedDate
     ? new Date(scheme.lastVerifiedDate).toLocaleDateString(language === "mr" ? "mr-IN" : language === "hi" ? "hi-IN" : "en-IN", {
@@ -45,13 +108,13 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
 
   return (
     <AnimatePresence>
-      <div className="ks-modal-backdrop" onClick={onClose}>
+      <div className="ks-modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
         <motion.div
           className="ks-modal-card"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.96, y: 25 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.22, ease: "easeOut" }}
+          exit={{ opacity: 0, scale: 0.96, y: 25 }}
+          transition={{ duration: 0.24, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header */}
@@ -70,8 +133,8 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                 <p className="ks-modal-sub-en">{officialEnName}</p>
               )}
               <div className="ks-modal-dept">
-                <FaBuilding style={{ color: "#15803d" }} />
-                <span>{scheme.department}</span>
+                <FaBuilding className="ks-modal-dept-icon" />
+                <span>{scheme.department || "Department of Agriculture, Government of Maharashtra"}</span>
               </div>
             </div>
 
@@ -96,27 +159,19 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
             </div>
           </div>
 
-          {/* Modal Body (Scrollable) */}
-          <div className="ks-modal-body">
+          {/* Modal Body (Scrollable with zero horizontal overflow) */}
+          <div className="ks-modal-body ks-modal-scroll">
             
-            {/* 🎯 Real Eligibility Evaluation Result */}
+            {/* 1. 🎯 Real Eligibility Evaluation Card */}
             {evalData && (
-              <div
-                className="ks-eval-card"
-                style={{
-                  background: evalData.bg || "#f8fafc",
-                  borderColor: `${evalData.color || "#cbd5e1"}55`
-                }}
-              >
+              <div className={`ks-eval-card ${evalHeaderInfo.colorClass}`}>
                 <div className="ks-eval-header">
-                  <div className="ks-eval-icon" style={{ color: evalData.color || "#15803d" }}>
-                    {evalData.status === "eligible" && <FaCheckCircle size={22} />}
-                    {evalData.status === "partial" && <FaExclamationTriangle size={22} />}
-                    {evalData.status === "ineligible" && <FaTimesCircle size={22} />}
+                  <div className="ks-eval-icon">
+                    {evalHeaderInfo.icon}
                   </div>
-                  <div>
-                    <h4 className="ks-eval-status" style={{ color: evalData.color || "#15803d" }}>
-                      {evalBadge}
+                  <div className="ks-eval-title-wrap">
+                    <h4 className="ks-eval-status">
+                      {evalHeaderInfo.title}
                     </h4>
                     <p className="ks-eval-sub">
                       {language === "mr"
@@ -132,7 +187,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                   <ul className="ks-eval-reasons">
                     {evalData.reasons.map((r, idx) => (
                       <li key={idx}>
-                        <span style={{ color: evalData.color }}>•</span> {r}
+                        <span className="ks-eval-bullet">•</span> {r}
                       </li>
                     ))}
                   </ul>
@@ -140,7 +195,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
               </div>
             )}
 
-            {/* Scheme Description */}
+            {/* 2. Scheme Overview & Objectives */}
             <div className="ks-modal-section">
               <h3 className="ks-section-heading">
                 📝 {language === "mr" ? "योजनेचे स्वरूप व उद्दिष्टे" : language === "hi" ? "योजना का विवरण एवं उद्देश्य" : "Scheme Overview & Objectives"}
@@ -148,7 +203,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
               <p className="ks-section-text">{displayDesc}</p>
             </div>
 
-            {/* Benefits & Subsidy Breakdown */}
+            {/* 3. Benefits & Subsidy Breakdown */}
             <div className="ks-modal-section">
               <h3 className="ks-section-heading">
                 💰 {language === "mr" ? "अनुदान व आर्थिक लाभ" : language === "hi" ? "सब्सिडी एवं वित्तीय लाभ" : "Subsidy & Financial Benefits"}
@@ -168,18 +223,18 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                 )}
               </div>
               {displayBenefit && (
-                <p className="ks-section-text" style={{ marginTop: "10px" }}>{displayBenefit}</p>
+                <p className="ks-section-text ks-benefit-extra-text">{displayBenefit}</p>
               )}
             </div>
 
-            {/* Eligibility Criteria Detailed */}
+            {/* 4. Eligibility Criteria Detailed */}
             <div className="ks-modal-section">
               <h3 className="ks-section-heading">
                 📋 {language === "mr" ? "पात्रता व निकष" : language === "hi" ? "पात्रता एवं शर्तें" : "Eligibility Criteria"}
               </h3>
               <div className="ks-criteria-list">
                 <div className="ks-crit-item">
-                  <FaUserCheck style={{ color: "#15803d" }} />
+                  <FaUserCheck className="ks-crit-icon green" />
                   <span>
                     <strong>{language === "mr" ? "शेतकरी प्रवर्ग: " : language === "hi" ? "किसान श्रेणी: " : "Eligible Categories: "}</strong>
                     {scheme.eligibility?.farmerCategories?.map(c => c.toUpperCase()).join(", ") || "All Farmers"}
@@ -187,7 +242,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                 </div>
                 {scheme.eligibility?.maxLandHectares && (
                   <div className="ks-crit-item">
-                    <FaSeedling style={{ color: "#15803d" }} />
+                    <FaSeedling className="ks-crit-icon green" />
                     <span>
                       <strong>{language === "mr" ? "जमीन मर्यादा: " : language === "hi" ? "भूमि सीमा: " : "Land Holding Limit: "}</strong>
                       {scheme.eligibility.minLandHectares ? `${scheme.eligibility.minLandHectares} ha to ` : "Up to "}
@@ -197,7 +252,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                 )}
                 {scheme.eligibility?.irrigationRequired && (
                   <div className="ks-crit-item">
-                    <FaWater style={{ color: "#0284c7" }} />
+                    <FaWater className="ks-crit-icon blue" />
                     <span>
                       <strong>{language === "mr" ? "पाण्याची सोय: " : language === "hi" ? "सिंचाई सुविधा: " : "Irrigation Requirement: "}</strong>
                       {language === "mr" ? "शेतावर बारमाही पाण्याचा शाश्वत स्त्रोत आवश्यक" : language === "hi" ? "खेत पर सुनिश्चित सिंचाई स्त्रोत आवश्यक" : "Assured source of irrigation required"}
@@ -205,7 +260,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                   </div>
                 )}
                 <div className="ks-crit-item">
-                  <FaMapMarkerAlt style={{ color: "#dc2626" }} />
+                  <FaMapMarkerAlt className="ks-crit-icon red" />
                   <span>
                     <strong>{language === "mr" ? "कार्यक्षेत्र: " : language === "hi" ? "लागू क्षेत्र: " : "Jurisdiction: "}</strong>
                     {scheme.eligibility?.applicableDistricts?.length > 0
@@ -217,9 +272,9 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
 
               {/* Additional specific criteria list */}
               {scheme.eligibility?.additionalCriteria && scheme.eligibility.additionalCriteria.length > 0 && (
-                <div style={{ marginTop: "12px" }}>
-                  <h4 style={{ fontSize: "12.5px", fontWeight: 750, color: "#334155", marginBottom: "6px" }}>
-                    {language === "mr" ? "महत्वाच्या अटी व नियम:" : language === "hi" ? "महत्वपूर्ण शर्तें व नियम:" : "Key Guidelines:"}
+                <div className="ks-add-criteria-box">
+                  <h4 className="ks-add-crit-title">
+                    {language === "mr" ? "महत्वाच्या अटी व नियम:" : language === "hi" ? "महत्वपूर्ण शर्तें व नियम:" : "Key Guidelines & Rules:"}
                   </h4>
                   <ul className="ks-bullet-list">
                     {(language === "mr" && scheme.eligibility.additionalCriteriaMr
@@ -235,11 +290,11 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
               )}
             </div>
 
-            {/* Required Documents Checklist */}
+            {/* 5. Required Documents Checklist */}
             {scheme.requiredDocuments && scheme.requiredDocuments.length > 0 && (
               <div className="ks-modal-section">
                 <h3 className="ks-section-heading">
-                  📄 {language === "mr" ? "आवश्यक कागदपत्रे" : language === "hi" ? "आवश्यक दस्तावेज" : "Required Documents"}
+                  📄 {language === "mr" ? "आवश्यक कागदपत्रे" : language === "hi" ? "आवश्यक दस्तावेज" : "Required Documents Checklist"}
                 </h3>
                 <div className="ks-docs-grid">
                   {(language === "mr" && scheme.requiredDocumentsMr
@@ -249,7 +304,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                     : scheme.requiredDocuments
                   ).map((doc, idx) => (
                     <div key={idx} className="ks-doc-chip">
-                      <FaFileAlt style={{ color: "#15803d", flexShrink: 0 }} />
+                      <FaFileAlt className="ks-doc-icon" />
                       <span>{doc}</span>
                     </div>
                   ))}
@@ -257,11 +312,11 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
               </div>
             )}
 
-            {/* Verification Footer & Helpline */}
+            {/* 6. Verification Source & Helpline */}
             <div className="ks-verification-box">
               <div className="ks-v-left">
-                <FaShieldAlt style={{ color: "#15803d", fontSize: "18px" }} />
-                <div>
+                <FaShieldAlt className="ks-v-shield" />
+                <div className="ks-v-text">
                   <p className="ks-v-title">
                     {language === "mr" ? "शासकीय अधिकृत स्त्रोतावरून पडताळणी" : language === "hi" ? "शासकीय आधिकारिक स्त्रोत से सत्यापित" : "Information Verified from Official Source"}
                   </p>
@@ -298,7 +353,7 @@ const SchemeDetailModal = ({ scheme, isOpen, onClose, onToggleBookmark, isBookma
                   className="ks-gr-btn"
                 >
                   <FaFileAlt />
-                  <span>{language === "mr" ? "अधिकृत शासन निर्णय (GR)" : language === "hi" ? "आधिकारिक शासनादेश (GR)" : "Official GR / Details"}</span>
+                  <span>{language === "mr" ? "शासन निर्णय (GR)" : language === "hi" ? "शासनादेश (GR)" : "Official GR / Details"}</span>
                 </a>
               )}
 

@@ -46,19 +46,21 @@ const createTransporter = () => {
     return cachedTransporter;
   }
 
-  // 2. Standard Gmail service transport (fast, high-reliability)
+  // 2. Standard Gmail direct SSL transport (fast, high-reliability on cloud providers)
   cachedTransporter = nodemailer.createTransport({
-    service: emailService === "gmail" ? "gmail" : undefined,
-    host: emailService !== "gmail" ? "smtp.gmail.com" : undefined,
+    host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
       user: emailUser,
       pass: emailPass,
     },
-    connectionTimeout: 6000,
-    greetingTimeout: 6000,
-    socketTimeout: 8000,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 12000,
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 
   return cachedTransporter;
@@ -86,7 +88,7 @@ const verifyEmailConfig = async () => {
     }
 
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (5s)")), 5000);
+      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (10s)")), 10000);
       transporter.verify((err, success) => {
         clearTimeout(timer);
         if (err) reject(err);
@@ -300,7 +302,7 @@ Portal: https://kisan-setu54.vercel.app/login
     });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email dispatch timed out after 6s")), 6000)
+      setTimeout(() => reject(new Error("Email dispatch timed out after 10s")), 10000)
     );
 
     const info = await Promise.race([sendMailPromise, timeoutPromise]);

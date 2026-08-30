@@ -19,7 +19,8 @@ import {
   FaCloudSunRain,
   FaWarehouse,
   FaArrowRight,
-  FaInfoCircle
+  FaInfoCircle,
+  FaBuilding
 } from "react-icons/fa";
 import { useLanguage } from "../context/LanguageContext";
 import schemeService from "../services/schemeService";
@@ -181,6 +182,32 @@ const SchemesPage = () => {
     };
   }, [schemes, bookmarkedSet]);
 
+  // Helper for eligibility visual state
+  const getEligibilityBadge = (evalData) => {
+    if (!evalData) return null;
+    const status = evalData.status || "partial";
+
+    if (status === "eligible") {
+      return {
+        className: "status-eligible",
+        icon: <FaCheckCircle />,
+        text: language === "mr" ? "पात्र शेतकरी" : language === "hi" ? "पात्र किसान" : "Eligible"
+      };
+    }
+    if (status === "ineligible") {
+      return {
+        className: "status-ineligible",
+        icon: <FaTimesCircle />,
+        text: language === "mr" ? "सध्या अपात्र" : language === "hi" ? "वर्तमान में अपात्र" : "Not currently eligible"
+      };
+    }
+    return {
+      className: "status-partial",
+      icon: <FaExclamationTriangle />,
+      text: language === "mr" ? "शर्ती पडताळा – पात्र असू शकता" : language === "hi" ? "शर्तें जांचें – पात्र हो सकते हैं" : "May be eligible – verify requirements"
+    };
+  };
+
   return (
     <div className="ks-schemes-page">
       
@@ -190,7 +217,7 @@ const SchemesPage = () => {
           <div className="ks-emblem-badge">
             <FaLandmark />
           </div>
-          <div>
+          <div className="ks-banner-info-wrap">
             <div className="ks-banner-tags">
               <span className="ks-gov-tag">🏛️ MahaDBT Agriculture</span>
               <span className="ks-verified-tag">
@@ -232,11 +259,13 @@ const SchemesPage = () => {
         <div
           className={`ks-stat-card ${eligibilityFilter === "all" ? "selected" : ""}`}
           onClick={() => setEligibilityFilter("all")}
+          role="button"
+          tabIndex={0}
         >
           <div className="ks-stat-icon-wrap" style={{ background: "rgba(21, 128, 61, 0.12)", color: "#15803d" }}>
             <FaLandmark />
           </div>
-          <div>
+          <div className="ks-stat-content">
             <span className="ks-stat-count">{stats.total}</span>
             <span className="ks-stat-label">{language === "mr" ? "एकूण योजना" : language === "hi" ? "कुल योजनाएं" : "Total Schemes"}</span>
           </div>
@@ -245,11 +274,13 @@ const SchemesPage = () => {
         <div
           className={`ks-stat-card ${eligibilityFilter === "eligible" ? "selected" : ""}`}
           onClick={() => setEligibilityFilter("eligible")}
+          role="button"
+          tabIndex={0}
         >
           <div className="ks-stat-icon-wrap" style={{ background: "rgba(22, 163, 74, 0.15)", color: "#16a34a" }}>
             <FaCheckCircle />
           </div>
-          <div>
+          <div className="ks-stat-content">
             <span className="ks-stat-count" style={{ color: "#15803d" }}>{stats.eligible}</span>
             <span className="ks-stat-label">{language === "mr" ? "थेट पात्र योजना" : language === "hi" ? "प्रत्यक्ष पात्र" : "Eligible Schemes"}</span>
           </div>
@@ -258,11 +289,13 @@ const SchemesPage = () => {
         <div
           className={`ks-stat-card ${eligibilityFilter === "partial" ? "selected" : ""}`}
           onClick={() => setEligibilityFilter("partial")}
+          role="button"
+          tabIndex={0}
         >
           <div className="ks-stat-icon-wrap" style={{ background: "rgba(217, 119, 6, 0.15)", color: "#d97706" }}>
             <FaExclamationTriangle />
           </div>
-          <div>
+          <div className="ks-stat-content">
             <span className="ks-stat-count" style={{ color: "#d97706" }}>{stats.partial}</span>
             <span className="ks-stat-label">{language === "mr" ? "शर्ती पडताळा" : language === "hi" ? "शर्तें जांचें" : "Verify Requirements"}</span>
           </div>
@@ -271,11 +304,13 @@ const SchemesPage = () => {
         <div
           className={`ks-stat-card ${eligibilityFilter === "saved" ? "selected" : ""}`}
           onClick={() => setEligibilityFilter("saved")}
+          role="button"
+          tabIndex={0}
         >
           <div className="ks-stat-icon-wrap" style={{ background: "rgba(147, 51, 234, 0.12)", color: "#9333ea" }}>
             <FaBookmark />
           </div>
-          <div>
+          <div className="ks-stat-content">
             <span className="ks-stat-count" style={{ color: "#9333ea" }}>{stats.saved}</span>
             <span className="ks-stat-label">{language === "mr" ? "जतन केलेल्या" : language === "hi" ? "सहेजी गई" : "Saved Bookmarks"}</span>
           </div>
@@ -306,6 +341,7 @@ const SchemesPage = () => {
               type="button"
               className="ks-clear-search-btn"
               onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
             >
               ✕
             </button>
@@ -427,14 +463,7 @@ const SchemesPage = () => {
                 ? scheme.descriptionHi
                 : scheme.description;
             const isBookmarked = bookmarkedSet.has(scheme._id);
-            const evalData = scheme.evaluation;
-            const evalBadge = evalData
-              ? language === "mr"
-                ? evalData.statusBadgeMr
-                : language === "hi"
-                ? evalData.statusBadgeHi
-                : evalData.statusBadge
-              : null;
+            const evalBadgeData = getEligibilityBadge(scheme.evaluation);
 
             return (
               <motion.div
@@ -442,12 +471,12 @@ const SchemesPage = () => {
                 className="ks-scheme-card"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03, duration: 0.25 }}
+                transition={{ delay: Math.min(index * 0.03, 0.3), duration: 0.25 }}
               >
-                {/* Card Top: Category + Bookmark */}
+                {/* 1. Card Top: Category Badge + Bookmark */}
                 <div className="ks-card-top-row">
                   <span className="ks-scheme-card-cat">
-                    {scheme.category?.toUpperCase() || "AGRICULTURE"}
+                    🏛️ {scheme.category?.toUpperCase() || "AGRICULTURE"}
                   </span>
                   <button
                     type="button"
@@ -460,16 +489,22 @@ const SchemesPage = () => {
                   </button>
                 </div>
 
-                {/* Scheme Title */}
+                {/* 2. Scheme Name */}
                 <h3 className="ks-scheme-card-title">{displayName}</h3>
                 {displayName !== officialEnName && (
                   <p className="ks-scheme-card-en-ref">{officialEnName}</p>
                 )}
 
-                {/* Short Description */}
+                {/* 3. Department / Source */}
+                <div className="ks-card-dept">
+                  <FaBuilding className="ks-dept-icon" />
+                  <span>{scheme.department || "Department of Agriculture, Maharashtra"}</span>
+                </div>
+
+                {/* 4. Description */}
                 <p className="ks-scheme-card-desc">{displayDesc}</p>
 
-                {/* Benefit Highlight Pill */}
+                {/* 5. Benefits / Subsidy Highlight */}
                 {scheme.benefits?.subsidyPercentage && (
                   <div className="ks-card-benefit-pill">
                     <span className="ks-b-icon">💰</span>
@@ -477,26 +512,17 @@ const SchemesPage = () => {
                   </div>
                 )}
 
-                {/* 🎯 Real Profile Eligibility Badge */}
-                {evalData && (
-                  <div
-                    className="ks-card-eligibility-badge"
-                    style={{
-                      background: evalData.bg || "#f1f5f9",
-                      borderColor: `${evalData.color || "#cbd5e1"}55`,
-                      color: evalData.color || "#334155"
-                    }}
-                  >
+                {/* 6. 🎯 Real Profile Eligibility Status */}
+                {evalBadgeData && (
+                  <div className={`ks-card-eligibility-badge ${evalBadgeData.className}`}>
                     <div className="ks-badge-icon">
-                      {evalData.status === "eligible" && <FaCheckCircle />}
-                      {evalData.status === "partial" && <FaExclamationTriangle />}
-                      {evalData.status === "ineligible" && <FaTimesCircle />}
+                      {evalBadgeData.icon}
                     </div>
-                    <span className="ks-badge-text">{evalBadge}</span>
+                    <span className="ks-badge-text">{evalBadgeData.text}</span>
                   </div>
                 )}
 
-                {/* Card Footer Actions */}
+                {/* 7. Card Actions Footer */}
                 <div className="ks-card-actions-footer">
                   <button
                     type="button"
@@ -514,7 +540,12 @@ const SchemesPage = () => {
                     className="ks-card-apply-btn"
                     title="Open MahaDBT Portal"
                   >
-                    <span>{language === "mr" ? "महाडीबीटी" : language === "hi" ? "महाडीबीटी" : "MahaDBT"}</span>
+                    <span className="ks-btn-text-desktop">
+                      {language === "mr" ? "महाडीबीटी" : language === "hi" ? "महाडीबीटी" : "MahaDBT"}
+                    </span>
+                    <span className="ks-btn-text-mobile">
+                      {language === "mr" ? "महाडीबीटीवर अर्ज करा" : language === "hi" ? "महाडीबीटी पर आवेदन करें" : "Apply on MahaDBT"}
+                    </span>
                     <FaExternalLinkAlt size={11} />
                   </a>
                 </div>
