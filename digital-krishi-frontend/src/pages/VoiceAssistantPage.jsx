@@ -173,7 +173,7 @@ const VoiceAssistantPage = () => {
     }
   };
 
-  /* ── Start Voice Recognition with Permission Handling ── */
+  /* ── Start Voice Recognition with Permission & Mobile Lifecycle Handling ── */
   const startListening = async () => {
     setErrorMsg(null);
     setTranscript('');
@@ -181,30 +181,36 @@ const VoiceAssistantPage = () => {
     stopSpeaking();
 
     if (!isSpeechRecognitionSupported()) {
-      setErrorMsg('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+      setErrorMsg(
+        activeLangRef.current === 'mr-IN'
+          ? 'आपल्या ब्राऊझरमध्ये व्हॉइस रेकग्निशन उपलब्ध नाही. कृपया खाली प्रश्न टाईप करा किंवा Google Chrome वापरा.'
+          : activeLangRef.current === 'hi-IN'
+          ? 'आपके ब्राउज़र में वॉइस रिकग्निशन उपलब्ध नहीं है। कृपया नीचे प्रश्न टाइप करें या Google Chrome का उपयोग करें।'
+          : 'Speech recognition is not supported in this browser. Please type your query below or use Google Chrome / Edge.'
+      );
       setVoiceState('error');
       return;
     }
 
-    // Step 1: Check HTTPS / Secure context
+    // Check HTTPS / Secure context
     if (!isSecureVoiceContext()) {
-      setErrorMsg('Microphone access requires HTTPS in production. Please check your secure connection.');
+      setErrorMsg('Microphone access requires a secure connection (HTTPS).');
       setVoiceState('error');
       return;
     }
+
+    // Step 1: Stop any existing session
+    if (sessionRef.current) {
+      try {
+        sessionRef.current.abort();
+      } catch (e) {}
+      sessionRef.current = null;
+    }
+
+    setVoiceState('listening');
 
     try {
-      setVoiceState('permission');
-      // Request mic permission explicitly
-      await requestMicrophonePermission();
-
-      // Step 2: Stop any existing session
-      if (sessionRef.current) {
-        sessionRef.current.abort();
-        sessionRef.current = null;
-      }
-
-      // Step 3: Launch SpeechRecognition session
+      // Step 2: Launch SpeechRecognition session directly in user gesture
       const session = startVoiceRecognitionSession({
         language: activeLangRef.current,
         interimResults: true,

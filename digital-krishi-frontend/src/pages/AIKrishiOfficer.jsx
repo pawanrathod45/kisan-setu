@@ -138,16 +138,15 @@ const AIKrishiOfficer = () => {
     }
 
     if (!isSecureVoiceContext()) {
-      setVoiceError('Microphone access requires HTTPS in production.');
+      setVoiceError('Microphone access requires a secure connection (HTTPS).');
       return;
     }
 
     try {
-      // Request mic hardware permission explicitly for mobile Chrome
-      await requestMicrophonePermission();
-
       if (voiceSessionRef.current) {
-        voiceSessionRef.current.abort();
+        try {
+          voiceSessionRef.current.abort();
+        } catch (e) {}
         voiceSessionRef.current = null;
       }
 

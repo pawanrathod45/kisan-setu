@@ -24,6 +24,7 @@ import {
   FaPhoneAlt
 } from "react-icons/fa";
 import adminService from "../../services/adminService";
+import schemeService from "../../services/schemeService";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import "./AdminSchemesPage.css";
 
@@ -158,17 +159,50 @@ const AdminSchemesPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await adminService.getAdminSchemes({
-        search,
-        category,
-        status,
-        applicationStatus: appStatus
-      });
+      
+      let schemesList = [];
+      let summaryData = null;
 
-      if (res && res.success && res.data) {
-        setSchemes(res.data.schemes || []);
-        setSummary(res.data.summary || { total: 0, active: 0, inactive: 0, verifiedRecently: 0 });
+      try {
+        const res = await adminService.getAdminSchemes({
+          search,
+          category,
+          status,
+          applicationStatus: appStatus
+        });
+
+        if (res) {
+          schemesList = res.data?.schemes || res.schemes || (Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []));
+          summaryData = res.data?.summary;
+        }
+      } catch (adminApiErr) {
+        console.warn("Admin endpoint hit encountered issue, trying fallback scheme retrieval:", adminApiErr);
+        const fallbackRes = await schemeService.getSchemes();
+        if (fallbackRes && fallbackRes.schemes) {
+          schemesList = fallbackRes.schemes;
+        }
       }
+
+      if (!schemesList || schemesList.length === 0) {
+        try {
+          const fallbackRes = await schemeService.getSchemes();
+          if (fallbackRes && fallbackRes.schemes && fallbackRes.schemes.length > 0) {
+            schemesList = fallbackRes.schemes;
+          }
+        } catch (e) {}
+      }
+
+      if (!summaryData) {
+        summaryData = {
+          total: schemesList.length,
+          active: schemesList.filter(s => s.isActive !== false).length,
+          inactive: schemesList.filter(s => s.isActive === false).length,
+          verifiedRecently: schemesList.filter(s => s.lastVerifiedDate).length
+        };
+      }
+
+      setSchemes(schemesList);
+      setSummary(summaryData);
     } catch (err) {
       console.error("Failed to fetch government schemes:", err);
       setError(err.response?.data?.message || "Failed to load government schemes from database.");

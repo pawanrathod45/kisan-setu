@@ -113,7 +113,7 @@ const verifyEmailConfig = async () => {
 
 /**
  * Send Official Account Verification OTP Email
- * Uses Resend API with automatic fallback to SMTP for 100% deliverability
+ * Sends via official Gmail SMTP (kisansetu.agri@gmail.com) with Resend fallback
  * @param {string} email - Recipient email address
  * @param {string} otp - 6-digit numeric OTP code
  * @param {string} name - Farmer / User name
@@ -121,10 +121,15 @@ const verifyEmailConfig = async () => {
  */
 const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
   const startTime = Date.now();
+  const clientUrl = (process.env.CLIENT_URL || "https://kisan-setu94.vercel.app").replace(/\/$/, "");
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "kisansetu.agri@gmail.com").trim();
+  const fromAddress = (process.env.EMAIL_FROM || `"🌾 Kisan Setu Official" <${emailUser}>`).trim();
   const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
   const resendFrom = (process.env.RESEND_FROM || "Kisan Setu <onboarding@resend.dev>").trim();
-  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
-  const fromAddress = (process.env.EMAIL_FROM || emailUser || "").trim();
+
+  const formattedFrom = fromAddress.includes("<")
+    ? fromAddress
+    : `"🌾 Kisan Setu Official" <${emailUser}>`;
 
   const otpDigits = String(otp).trim().split("");
   const otpBoxesHtml = otpDigits
@@ -248,8 +253,8 @@ const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
           <tr>
             <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 24px; text-align: center;">
               <div style="font-size: 12px; margin-bottom: 8px;">
-                <a href="https://kisan-setu54.vercel.app/login" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Portal Sign In</a> •
-                <a href="https://kisan-setu54.vercel.app" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Official Website</a>
+                <a href="${clientUrl}/login" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Portal Sign In</a> •
+                <a href="${clientUrl}" style="color: #15803d; text-decoration: none; font-weight: 700; margin: 0 8px;">Official Website</a>
               </div>
               <p style="margin: 0; font-size: 11px; color: #94a3b8; line-height: 1.5;">
                 © ${new Date().getFullYear()} Kisan Setu Digital Agriculture Engine. All rights reserved.<br>
@@ -285,13 +290,40 @@ SECURITY WARNING:
 - Kisan Setu officials or Krishi Officers will NEVER ask for your OTP.
 - If you did not request this verification, please disregard this email.
 
-Portal: https://kisan-setu54.vercel.app/login
+Portal Sign In: ${clientUrl}/login
+Official Website: ${clientUrl}
 
 © ${new Date().getFullYear()} Kisan Setu. All rights reserved.
 ============================================================
   `.trim();
 
-  // Tier 1: Attempt Resend API Dispatch (High performance, direct inbox delivery)
+  // Tier 1: Dispatch via Official Gmail SMTP (From: kisansetu.agri@gmail.com)
+  const transporter = createTransporter();
+  if (transporter && emailUser) {
+    try {
+      const sendMailPromise = transporter.sendMail({
+        from: formattedFrom,
+        to: email,
+        subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
+        text: plainTextContent,
+        html: htmlContent,
+      });
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("SMTP email dispatch timed out after 10s")), 10000)
+      );
+
+      const info = await Promise.race([sendMailPromise, timeoutPromise]);
+      const durationMs = Date.now() - startTime;
+
+      console.log(`✅ [EmailService] [Gmail SMTP] Email sent successfully from ${emailUser} to ${maskEmail(email)} (duration: ${durationMs}ms, messageId: ${info.messageId})`);
+      return { success: true, messageId: info.messageId, durationMs, provider: "smtp" };
+    } catch (smtpError) {
+      console.warn(`⚠️ [EmailService] [Gmail SMTP] Dispatch failed: ${smtpError.message}. Attempting Resend API fallback...`);
+    }
+  }
+
+  // Tier 2: Resend API Fallback (if SMTP fails)
   if (resendApiKey) {
     try {
       const controller = new AbortController();
@@ -318,52 +350,19 @@ Portal: https://kisan-setu54.vercel.app/login
 
       if (response.ok && resData.id) {
         const durationMs = Date.now() - startTime;
-        console.log(`✅ [EmailService] [Resend] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, id: ${resData.id})`);
+        console.log(`✅ [EmailService] [Resend Fallback] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, id: ${resData.id})`);
         return { success: true, messageId: resData.id, durationMs, provider: "resend" };
       } else {
-        console.warn(`⚠️ [EmailService] [Resend] Dispatch failed (${response.status}: ${resData.message || JSON.stringify(resData)}). Falling back to SMTP...`);
+        console.warn(`⚠️ [EmailService] [Resend Fallback] Dispatch failed: ${resData.message || JSON.stringify(resData)}`);
       }
     } catch (resendError) {
-      console.warn(`⚠️ [EmailService] [Resend] API connection error: ${resendError.message}. Falling back to SMTP...`);
+      console.error(`❌ [EmailService] [Resend Fallback] Error: ${resendError.message}`);
     }
   }
 
-  // Tier 2: Attempt SMTP Transporter Dispatch (Gmail / Custom SMTP fallback)
-  const transporter = createTransporter();
-
-  if (!transporter || !emailUser) {
-    const errMsg = "Email delivery failed: Neither Resend API nor valid SMTP credentials are functional.";
-    console.error(`❌ [EmailService] ${errMsg}`);
-    return { success: false, error: errMsg, durationMs: Date.now() - startTime };
-  }
-
-  const formattedFrom = fromAddress.includes("<")
-    ? fromAddress
-    : `"🌾 Kisan Setu Official" <${emailUser}>`;
-
-  try {
-    const sendMailPromise = transporter.sendMail({
-      from: formattedFrom,
-      to: email,
-      subject: `🌾 [Kisan Setu] Your Official One-Time Verification Code: ${otp}`,
-      text: plainTextContent,
-      html: htmlContent,
-    });
-
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("SMTP email dispatch timed out after 10s")), 10000)
-    );
-
-    const info = await Promise.race([sendMailPromise, timeoutPromise]);
-    const durationMs = Date.now() - startTime;
-
-    console.log(`✅ [EmailService] [SMTP] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, messageId: ${info.messageId})`);
-    return { success: true, messageId: info.messageId, durationMs, provider: "smtp" };
-  } catch (error) {
-    const durationMs = Date.now() - startTime;
-    console.error(`❌ [EmailService] [SMTP] OTP email failed for ${maskEmail(email)} (duration: ${durationMs}ms): ${error.message}`);
-    return { success: false, error: error.message, durationMs };
-  }
+  const errMsg = "Email delivery failed: Neither Gmail SMTP nor Resend API could deliver the verification code.";
+  console.error(`❌ [EmailService] ${errMsg}`);
+  return { success: false, error: errMsg, durationMs: Date.now() - startTime };
 };
 
 module.exports = {
@@ -371,4 +370,5 @@ module.exports = {
   sendVerificationOtpEmail,
   verifyEmailConfig,
 };
+
 
