@@ -107,26 +107,14 @@ const AdminHeader = ({ toggleSidebar, sidebarOpen }) => {
           {/* Language Selector Dropdown */}
           <div style={{ position: "relative" }}>
             <button
-              className="lang-select-btn"
+              className="admin-lang-btn"
               onClick={() => setLangOpen(o => !o)}
               title="Switch Language"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 10px',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#ffffff',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
+              aria-label="Switch Language"
             >
-              <FaGlobe style={{ color: '#4ade80' }} />
-              <span>{currentLangObj.native}</span>
-              <FaChevronDown style={{ fontSize: '9px', opacity: 0.7 }} />
+              <FaGlobe className="admin-lang-globe-icon" />
+              <span className="admin-lang-text">{currentLangObj.native || currentLangObj.name}</span>
+              <FaChevronDown className="admin-lang-arrow-icon" />
             </button>
 
             {langOpen && (
@@ -135,42 +123,15 @@ const AdminHeader = ({ toggleSidebar, sidebarOpen }) => {
                   style={{ position: "fixed", inset: 0, zIndex: 1040 }}
                   onClick={() => setLangOpen(false)}
                 />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "calc(100% + 8px)",
-                    right: 0,
-                    zIndex: 1050,
-                    background: "#0f172a",
-                    border: "1px solid rgba(255, 255, 255, 0.15)",
-                    borderRadius: "10px",
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.5)",
-                    minWidth: "140px",
-                    padding: "6px"
-                  }}
-                >
+                <div className="admin-lang-dropdown-panel">
                   {languages.map((l) => (
                     <button
                       key={l.code}
                       onClick={() => handleLanguageChange(l.code)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
-                        padding: "8px 12px",
-                        border: "none",
-                        background: language === l.code ? "rgba(34, 197, 94, 0.15)" : "transparent",
-                        color: language === l.code ? "#4ade80" : "#cbd5e1",
-                        fontSize: "12px",
-                        fontWeight: language === l.code ? 700 : 500,
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        textAlign: "left"
-                      }}
+                      className={`admin-lang-option ${language === l.code ? "active" : ""}`}
                     >
                       <span>{l.native}</span>
-                      {language === l.code && <span style={{ color: "#4ade80" }}>✓</span>}
+                      {language === l.code && <span style={{ color: "#15803d", fontWeight: 900 }}>✓</span>}
                     </button>
                   ))}
                 </div>

@@ -712,18 +712,31 @@ const AdminSchemesPage = () => {
                     </td>
 
                     {/* Benefits / Subsidy */}
-                    <td style={{ maxWidth: "200px" }}>
+                    <td style={{ maxWidth: "220px" }}>
                       {scheme.benefits?.subsidyPercentage && (
-                        <div style={{ fontWeight: 800, color: "#15803d", fontSize: "13px" }}>
-                          {scheme.benefits.subsidyPercentage} Subsidy
+                        <div
+                          style={{
+                            fontWeight: 800,
+                            color: "#15803d",
+                            fontSize: "12.5px",
+                            lineHeight: 1.35,
+                            marginBottom: "2px"
+                          }}
+                          title={scheme.benefits.subsidyPercentage}
+                        >
+                          💰 {scheme.benefits.subsidyPercentage.length > 50
+                            ? `${scheme.benefits.subsidyPercentage.slice(0, 48)}...`
+                            : scheme.benefits.subsidyPercentage}
                         </div>
                       )}
                       {scheme.benefits?.maxSubsidyAmount && (
-                        <div style={{ fontSize: "11.5px", color: "#0f172a", fontWeight: 700 }}>
-                          Up to {scheme.benefits.maxSubsidyAmount}
+                        <div style={{ fontSize: "11px", color: "#0f172a", fontWeight: 700 }}>
+                          Norm: {scheme.benefits.maxSubsidyAmount.length > 40
+                            ? `${scheme.benefits.maxSubsidyAmount.slice(0, 38)}...`
+                            : scheme.benefits.maxSubsidyAmount}
                         </div>
                       )}
-                      <div style={{ fontSize: "11px", color: "#64748b", textTransform: "capitalize" }}>
+                      <div style={{ fontSize: "10.5px", color: "#64748b", textTransform: "capitalize", marginTop: "2px" }}>
                         Type: {scheme.benefits?.benefitType || "subsidy"}
                       </div>
                     </td>
