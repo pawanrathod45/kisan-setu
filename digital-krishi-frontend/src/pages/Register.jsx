@@ -37,9 +37,12 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prevent duplicate concurrent submissions
+    if (loading) return;
+
     setError('');
     setSuccess('');
-    setLoading(true);
 
     const cleanEmail = formData.email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,7 +55,6 @@ const Register = () => {
           ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा'
           : 'कृपया मान्य ईमेल पता दर्ज करें'
       );
-      setLoading(false);
       return;
     }
 
@@ -64,7 +66,6 @@ const Register = () => {
           ? 'कृपया आपले पूर्ण नाव प्रविष्ट करा'
           : 'कृपया अपना पूरा नाम दर्ज करें'
       );
-      setLoading(false);
       return;
     }
 
@@ -76,7 +77,6 @@ const Register = () => {
           ? 'पासवर्ड किमान 6 अक्षरांचा असावा'
           : 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए'
       );
-      setLoading(false);
       return;
     }
 
@@ -88,9 +88,10 @@ const Register = () => {
           ? 'पासवर्ड जुळत नाहीत'
           : 'पासवर्ड मेल नहीं खाते'
       );
-      setLoading(false);
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await API.post('/auth/register', {
@@ -118,37 +119,70 @@ const Register = () => {
         navigate(`/verify-email?email=${encodeURIComponent(cleanEmail)}`);
       }
     } catch (err) {
-      let msg = err.response?.data?.message;
+      const status = err.response?.status;
+      const dataMsg = err.response?.data?.message;
 
       if (!err.response) {
-        // Network timeout / connection error
-        msg =
+        // Network timeout / connection error / cold-start
+        setError(
           language === 'mr'
-            ? 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.'
+            ? 'सर्व्हरशी संपर्क होऊ शकला नाही. कृपया आपले इंटरनेट तपासा किंवा थोड्या वेळाने प्रयत्न करा.'
             : language === 'hi'
-            ? 'सर्वर से संपर्क नहीं हो सका। कृपया कुछ समय बाद पुनः प्रयास करें।'
-            : 'Unable to connect to the server. Please check your internet connection or try again in a few moments.';
-      } else if (msg && (msg.includes('E11000') || msg.includes('duplicate key') || msg.includes('already exists'))) {
-        msg =
+            ? 'सर्वर से संपर्क नहीं हो सका। कृपया अपना इंटरनेट कनेक्शन जांचें या कुछ समय बाद प्रयास करें।'
+            : 'Unable to connect to the server. Please check your internet connection or try again in a few moments.'
+        );
+      } else if (status === 409 || (dataMsg && (dataMsg.includes('already exists') || dataMsg.includes('duplicate')))) {
+        // 409 Conflict: Existing user
+        setError(
           language === 'mr'
             ? 'हा ईमेल आधीच नोंदणीकृत आहे. कृपया दुसरा ईमेल वापरा किंवा साइन इन करा.'
             : language === 'hi'
             ? 'यह ईमेल पहले से पंजीकृत है। कृपया दूसरा ईमेल उपयोग करें या साइन इन करें।'
-            : 'This email is already registered. Please use another email or sign in.';
-      } else if (!msg) {
-        msg =
+            : 'This email is already registered. Please use another email or sign in.'
+        );
+      } else if (status === 408 || err.code === 'ECONNABORTED') {
+        // 408 Timeout
+        setError(
           language === 'mr'
+            ? 'सर्व्हर प्रतिसाद देण्यास वेळ घेत आहे. कृपया पुन्हा प्रयत्न करा.'
+            : language === 'hi'
+            ? 'सर्वर प्रतिक्रिया देने में समय ले रहा है। कृपया पुनः प्रयास करें।'
+            : 'Request timed out. The server is taking longer than usual, please try again.'
+        );
+      } else if (status === 503) {
+        // 503 Email Service / DB error
+        setError(
+          dataMsg ||
+          (language === 'mr'
+            ? 'ईमेल सेवा तात्पुरती अनुपलब्ध आहे. पडताळणी कोड पाठवता आला नाही. कृपया पुन्हा प्रयत्न करा.'
+            : language === 'hi'
+            ? 'ईमेल सेवा अस्थायी रूप से अनुपलब्ध है। सत्यापन कोड नहीं भेजा जा सका। कृपया पुनः प्रयास करें।'
+            : 'Account could not be verified because the verification email could not be sent. Please try again.')
+        );
+      } else if (status === 400) {
+        // 400 Validation Error
+        setError(
+          dataMsg ||
+          (language === 'mr'
+            ? 'कृपया प्रविष्ट केलेली माहिती तपासा.'
+            : language === 'hi'
+            ? 'कृपया दर्ज की गई जानकारी की जांच करें।'
+            : 'Invalid details provided. Please check and try again.')
+        );
+      } else {
+        // 500 or generic
+        setError(
+          dataMsg ||
+          (language === 'mr'
             ? 'नोंदणी अयशस्वी झाली. कृपया पुन्हा प्रयत्न करा.'
             : language === 'hi'
             ? 'पंजीकरण विफल रहा। कृपया पुनः प्रयास करें।'
-            : 'Registration failed. Please try again.';
+            : 'Registration failed. Please try again.')
+        );
       }
-
-      setError(msg);
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
@@ -255,6 +289,7 @@ const Register = () => {
               onChange={handleChange}
               required
               autoComplete="name"
+              disabled={loading}
             />
           </div>
 
@@ -272,6 +307,7 @@ const Register = () => {
               onChange={handleChange}
               required
               autoComplete="email"
+              disabled={loading}
             />
           </div>
 
@@ -288,6 +324,7 @@ const Register = () => {
                 placeholder={t.districtPlaceholder || 'e.g. Pune, Maharashtra'}
                 value={formData.location}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
@@ -302,6 +339,7 @@ const Register = () => {
                 placeholder={t.mainCropPlaceholder || 'e.g. Wheat (गेहूं)'}
                 value={formData.crop}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
           </div>
@@ -322,12 +360,14 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   className="ks-password-toggle-btn"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label="Toggle password visibility"
+                  disabled={loading}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -348,12 +388,14 @@ const Register = () => {
                   onChange={handleChange}
                   required
                   autoComplete="new-password"
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   className="ks-password-toggle-btn"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   aria-label="Toggle password visibility"
+                  disabled={loading}
                 >
                   {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -368,7 +410,7 @@ const Register = () => {
             disabled={loading}
           >
             {loading ? (
-              <span>{language === 'en' ? 'Sending code...' : 'पडताळणी कोड पाठवत आहे...'}</span>
+              <span>{language === 'en' ? 'Creating account & sending code...' : language === 'mr' ? 'खाते तयार करत आहे आणि कोड पाठवत आहे...' : 'खाता बन रहा है और कोड भेजा जा रहा है...'}</span>
             ) : (
               <>
                 <span>{language === 'en' ? 'Continue to Email Verification' : 'ईमेल पडताळणीकडे पुढे जा'}</span>

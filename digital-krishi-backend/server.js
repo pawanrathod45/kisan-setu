@@ -1,11 +1,10 @@
-process.env.UV_THREADPOOL_SIZE = "64";
 require("dotenv").config();
 const express = require("express");
-
 const cors = require("cors");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const { verifyEmailConfig, maskEmail } = require("./src/services/emailService");
 
 // Ensure uploads directory exists on boot
 const uploadsDir = path.join(__dirname, "uploads");
@@ -117,10 +116,24 @@ app.use("/api", schemesRoutes);
 app.use((err, req, res, next) => {
   console.error("❌ Unhandled Application Error:", err);
   res.status(err.status || 500).json({
+    success: false,
     message: err.message || "Internal Server Error",
     error: process.env.NODE_ENV === "development" ? err.stack : undefined
   });
 });
+
+// Phase 2 Safe Environment Verification
+const logEnvironmentConfig = () => {
+  console.log("==================================================");
+  console.log("⚙️  [Kisan Setu] Environment Configuration Check:");
+  console.log(`- EMAIL_SERVICE : ${process.env.EMAIL_SERVICE ? `configured (${process.env.EMAIL_SERVICE})` : "not configured (defaulting to gmail)"}`);
+  console.log(`- EMAIL_USER    : ${process.env.EMAIL_USER ? `configured (${maskEmail(process.env.EMAIL_USER)})` : "not configured"}`);
+  console.log(`- EMAIL_PASS    : ${process.env.EMAIL_PASS ? "configured (yes)" : "not configured"}`);
+  console.log(`- MONGO_URI     : ${process.env.MONGO_URI || process.env.MONGODB_URI ? "configured (yes)" : "not configured"}`);
+  console.log(`- JWT_SECRET    : ${process.env.JWT_SECRET ? "configured (yes)" : "not configured (using fallback)"}`);
+  console.log(`- CLIENT_URL    : ${process.env.CLIENT_URL ? `configured (${process.env.CLIENT_URL})` : "not configured"}`);
+  console.log("==================================================");
+};
 
 // MongoDB Connection
 mongoose.set("bufferCommands", false);
@@ -147,6 +160,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Kisan Setu Server running on port ${PORT}`);
+  logEnvironmentConfig();
+  verifyEmailConfig().catch(() => {});
 });
-
-

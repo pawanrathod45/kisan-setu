@@ -27,7 +27,7 @@ const VerifyEmailPage = () => {
 
   const { language, setLanguage, languages } = useLanguage();
 
-  // Mask email for privacy: e.g. "paw***@gmail.com"
+  // Mask email for privacy: e.g. "pa***@gmail.com"
   const getMaskedEmail = (raw) => {
     if (!raw || !raw.includes("@")) return raw || "your email";
     const [name, domain] = raw.split("@");
@@ -94,6 +94,8 @@ const VerifyEmailPage = () => {
   // Submit OTP for verification
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setError("");
     setSuccess("");
 
@@ -114,8 +116,9 @@ const VerifyEmailPage = () => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
       const res = await API.post("/auth/verify-email-otp", {
         email: email.trim(),
         otp: fullOtp,
@@ -123,7 +126,9 @@ const VerifyEmailPage = () => {
 
       if (res.data?.accessToken) {
         localStorage.setItem("token", res.data.accessToken);
-        localStorage.setItem("refreshToken", res.data.refreshToken);
+        if (res.data.refreshToken) {
+          localStorage.setItem("refreshToken", res.data.refreshToken);
+        }
         localStorage.setItem("user", JSON.stringify(res.data.user));
 
         setSuccess(
@@ -146,8 +151,18 @@ const VerifyEmailPage = () => {
         setTimeout(() => navigate("/login"), 1200);
       }
     } catch (err) {
-      console.error("Verification error:", err);
-      setError(err.response?.data?.message || "Invalid or expired verification code. Please try again.");
+      const dataMsg = err.response?.data?.message;
+      if (!err.response) {
+        setError(
+          language === "mr"
+            ? "सर्व्हरशी संपर्क होऊ शकला नाही. कृपया आपले इंटरनेट तपासा."
+            : language === "hi"
+            ? "सर्वर से संपर्क नहीं हो सका। कृपया अपना इंटरनेट जांचें।"
+            : "Unable to connect to the server. Please check your internet connection."
+        );
+      } else {
+        setError(dataMsg || "Incorrect or expired verification code. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -157,9 +172,10 @@ const VerifyEmailPage = () => {
   const handleResend = async () => {
     if (resendCooldown > 0 || resending || !email) return;
 
+    setResending(true);
+    setError("");
+
     try {
-      setResending(true);
-      setError("");
       const res = await API.post("/auth/resend-email-otp", { email: email.trim() });
       setSuccess(res.data?.message || "Fresh 6-digit verification code sent to your email.");
       setResendCooldown(60);
@@ -167,8 +183,8 @@ const VerifyEmailPage = () => {
       inputRefs.current[0]?.focus();
       setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
-      console.error("Resend error:", err);
-      setError(err.response?.data?.message || "Failed to resend verification code. Please wait.");
+      const dataMsg = err.response?.data?.message;
+      setError(dataMsg || "Failed to resend verification code. Please wait and try again.");
     } finally {
       setResending(false);
     }
@@ -339,6 +355,7 @@ const VerifyEmailPage = () => {
                   value={digit}
                   onChange={(e) => handleDigitChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
+                  disabled={loading}
                   style={{
                     width: "48px",
                     height: "54px",

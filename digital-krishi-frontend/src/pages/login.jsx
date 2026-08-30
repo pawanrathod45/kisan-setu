@@ -25,9 +25,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setError('');
     setSuccess('');
-    setLoading(true);
 
     const cleanEmail = email.trim().toLowerCase();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,7 +41,6 @@ const Login = () => {
           ? 'कृपया वैध ईमेल पत्ता प्रविष्ट करा'
           : 'कृपया मान्य ईमेल पता दर्ज करें'
       );
-      setLoading(false);
       return;
     }
 
@@ -52,9 +52,10 @@ const Login = () => {
           ? 'पासवर्ड किमान 6 अक्षरांचा असावा'
           : 'पासवर्ड कम से कम 6 वर्णों का होना चाहिए'
       );
-      setLoading(false);
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await API.post('/auth/login', {
@@ -230,6 +231,7 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
+              disabled={loading}
             />
           </div>
 
@@ -247,12 +249,14 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
+                disabled={loading}
               />
               <button
                 type="button"
                 className="ks-password-toggle-btn"
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label="Toggle password visibility"
+                disabled={loading}
               >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>

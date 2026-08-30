@@ -8,29 +8,27 @@ const maskEmail = (email) => {
   return `${name.substring(0, 2)}***${name.slice(-1)}@${domain}`;
 };
 
-// Create dynamic high-performance SMTP transporter
+// Singleton transporter instance
+let cachedTransporter = null;
+
 const createTransporter = () => {
+  if (cachedTransporter) {
+    return cachedTransporter;
+  }
+
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
   const emailPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || "465", 10);
-  const emailService = (process.env.EMAIL_SERVICE || "").trim().toLowerCase();
+  const emailService = (process.env.EMAIL_SERVICE || "gmail").trim().toLowerCase();
 
   if (!emailUser || !emailPass) {
     return null;
   }
 
-  // Fast options: direct SSL port 465, IPv4 enforcement
-  const commonOptions = {
-    family: 4, // Enforce IPv4
-    connectionTimeout: 4000,
-    greetingTimeout: 4000,
-    socketTimeout: 5000,
-  };
-
-  // 1. If explicit custom host is provided (e.g., Brevo, SendGrid, Amazon SES)
+  // 1. If explicit custom host is provided (e.g. Brevo, SendGrid, Amazon SES)
   if (emailHost && emailHost !== "smtp.gmail.com") {
-    return nodemailer.createTransport({
+    cachedTransporter = nodemailer.createTransport({
       host: emailHost,
       port: emailPort,
       secure: emailPort === 465,
@@ -38,28 +36,33 @@ const createTransporter = () => {
         user: emailUser,
         pass: emailPass,
       },
+      connectionTimeout: 6000,
+      greetingTimeout: 6000,
+      socketTimeout: 8000,
       tls: {
         rejectUnauthorized: false,
       },
-      ...commonOptions,
     });
+    return cachedTransporter;
   }
 
-  // 2. Default to high-speed direct SSL Gmail SMTP (port 465)
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
+  // 2. Standard Gmail service transport (fast, high-reliability)
+  cachedTransporter = nodemailer.createTransport({
+    service: emailService === "gmail" ? "gmail" : undefined,
+    host: emailService !== "gmail" ? "smtp.gmail.com" : undefined,
     port: 465,
     secure: true,
     auth: {
       user: emailUser,
       pass: emailPass,
     },
-    ...commonOptions,
+    connectionTimeout: 6000,
+    greetingTimeout: 6000,
+    socketTimeout: 8000,
   });
+
+  return cachedTransporter;
 };
-
-
-
 
 /**
  * Diagnostic helper to verify SMTP credentials on startup (without logging secrets)
@@ -67,23 +70,23 @@ const createTransporter = () => {
 const verifyEmailConfig = async () => {
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const emailPass = (process.env.EMAIL_PASS || process.env.SMTP_PASS || process.env.EMAIL_PASSWORD || "").trim();
-  const emailService = (process.env.EMAIL_SERVICE || "").trim();
+  const emailService = (process.env.EMAIL_SERVICE || "gmail").trim();
   const emailHost = (process.env.SMTP_HOST || process.env.EMAIL_HOST || "").trim();
 
   if (!emailUser || !emailPass) {
-    console.warn("⚠️ [EmailService] SMTP credentials not fully configured (EMAIL_USER/EMAIL_PASS missing).");
+    console.warn("⚠️ [EmailService] SMTP credentials not fully configured (EMAIL_USER or EMAIL_PASS missing).");
     return { configured: false, reason: "Missing EMAIL_USER or EMAIL_PASS" };
   }
 
   try {
     const transporter = createTransporter();
     if (!transporter) {
-      console.warn("⚠️ [EmailService] Could not create email transporter.");
+      console.warn("⚠️ [EmailService] Could not initialize email transporter.");
       return { configured: false, reason: "Failed to initialize transporter" };
     }
 
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (4s)")), 4000);
+      const timer = setTimeout(() => reject(new Error("SMTP verification timeout (5s)")), 5000);
       transporter.verify((err, success) => {
         clearTimeout(timer);
         if (err) reject(err);
@@ -91,7 +94,7 @@ const verifyEmailConfig = async () => {
       });
     });
 
-    console.log(`✅ [EmailService] SMTP connection verified successfully for ${maskEmail(emailUser)} (Service/Host: ${emailService || emailHost || "gmail"})`);
+    console.log(`✅ [EmailService] SMTP connection verified successfully for ${maskEmail(emailUser)} (Service: ${emailService || emailHost || "gmail"})`);
     return { configured: true, user: maskEmail(emailUser) };
   } catch (err) {
     console.error("❌ [EmailService] SMTP verification failed on startup:", err.message);
@@ -104,17 +107,18 @@ const verifyEmailConfig = async () => {
  * @param {string} email - Recipient email address
  * @param {string} otp - 6-digit numeric OTP code
  * @param {string} name - Farmer / User name
- * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
+ * @returns {Promise<{success: boolean, messageId?: string, error?: string, durationMs?: number}>}
  */
 const sendVerificationOtpEmail = async (email, otp, name = "Farmer") => {
+  const startTime = Date.now();
   const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || "").trim();
   const fromAddress = (process.env.EMAIL_FROM || emailUser || "").trim();
   const transporter = createTransporter();
 
   if (!transporter || !emailUser) {
     const errMsg = "Email transporter not configured. Please set EMAIL_USER and EMAIL_PASS environment variables.";
-    console.error("OTP email failed", errMsg);
-    return { success: false, error: errMsg };
+    console.error(`❌ [EmailService] Email dispatch aborted: ${errMsg}`);
+    return { success: false, error: errMsg, durationMs: Date.now() - startTime };
   }
 
   const formattedFrom = fromAddress.includes("<")
@@ -287,7 +291,6 @@ Portal: https://kisan-setu54.vercel.app/login
   `.trim();
 
   try {
-    console.log("OTP email attempted", { recipient: email });
     const sendMailPromise = transporter.sendMail({
       from: formattedFrom,
       to: email,
@@ -297,21 +300,23 @@ Portal: https://kisan-setu54.vercel.app/login
     });
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Email dispatch timed out after 5s")), 5000)
+      setTimeout(() => reject(new Error("Email dispatch timed out after 6s")), 6000)
     );
 
     const info = await Promise.race([sendMailPromise, timeoutPromise]);
+    const durationMs = Date.now() - startTime;
 
-    console.log("OTP email sent", { messageId: info.messageId });
-    return { success: true, messageId: info.messageId };
+    console.log(`✅ [EmailService] Email sent successfully to ${maskEmail(email)} (duration: ${durationMs}ms, messageId: ${info.messageId})`);
+    return { success: true, messageId: info.messageId, durationMs };
   } catch (error) {
-    console.error("OTP email failed", error.message);
-    return { success: false, error: error.message };
+    const durationMs = Date.now() - startTime;
+    console.error(`❌ [EmailService] OTP email failed for ${maskEmail(email)} (duration: ${durationMs}ms): ${error.message}`);
+    return { success: false, error: error.message, durationMs };
   }
 };
 
-
 module.exports = {
+  maskEmail,
   sendVerificationOtpEmail,
   verifyEmailConfig,
 };
