@@ -34,6 +34,8 @@ import AdminCropsPage from './pages/admin/AdminCropsPage';
 import AdminAlertsPage from './pages/admin/AdminAlertsPage';
 import AdminReportsPage from './pages/admin/AdminReportsPage';
 import AdminSystemPage from './pages/admin/AdminSystemPage';
+import AdminSchemesPage from './pages/admin/AdminSchemesPage';
+
 
 // 🔐 Protected Routes
 import ProtectedRoute from './components/ProtectedRoute';
@@ -109,12 +111,14 @@ function App() {
             >
               <Route index element={<Navigate to="/admin/dashboard" replace />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
+              <Route path="schemes" element={<AdminSchemesPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="crops" element={<AdminCropsPage />} />
               <Route path="alerts" element={<AdminAlertsPage />} />
               <Route path="reports" element={<AdminReportsPage />} />
               <Route path="system" element={<AdminSystemPage />} />
             </Route>
+
 
             {/* ❌ Unauthorized fallback */}
             <Route path="*" element={<Navigate to="/login" replace />} />

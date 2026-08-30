@@ -65,7 +65,44 @@ const adminService = {
   getReports: async (params = {}) => {
     const response = await API.get("/admin/reports", { params });
     return response.data;
+  },
+
+  // 12. Government Schemes Management (Real MongoDB Backend)
+  getAdminSchemes: async (params = {}) => {
+    const response = await API.get("/admin/schemes", { params });
+    return response.data;
+  },
+
+  getAdminSchemeById: async (id) => {
+    const response = await API.get(`/admin/schemes/${id}`);
+    return response.data;
+  },
+
+  createScheme: async (schemeData) => {
+    const response = await API.post("/admin/schemes", schemeData);
+    return response.data;
+  },
+
+  updateScheme: async (id, schemeData) => {
+    const response = await API.put(`/admin/schemes/${id}`, schemeData);
+    return response.data;
+  },
+
+  toggleSchemeStatus: async (id, isActive, applicationStatus) => {
+    const response = await API.patch(`/admin/schemes/${id}/status`, { isActive, applicationStatus });
+    return response.data;
+  },
+
+  verifySchemeToday: async (id, verifiedSource) => {
+    const response = await API.post(`/admin/schemes/${id}/verify`, { verifiedSource });
+    return response.data;
+  },
+
+  deleteScheme: async (id) => {
+    const response = await API.delete(`/admin/schemes/${id}`);
+    return response.data;
   }
 };
 
 export default adminService;
+

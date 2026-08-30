@@ -12,7 +12,8 @@ import {
   FaSignOutAlt,
   FaChevronRight,
   FaTimes,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaLandmark
 } from "react-icons/fa";
 import { GiWheat } from "react-icons/gi";
 import ConfirmModal from "../common/ConfirmModal";
@@ -27,11 +28,13 @@ const ADMIN_SECTIONS = [
   {
     group: "MANAGEMENT",
     items: [
+      { path: "/admin/schemes", icon: FaLandmark, label: "Government Schemes", iconColor: "#d97706", badge: "MahaDBT", badgeColor: "#d97706" },
       { path: "/admin/users", icon: FaUsers, label: "User Directory", iconColor: "#2563eb" },
       { path: "/admin/alerts", icon: FaBell, label: "Alerts & Broadcasts", iconColor: "#dc2626" },
       { path: "/admin/crops", icon: FaSeedling, label: "Crop Database", iconColor: "#16a34a" },
     ]
   },
+
   {
     group: "INSIGHTS & REPORTS",
     items: [

@@ -32,4 +32,14 @@ router.get("/analytics", adminController.getReportsAndAnalytics);
 // 6. Database Diagnostics & System Health
 router.get("/system-health", adminController.getSystemHealth);
 
+// 7. Government Schemes Management
+router.get("/schemes", adminController.getAdminSchemes);
+router.get("/schemes/:id", adminController.getAdminSchemeById);
+router.post("/schemes", adminController.createScheme);
+router.put("/schemes/:id", adminController.updateScheme);
+router.patch("/schemes/:id/status", adminController.toggleSchemeStatus);
+router.post("/schemes/:id/verify", adminController.verifySchemeToday);
+router.delete("/schemes/:id", adminController.deleteScheme);
+
 module.exports = router;
+

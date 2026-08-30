@@ -5,6 +5,9 @@ const Alert = require("../models/Alert");
 const Task = require("../models/Task");
 const Market = require("../models/Market");
 const Query = require("../models/Query");
+const Scheme = require("../models/Scheme");
+const SchemeBookmark = require("../models/SchemeBookmark");
+
 
 // 1. REAL-TIME DASHBOARD AGGREGATED STATISTICS
 exports.getDashboardStats = async (req, res) => {
@@ -637,5 +640,472 @@ exports.getReportsAndAnalytics = async (req, res) => {
     res.status(500).json({ message: "Failed to generate analytics reports", error: err.message });
   }
 };
+
+// ============================================================================
+// 7. GOVERNMENT SCHEMES MANAGEMENT (ADMIN MODULE)
+// ============================================================================
+
+/**
+ * GET /api/admin/schemes
+ * List all schemes with search, category, status filters & summary metrics
+ */
+exports.getAdminSchemes = async (req, res) => {
+  try {
+    const {
+      search,
+      category,
+      status, // "active", "inactive", "all"
+      applicationStatus, // "open", "closed", "upcoming", "year-round", "all"
+      benefitType,
+      sortBy = "createdAt",
+      sortOrder = "desc"
+    } = req.query;
+
+    const filter = {};
+
+    // Active/Inactive filter
+    if (status === "active") {
+      filter.isActive = true;
+    } else if (status === "inactive" || status === "archived") {
+      filter.isActive = false;
+    }
+
+    // Category filter
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    // Application Status filter
+    if (applicationStatus && applicationStatus !== "all") {
+      filter.applicationStatus = applicationStatus;
+    }
+
+    // Benefit Type filter
+    if (benefitType && benefitType !== "all") {
+      filter["benefits.benefitType"] = benefitType;
+    }
+
+    // Search query across names, description, department, schemeId
+    if (search && search.trim()) {
+      const q = search.trim();
+      filter.$or = [
+        { name: { $regex: q, $options: "i" } },
+        { nameMr: { $regex: q, $options: "i" } },
+        { nameHi: { $regex: q, $options: "i" } },
+        { schemeId: { $regex: q, $options: "i" } },
+        { department: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+        { "eligibility.applicableCrops": { $regex: q, $options: "i" } },
+        { "eligibility.applicableDistricts": { $regex: q, $options: "i" } }
+      ];
+    }
+
+    const sortOptions = {};
+    sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+
+    const [
+      schemes,
+      totalCount,
+      activeCount,
+      inactiveCount,
+      categoryBreakdown
+    ] = await Promise.all([
+      Scheme.find(filter).sort(sortOptions),
+      Scheme.countDocuments(),
+      Scheme.countDocuments({ isActive: true }),
+      Scheme.countDocuments({ isActive: false }),
+      Scheme.aggregate([
+        {
+          $group: {
+            _id: "$category",
+            count: { $sum: 1 },
+            active: { $sum: { $cond: ["$isActive", 1, 0] } }
+          }
+        },
+        { $sort: { count: -1 } }
+      ])
+    ]);
+
+    // Count recently verified schemes (last 30 days)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const verifiedRecentlyCount = schemes.filter(s => s.lastVerifiedDate && new Date(s.lastVerifiedDate) >= thirtyDaysAgo).length;
+
+    res.json({
+      success: true,
+      data: {
+        schemes,
+        summary: {
+          total: totalCount,
+          active: activeCount,
+          inactive: inactiveCount,
+          verifiedRecently: verifiedRecentlyCount,
+          returnedCount: schemes.length
+        },
+        categoryBreakdown
+      }
+    });
+  } catch (err) {
+    console.error("❌ Admin Get Schemes Error:", err);
+    res.status(500).json({ success: false, message: "Failed to retrieve government schemes", error: err.message });
+  }
+};
+
+/**
+ * GET /api/admin/schemes/:id
+ * Retrieve full scheme detail by ID
+ */
+exports.getAdminSchemeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let scheme = null;
+
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      scheme = await Scheme.findById(id);
+    }
+    if (!scheme) {
+      scheme = await Scheme.findOne({ schemeId: id });
+    }
+
+    if (!scheme) {
+      return res.status(404).json({ success: false, message: "Government scheme not found in database" });
+    }
+
+    // Also get bookmark metrics
+    const bookmarkCount = await SchemeBookmark.countDocuments({ schemeId: scheme._id });
+
+    res.json({
+      success: true,
+      data: {
+        ...scheme.toObject(),
+        bookmarkCount
+      }
+    });
+  } catch (err) {
+    console.error("❌ Admin Get Scheme Detail Error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch scheme detail", error: err.message });
+  }
+};
+
+/**
+ * POST /api/admin/schemes
+ * Create a new official Government Scheme in MongoDB
+ */
+exports.createScheme = async (req, res) => {
+  try {
+    const {
+      schemeId,
+      name,
+      nameMr,
+      nameHi,
+      department,
+      category,
+      description,
+      descriptionMr,
+      descriptionHi,
+      benefits,
+      eligibility,
+      requiredDocuments,
+      requiredDocumentsMr,
+      requiredDocumentsHi,
+      officialLink,
+      sourceGrLink,
+      helplineNumber,
+      applicationStatus,
+      verifiedSource,
+      lastVerifiedDate,
+      isActive
+    } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Scheme name (English) is required." });
+    }
+
+    if (!department || !department.trim()) {
+      return res.status(400).json({ success: false, message: "Government department name is required." });
+    }
+
+    if (!description || !description.trim()) {
+      return res.status(400).json({ success: false, message: "Scheme description is required." });
+    }
+
+    // Auto-generate clean unique scheme ID if not provided
+    let finalSchemeId = schemeId && schemeId.trim() ? schemeId.trim() : null;
+    if (!finalSchemeId) {
+      const prefix = category ? category.toUpperCase().slice(0, 4) : "GOVT";
+      const rand = Math.floor(1000 + Math.random() * 9000);
+      finalSchemeId = `MAHA-${prefix}-${rand}`;
+    }
+
+    // Check duplicate scheme ID
+    const existing = await Scheme.findOne({ schemeId: finalSchemeId });
+    if (existing) {
+      return res.status(409).json({
+        success: false,
+        message: `Scheme ID '${finalSchemeId}' already exists. Please choose a unique Scheme ID.`
+      });
+    }
+
+    const newScheme = new Scheme({
+      schemeId: finalSchemeId,
+      name: name.trim(),
+      nameMr: (nameMr || "").trim(),
+      nameHi: (nameHi || "").trim(),
+      department: department.trim(),
+      category: category || "general",
+      description: description.trim(),
+      descriptionMr: (descriptionMr || "").trim(),
+      descriptionHi: (descriptionHi || "").trim(),
+      benefits: {
+        subsidyPercentage: benefits?.subsidyPercentage || null,
+        maxSubsidyAmount: benefits?.maxSubsidyAmount || null,
+        benefitType: benefits?.benefitType || "subsidy",
+        benefitDescription: benefits?.benefitDescription || "",
+        benefitDescriptionMr: benefits?.benefitDescriptionMr || "",
+        benefitDescriptionHi: benefits?.benefitDescriptionHi || ""
+      },
+      eligibility: {
+        farmerCategories: Array.isArray(eligibility?.farmerCategories) && eligibility.farmerCategories.length > 0
+          ? eligibility.farmerCategories
+          : ["all"],
+        maxLandHectares: eligibility?.maxLandHectares ? Number(eligibility.maxLandHectares) : null,
+        minLandHectares: eligibility?.minLandHectares ? Number(eligibility.minLandHectares) : null,
+        irrigationRequired: Boolean(eligibility?.irrigationRequired),
+        applicableCrops: Array.isArray(eligibility?.applicableCrops) ? eligibility.applicableCrops : [],
+        applicableDistricts: Array.isArray(eligibility?.applicableDistricts) ? eligibility.applicableDistricts : [],
+        residencyRequired: eligibility?.residencyRequired || "Maharashtra",
+        aadhaarRequired: eligibility?.aadhaarRequired !== undefined ? Boolean(eligibility.aadhaarRequired) : true,
+        bankAccountRequired: eligibility?.bankAccountRequired !== undefined ? Boolean(eligibility.bankAccountRequired) : true,
+        landDocumentsRequired: eligibility?.landDocumentsRequired !== undefined ? Boolean(eligibility.landDocumentsRequired) : true,
+        additionalCriteria: Array.isArray(eligibility?.additionalCriteria) ? eligibility.additionalCriteria : [],
+        additionalCriteriaMr: Array.isArray(eligibility?.additionalCriteriaMr) ? eligibility.additionalCriteriaMr : [],
+        additionalCriteriaHi: Array.isArray(eligibility?.additionalCriteriaHi) ? eligibility.additionalCriteriaHi : []
+      },
+      requiredDocuments: Array.isArray(requiredDocuments) ? requiredDocuments : [],
+      requiredDocumentsMr: Array.isArray(requiredDocumentsMr) ? requiredDocumentsMr : [],
+      requiredDocumentsHi: Array.isArray(requiredDocumentsHi) ? requiredDocumentsHi : [],
+      officialLink: (officialLink || "https://mahadbt.maharashtra.gov.in").trim(),
+      sourceGrLink: (sourceGrLink || "").trim(),
+      helplineNumber: (helplineNumber || "").trim(),
+      applicationStatus: applicationStatus || "year-round",
+      verifiedSource: (verifiedSource || "MahaDBT Portal – mahadbt.maharashtra.gov.in").trim(),
+      lastVerifiedDate: lastVerifiedDate ? new Date(lastVerifiedDate) : new Date(),
+      isActive: isActive !== undefined ? Boolean(isActive) : true
+    });
+
+    const saved = await newScheme.save();
+
+    console.log(`👑 [ADMIN] New Government Scheme created: '${saved.name}' (${saved.schemeId}) by Admin: ${req.user.id}`);
+
+    res.status(201).json({
+      success: true,
+      message: `Official scheme '${saved.name}' created successfully.`,
+      scheme: saved
+    });
+  } catch (err) {
+    console.error("❌ Admin Create Scheme Error:", err);
+    res.status(500).json({ success: false, message: "Failed to create government scheme", error: err.message });
+  }
+};
+
+/**
+ * PUT /api/admin/schemes/:id
+ * Fully update an existing scheme in MongoDB
+ */
+exports.updateScheme = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    let scheme = await Scheme.findById(id);
+    if (!scheme) {
+      scheme = await Scheme.findOne({ schemeId: id });
+    }
+
+    if (!scheme) {
+      return res.status(404).json({ success: false, message: "Government scheme not found" });
+    }
+
+    // Check schemeId collision if updated
+    if (updateData.schemeId && updateData.schemeId !== scheme.schemeId) {
+      const collision = await Scheme.findOne({ schemeId: updateData.schemeId, _id: { $ne: scheme._id } });
+      if (collision) {
+        return res.status(409).json({ success: false, message: `Scheme ID '${updateData.schemeId}' is already in use by another scheme.` });
+      }
+      scheme.schemeId = updateData.schemeId.trim();
+    }
+
+    // Basic Fields
+    if (updateData.name !== undefined) scheme.name = updateData.name.trim();
+    if (updateData.nameMr !== undefined) scheme.nameMr = (updateData.nameMr || "").trim();
+    if (updateData.nameHi !== undefined) scheme.nameHi = (updateData.nameHi || "").trim();
+    if (updateData.department !== undefined) scheme.department = updateData.department.trim();
+    if (updateData.category !== undefined) scheme.category = updateData.category;
+    if (updateData.description !== undefined) scheme.description = updateData.description.trim();
+    if (updateData.descriptionMr !== undefined) scheme.descriptionMr = (updateData.descriptionMr || "").trim();
+    if (updateData.descriptionHi !== undefined) scheme.descriptionHi = (updateData.descriptionHi || "").trim();
+
+    // Benefits
+    if (updateData.benefits) {
+      scheme.benefits = {
+        subsidyPercentage: updateData.benefits.subsidyPercentage !== undefined ? updateData.benefits.subsidyPercentage : scheme.benefits?.subsidyPercentage,
+        maxSubsidyAmount: updateData.benefits.maxSubsidyAmount !== undefined ? updateData.benefits.maxSubsidyAmount : scheme.benefits?.maxSubsidyAmount,
+        benefitType: updateData.benefits.benefitType || scheme.benefits?.benefitType || "subsidy",
+        benefitDescription: updateData.benefits.benefitDescription !== undefined ? updateData.benefits.benefitDescription : scheme.benefits?.benefitDescription,
+        benefitDescriptionMr: updateData.benefits.benefitDescriptionMr !== undefined ? updateData.benefits.benefitDescriptionMr : scheme.benefits?.benefitDescriptionMr,
+        benefitDescriptionHi: updateData.benefits.benefitDescriptionHi !== undefined ? updateData.benefits.benefitDescriptionHi : scheme.benefits?.benefitDescriptionHi
+      };
+    }
+
+    // Eligibility
+    if (updateData.eligibility) {
+      scheme.eligibility = {
+        farmerCategories: Array.isArray(updateData.eligibility.farmerCategories)
+          ? updateData.eligibility.farmerCategories
+          : scheme.eligibility?.farmerCategories || ["all"],
+        maxLandHectares: updateData.eligibility.maxLandHectares !== undefined ? (updateData.eligibility.maxLandHectares ? Number(updateData.eligibility.maxLandHectares) : null) : scheme.eligibility?.maxLandHectares,
+        minLandHectares: updateData.eligibility.minLandHectares !== undefined ? (updateData.eligibility.minLandHectares ? Number(updateData.eligibility.minLandHectares) : null) : scheme.eligibility?.minLandHectares,
+        irrigationRequired: updateData.eligibility.irrigationRequired !== undefined ? Boolean(updateData.eligibility.irrigationRequired) : scheme.eligibility?.irrigationRequired,
+        applicableCrops: Array.isArray(updateData.eligibility.applicableCrops) ? updateData.eligibility.applicableCrops : scheme.eligibility?.applicableCrops || [],
+        applicableDistricts: Array.isArray(updateData.eligibility.applicableDistricts) ? updateData.eligibility.applicableDistricts : scheme.eligibility?.applicableDistricts || [],
+        residencyRequired: updateData.eligibility.residencyRequired || scheme.eligibility?.residencyRequired || "Maharashtra",
+        aadhaarRequired: updateData.eligibility.aadhaarRequired !== undefined ? Boolean(updateData.eligibility.aadhaarRequired) : scheme.eligibility?.aadhaarRequired,
+        bankAccountRequired: updateData.eligibility.bankAccountRequired !== undefined ? Boolean(updateData.eligibility.bankAccountRequired) : scheme.eligibility?.bankAccountRequired,
+        landDocumentsRequired: updateData.eligibility.landDocumentsRequired !== undefined ? Boolean(updateData.eligibility.landDocumentsRequired) : scheme.eligibility?.landDocumentsRequired,
+        additionalCriteria: Array.isArray(updateData.eligibility.additionalCriteria) ? updateData.eligibility.additionalCriteria : scheme.eligibility?.additionalCriteria || [],
+        additionalCriteriaMr: Array.isArray(updateData.eligibility.additionalCriteriaMr) ? updateData.eligibility.additionalCriteriaMr : scheme.eligibility?.additionalCriteriaMr || [],
+        additionalCriteriaHi: Array.isArray(updateData.eligibility.additionalCriteriaHi) ? updateData.eligibility.additionalCriteriaHi : scheme.eligibility?.additionalCriteriaHi || []
+      };
+    }
+
+    // Required Documents
+    if (updateData.requiredDocuments !== undefined) scheme.requiredDocuments = Array.isArray(updateData.requiredDocuments) ? updateData.requiredDocuments : [];
+    if (updateData.requiredDocumentsMr !== undefined) scheme.requiredDocumentsMr = Array.isArray(updateData.requiredDocumentsMr) ? updateData.requiredDocumentsMr : [];
+    if (updateData.requiredDocumentsHi !== undefined) scheme.requiredDocumentsHi = Array.isArray(updateData.requiredDocumentsHi) ? updateData.requiredDocumentsHi : [];
+
+    // Official Links & Government Metadata
+    if (updateData.officialLink !== undefined) scheme.officialLink = (updateData.officialLink || "").trim();
+    if (updateData.sourceGrLink !== undefined) scheme.sourceGrLink = (updateData.sourceGrLink || "").trim();
+    if (updateData.helplineNumber !== undefined) scheme.helplineNumber = (updateData.helplineNumber || "").trim();
+    if (updateData.applicationStatus !== undefined) scheme.applicationStatus = updateData.applicationStatus;
+    if (updateData.verifiedSource !== undefined) scheme.verifiedSource = (updateData.verifiedSource || "").trim();
+    if (updateData.lastVerifiedDate !== undefined) scheme.lastVerifiedDate = new Date(updateData.lastVerifiedDate);
+    if (updateData.isActive !== undefined) scheme.isActive = Boolean(updateData.isActive);
+
+    const saved = await scheme.save();
+
+    console.log(`👑 [ADMIN] Scheme '${saved.name}' (${saved.schemeId}) updated by Admin: ${req.user.id}`);
+
+    res.json({
+      success: true,
+      message: `Scheme '${saved.name}' updated successfully in MongoDB.`,
+      scheme: saved
+    });
+  } catch (err) {
+    console.error("❌ Admin Update Scheme Error:", err);
+    res.status(500).json({ success: false, message: "Failed to update government scheme", error: err.message });
+  }
+};
+
+/**
+ * PATCH /api/admin/schemes/:id/status
+ * Quickly toggle or set scheme active status
+ */
+exports.toggleSchemeStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive, applicationStatus } = req.body;
+
+    const scheme = await Scheme.findById(id);
+    if (!scheme) {
+      return res.status(404).json({ success: false, message: "Scheme not found" });
+    }
+
+    if (isActive !== undefined) {
+      scheme.isActive = Boolean(isActive);
+    }
+    if (applicationStatus) {
+      scheme.applicationStatus = applicationStatus;
+    }
+
+    await scheme.save();
+
+    console.log(`👑 [ADMIN] Scheme '${scheme.name}' active status set to ${scheme.isActive}`);
+
+    res.json({
+      success: true,
+      message: `Scheme '${scheme.name}' is now ${scheme.isActive ? "Active (visible to farmers)" : "Archived / Inactive"}.`,
+      scheme
+    });
+  } catch (err) {
+    console.error("❌ Admin Toggle Scheme Status Error:", err);
+    res.status(500).json({ success: false, message: "Failed to change scheme status", error: err.message });
+  }
+};
+
+/**
+ * POST /api/admin/schemes/:id/verify
+ * Mark a scheme as officially verified today
+ */
+exports.verifySchemeToday = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { verifiedSource } = req.body;
+
+    const scheme = await Scheme.findById(id);
+    if (!scheme) {
+      return res.status(404).json({ success: false, message: "Scheme not found" });
+    }
+
+    scheme.lastVerifiedDate = new Date();
+    if (verifiedSource && verifiedSource.trim()) {
+      scheme.verifiedSource = verifiedSource.trim();
+    }
+
+    await scheme.save();
+
+    console.log(`👑 [ADMIN] Scheme '${scheme.name}' verified today: ${scheme.lastVerifiedDate.toISOString()}`);
+
+    res.json({
+      success: true,
+      message: `Scheme verification timestamp updated to today.`,
+      scheme
+    });
+  } catch (err) {
+    console.error("❌ Admin Verify Scheme Error:", err);
+    res.status(500).json({ success: false, message: "Failed to mark scheme as verified", error: err.message });
+  }
+};
+
+/**
+ * DELETE /api/admin/schemes/:id
+ * Delete scheme from database (and clean up bookmarks)
+ */
+exports.deleteScheme = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const scheme = await Scheme.findById(id);
+    if (!scheme) {
+      return res.status(404).json({ success: false, message: "Scheme not found" });
+    }
+
+    const schemeName = scheme.name;
+    await Promise.all([
+      Scheme.findByIdAndDelete(id),
+      SchemeBookmark.deleteMany({ schemeId: id })
+    ]);
+
+    console.log(`👑 [ADMIN] Scheme '${schemeName}' permanently deleted from MongoDB by Admin: ${req.user.id}`);
+
+    res.json({
+      success: true,
+      message: `Government Scheme '${schemeName}' has been permanently deleted.`
+    });
+  } catch (err) {
+    console.error("❌ Admin Delete Scheme Error:", err);
+    res.status(500).json({ success: false, message: "Failed to delete scheme", error: err.message });
+  }
+};
+
 
 
